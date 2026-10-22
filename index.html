@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Oparanno Trading – Price List</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f6f7f4;--card:#fff;--text:#1d2420;--muted:#6b7570;--line:#e2e6e0;--accent:#1f7a4d;--accent-t:#fff;--bad:#b3392f;--soft:#eef4f0}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f0f1a;--card:#14141f;--text:#f1f2f6;--muted:#9a9cab;--line:#2a2a38;--accent:#4cc489;--accent-t:#0c1a12;--bad:#ff8a8a;--soft:#191927}}
+:root[data-theme="dark"]{--bg:#0f0f1a;--card:#14141f;--text:#f1f2f6;--muted:#9a9cab;--line:#2a2a38;--accent:#4cc489;--accent-t:#0c1a12;--bad:#ff8a8a;--soft:#191927}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.4}
+main{max-width:960px;margin:0 auto;padding:20px 16px 48px;display:flex;flex-direction:column}
+h1{font-size:1.5rem;margin:0 0 2px}
+.sub{color:var(--muted);margin:0 0 18px;font-size:.95rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+.stat b{display:block;font-size:1.25rem}
+.stat span{color:var(--muted);font-size:.8rem}
+.fh{font-weight:600;margin:0 0 10px}
+.addtoggle{order:1;margin:0 0 12px;background:transparent;color:var(--accent);border:1px dashed var(--accent)}
+#addcard{order:2}
+#listcard{order:3}
+.stats{order:4}
+#status{order:5;margin:0 0 12px}
+.card[hidden]{display:none}
+form.top{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-items:end}
+label{font-size:.8rem;color:var(--muted);display:block;margin-bottom:4px}
+input[type=text],input[type=number],input:not([type]){width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit}
+input:focus{outline:2px solid var(--accent);outline-offset:0}
+button{font:inherit;border:0;border-radius:10px;padding:10px 14px;cursor:pointer;background:var(--accent);color:var(--accent-t);font-weight:600}
+button.ghost{background:transparent;color:var(--text);border:1px solid var(--line);font-weight:500;padding:8px 12px}
+.live{font-size:.8rem;margin:10px 0 0;color:var(--muted)}
+.searchbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;gap:10px;align-items:center;background:var(--bg);padding:8px 0 12px;margin-bottom:6px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+.curw{color:var(--muted);font-size:.85rem;white-space:nowrap}
+.searchbar #q{flex:1;padding:12px 14px;font-size:1rem}
+.cur{width:64px!important;display:inline-block;padding:4px 6px!important;text-align:center}
+.list{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--card)}
+.row{display:flex;align-items:center;gap:12px;padding:14px;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row.sim{background:var(--soft)}
+.thb{padding:0;border-radius:10px;background:var(--bg);border:1px solid var(--line);width:52px;height:52px;flex:none;overflow:hidden;line-height:0}
+.thb img{width:100%;height:100%;object-fit:cover;display:block}
+.main{flex:1;min-width:0}
+.simlbl{display:block;font-size:.72rem;color:var(--muted);margin-bottom:2px}
+.nm{font-weight:600;font-size:1.05rem;overflow-wrap:anywhere}
+.chip{display:inline-block;margin-top:6px;padding:2px 10px;border:1px solid var(--line);border-radius:8px;font-size:.78rem;color:var(--muted)}
+.vals{display:flex;align-items:baseline;gap:14px;font-size:.95rem;font-variant-numeric:tabular-nums;white-space:nowrap}
+.vals i{font-style:normal;font-size:.72rem;color:var(--muted);margin-right:3px;font-weight:600}
+.pc{font-weight:700}
+.pos{color:var(--accent)}
+.neg{color:var(--bad)}
+.ico{display:flex;align-items:center;gap:2px;min-width:92px;justify-content:flex-end}
+.ib{background:transparent;border:0;padding:7px;border-radius:8px;color:var(--muted);display:inline-flex;align-items:center;line-height:0}
+.ib:hover,.ib:focus-visible{background:var(--soft);color:var(--text)}
+.ib.add{color:var(--text)}
+.ib.sure{color:var(--bad);font-size:.8rem;font-weight:700;line-height:1.2;padding:7px 8px}
+.ib svg{width:20px;height:20px}
+.editor{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;align-items:end;background:var(--soft);border-left:3px solid var(--accent)}
+.editor .eh{grid-column:1/-1;font-weight:600}
+.editor .full{grid-column:1/-1}
+.editor .eb{display:flex;gap:8px}
+.pr{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pr img,.pp img{width:52px;height:52px;object-fit:cover;border-radius:10px;border:1px solid var(--line);display:block}
+.pick{display:inline-block;margin:0;padding:8px 12px;border:1px dashed var(--accent);border-radius:10px;color:var(--accent);font-weight:600;font-size:.85rem;cursor:pointer;position:relative;overflow:hidden}
+.pick input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;font-size:0}
+.pp{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.lb{position:fixed;inset:0;background:rgba(0,0,0,.82);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:20px;z-index:50}
+.lb[hidden]{display:none}
+.lb img{max-width:100%;max-height:78%;border-radius:12px;background:#fff}
+.lb span{color:#fff;font-weight:600}
+.empty{text-align:center;color:var(--muted);padding:28px 8px}
+@media (max-width:560px){
+  .row{flex-wrap:wrap}
+  .ico{order:2;min-width:0}
+  .main{order:1}
+  .vals{order:3;width:100%;justify-content:space-between}
+}
+
+input[type=email],input[type=password]{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;margin-bottom:10px}
+textarea{width:100%;min-height:90px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit}
+select{padding:8px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font:inherit}
+main[hidden],.screen[hidden]{display:none}
+.screen{max-width:420px;margin:0 auto;padding:8vh 16px 40px}
+.gbtn{width:100%;background:var(--card);color:var(--text);border:1px solid var(--line);margin-bottom:14px}
+.msg{font-size:.85rem;min-height:1.3em;margin:6px 0 10px;color:var(--bad)}
+.msg.ok{color:var(--accent)}
+.topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.who{font-size:.8rem;color:var(--muted);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.badge{display:inline-block;padding:1px 9px;border-radius:999px;background:var(--soft);border:1px solid var(--line);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--text)}
+#team{order:6}
+.urow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.urow:last-child{border-bottom:0}
+.urow small{display:block;color:var(--muted)}
+.hint{color:var(--muted);font-size:.85rem;margin:0 0 10px}
+</style>
+</head>
+<body>
+
+<div class="screen" id="setup" hidden>
+  <h1>Almost ready</h1>
+  <p class="sub">The Firebase settings are not filled in yet. Open <b>index.html</b>, find <b>firebaseConfig</b> near the top of the script, and paste your own values there (see SETUP.md).</p>
+</div>
+
+<div class="screen" id="loading"><p class="sub">Loading…</p></div>
+
+<div class="screen" id="login" hidden>
+  <h1>Oparanno Trading</h1>
+  <p class="sub">Sign in to see the price list.</p>
+  <button type="button" class="gbtn" id="gsign">Continue with Google</button>
+  <form id="ef" autocomplete="on">
+    <input type="email" id="em" placeholder="Email" required autocomplete="email">
+    <input type="password" id="pw" placeholder="Password (at least 6 characters)" required minlength="6" autocomplete="current-password">
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button type="submit" id="si">Sign in</button>
+      <button type="button" class="ghost" id="su">Create account</button>
+      <button type="button" class="ghost" id="fp">Forgot password?</button>
+    </div>
+  </form>
+  <div class="msg" id="amsg" role="status"></div>
+</div>
+
+<div class="screen" id="pending" hidden>
+  <h1>Waiting for approval</h1>
+  <p class="sub" id="pmail"></p>
+  <p class="sub">Your account is created. The owner needs to give you access before you can see the price list. Please ask the owner, then reload this page.</p>
+  <button type="button" class="ghost" id="pout">Sign out</button>
+</div>
+
+<main id="app" hidden>
+  <div class="topbar">
+    <div><h1>Oparanno Trading</h1>
+    <p class="sub">Price list – wholesale and retail price of every product in one place.</p></div>
+    <div class="who"><span id="who"></span><span class="badge" id="rolebadge"></span><button type="button" class="ghost" id="out">Sign out</button></div>
+  </div>
+  <div class="searchbar"><input id="q" placeholder="Search products…" aria-label="Search products"><span class="curw">Currency <input id="cur" class="cur" value="৳" maxlength="4" aria-label="Currency symbol"></span></div>
+
+  <button type="button" class="addtoggle" id="tg">+ Add new product</button>
+  <p class="live" id="status"></p>
+
+  <div class="stats">
+    <div class="stat"><b id="sCount">0</b><span>Products</span></div>
+    <div class="stat"><b id="sMargin">–</b><span>Average profit %</span></div>
+    <div class="stat"><b id="sBest">–</b><span>Best profit %</span></div>
+  </div>
+
+  <div class="card" id="addcard" hidden>
+    <div class="fh">Add a product</div>
+    <form class="top" id="f" autocomplete="off">
+      <div style="grid-column:1/-1"><label for="name">Product name</label><input id="name" required placeholder="e.g. Phone charger"></div>
+      <div><label for="ws">Wholesale price (W)</label><input id="ws" type="number" step="any" min="0" required inputmode="decimal"></div>
+      <div><label for="rt">Retail price (R)</label><input id="rt" type="number" step="any" min="0" required inputmode="decimal"></div>
+      <div><label for="nt">Tag (optional)</label><input id="nt" placeholder="Supplier, size…"></div>
+      <div style="grid-column:1/-1"><label>Picture (optional)</label>
+        <div class="pp"><label class="pick">+ Add picture<input type="file" accept="image/*" id="pf"></label>
+          <span id="pw2" hidden><img id="pprev" alt=""> <button type="button" class="ghost" id="prm">Remove</button></span></div></div>
+      <div><button type="submit">Add product</button></div>
+    </form>
+  </div>
+
+  <div class="card" id="listcard">
+    <div id="rows" class="list"></div>
+  </div>
+
+  <div class="card" id="team" hidden>
+    <div class="fh">Team</div>
+    <p class="hint">New people sign up and wait here. Choose what each person can do: <b>Viewer</b> can only look, <b>Staff</b> can look and add products, <b>Pending</b> has no access.</p>
+    <div id="users"></div>
+    <details style="margin-top:14px"><summary style="cursor:pointer;color:var(--accent);font-weight:600">Import products from the old page</summary>
+      <p class="hint" style="margin-top:10px">Paste the exported data here, then press Import.</p>
+      <textarea id="imp" placeholder="[ { &quot;name&quot;: &quot;…&quot; } ]"></textarea>
+      <div style="margin-top:8px"><button type="button" id="impgo">Import</button></div>
+      <div class="msg" id="impmsg"></div>
+    </details>
+  </div>
+</main>
+<div class="lb" id="lb" hidden><img id="lbi" alt=""><span id="lbt"></span></div>
+
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,GoogleAuthProvider,signInWithPopup,signOut,sendPasswordResetEmail} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {getFirestore,collection,doc,getDoc,setDoc,updateDoc,deleteDoc,onSnapshot} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// ====== Firebase settings for the "oparanno" project ======
+const firebaseConfig = {
+  apiKey: "AIzaSyBqtmeNjKlMA9Bllps7SYp2X2c-9hSoEAY",
+  authDomain: "oparanno.firebaseapp.com",
+  projectId: "oparanno",
+  storageBucket: "oparanno.firebasestorage.app",
+  messagingSenderId: "644746003028",
+  appId: "1:644746003028:web:5eafb9e7eb01a149b823c1"
+};
+// =================================================================
+
+const $ = (id) => document.getElementById(id);
+const show = (name) => {
+  ['setup','loading','login','pending','app'].forEach((n) => { $(n).hidden = (n !== name); });
+};
+
+if (String(firebaseConfig.apiKey).indexOf('PASTE') === 0) { show('setup'); throw new Error('Firebase settings are not filled in yet.'); }
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let user = null, role = null, items = [], inline = null, pendingDel = null, cur = '৳', newPhoto = '';
+let unsubUser = null, unsubProducts = null, unsubUsers = null, appStarted = false;
+const canAdd = () => role === 'owner' || role === 'staff';
+const canEdit = () => role === 'owner';
+
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){}return null}
+function money(n){return cur+(Math.round(n*100)/100).toLocaleString(undefined,{maximumFractionDigits:2})}
+function pct(p){return p.wholesale>0?(p.retail-p.wholesale)/p.wholesale*100:0}
+function pctTxt(p){return (Math.round(pct(p)*10)/10)+'%'}
+function setStatus(t){$('status').textContent=t}
+function short(n,pn){var s=pn+' – ';return n.indexOf(s)===0&&n.length>s.length?n.slice(s.length):n}
+function niceErr(e){
+  const c=(e&&e.code)||'';
+  if(c==='permission-denied')return 'You do not have permission to do this.';
+  if(c==='auth/invalid-credential'||c==='auth/wrong-password'||c==='auth/user-not-found'||c==='auth/invalid-login-credentials')return 'Wrong email or password.';
+  if(c==='auth/email-already-in-use')return 'This email already has an account. Try Sign in.';
+  if(c==='auth/weak-password')return 'Password must be at least 6 characters.';
+  if(c==='auth/invalid-email')return 'That email does not look right.';
+  if(c==='auth/too-many-requests')return 'Too many tries. Please wait a little and try again.';
+  if(c==='auth/popup-closed-by-user'||c==='auth/cancelled-popup-request')return '';
+  if(c==='auth/unauthorized-domain')return 'This website address is not allowed yet. In Firebase, open Authentication > Settings > Authorized domains and add it.';
+  if(c==='auth/operation-not-allowed')return 'This sign-in method is not turned on in Firebase yet (Authentication > Sign-in method).';
+  return (e&&e.message)||'Something went wrong.';
+}
+
+const ICON={
+  edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
+  add:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  del:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 14h10l1-14"/><path d="M10 10v6M14 10v6"/></svg>'
+};
+
+/* ---------- Sign in ---------- */
+function amsg(t,ok){const m=$('amsg');m.textContent=t||'';m.className='msg'+(ok?' ok':'')}
+$('gsign').addEventListener('click',async()=>{amsg('');try{await signInWithPopup(auth,new GoogleAuthProvider())}catch(e){amsg(niceErr(e))}});
+$('ef').addEventListener('submit',async(e)=>{e.preventDefault();amsg('');try{await signInWithEmailAndPassword(auth,$('em').value.trim(),$('pw').value)}catch(err){amsg(niceErr(err))}});
+$('su').addEventListener('click',async()=>{
+  amsg('');const em=$('em').value.trim(),pw=$('pw').value;
+  if(!em||pw.length<6){amsg('Type your email and a password of at least 6 characters first.');return}
+  try{await createUserWithEmailAndPassword(auth,em,pw)}catch(err){amsg(niceErr(err))}
+});
+$('fp').addEventListener('click',async()=>{
+  const em=$('em').value.trim();if(!em){amsg('Type your email first, then press Forgot password.');return}
+  try{await sendPasswordResetEmail(auth,em);amsg('Password reset email sent. Please check your inbox.',true)}catch(err){amsg(niceErr(err))}
+});
+$('out').addEventListener('click',()=>signOut(auth));
+$('pout').addEventListener('click',()=>signOut(auth));
+
+function stopAll(){
+  [unsubUser,unsubProducts,unsubUsers].forEach((u)=>{if(u)try{u()}catch(e){}});
+  unsubUser=unsubProducts=unsubUsers=null;appStarted=false;items=[];role=null;inline=null;
+}
+
+onAuthStateChanged(auth,async(u)=>{
+  stopAll();user=u;
+  if(!u){show('login');return}
+  show('loading');
+  try{
+    const ref=doc(db,'users',u.uid);
+    const s=await getDoc(ref);
+    if(!s.exists())await setDoc(ref,{email:u.email||'',name:u.displayName||'',role:'pending',createdAt:Date.now()});
+    unsubUser=onSnapshot(ref,(snap)=>{role=snap.exists()?snap.data().role:'pending';route()},(err)=>{amsg(niceErr(err));show('login')});
+  }catch(e){amsg(niceErr(e));show('login')}
+});
+
+function route(){
+  if(role==='owner'||role==='staff'||role==='viewer'){
+    show('app');
+    $('who').textContent=(user.displayName||user.email||'');
+    $('rolebadge').textContent=role;
+    $('tg').hidden=!canAdd();if(!canAdd())$('addcard').hidden=true;
+    $('team').hidden=role!=='owner';
+    if(!appStarted){appStarted=true;startProducts();if(role==='owner')startUsers()}
+    else if(role==='owner'&&!unsubUsers)startUsers();
+    render();
+  }else{
+    show('pending');$('pmail').textContent=user.email||user.displayName||'';
+  }
+}
+function startProducts(){
+  unsubProducts=onSnapshot(collection(db,'products'),(snap)=>{
+    items=snap.docs.map((d)=>Object.assign({},d.data(),{id:d.id}));
+    setStatus('');render();
+  },(err)=>setStatus(niceErr(err)));
+}
+
+/* ---------- Team (owner only) ---------- */
+function startUsers(){
+  unsubUsers=onSnapshot(collection(db,'users'),(snap)=>{
+    const list=snap.docs.map((d)=>Object.assign({},d.data(),{uid:d.id}));
+    const order={pending:0,staff:1,viewer:2,owner:3};
+    list.sort((a,b)=>(order[a.role]??4)-(order[b.role]??4)||String(a.email).localeCompare(String(b.email)));
+    $('users').innerHTML=list.map((u)=>{
+      const me=u.uid===user.uid||u.role==='owner';
+      const sel=me?'<span class="badge">'+esc(u.role)+'</span>'
+        :'<select data-uid="'+esc(u.uid)+'" aria-label="Role">'+['pending','viewer','staff'].map((r)=>'<option value="'+r+'"'+(u.role===r?' selected':'')+'>'+r.charAt(0).toUpperCase()+r.slice(1)+'</option>').join('')+'</select>';
+      return '<div class="urow"><div>'+esc(u.name||u.email||u.uid)+'<small>'+esc(u.email||'')+(u.uid===user.uid?' (you)':'')+'</small></div>'+sel+'</div>';
+    }).join('')||'<p class="hint">No one else has signed up yet.</p>';
+  },(err)=>{$('users').textContent=niceErr(err)});
+}
+$('users').addEventListener('change',async(e)=>{
+  const s=e.target.closest('select');if(!s)return;
+  try{await updateDoc(doc(db,'users',s.getAttribute('data-uid')),{role:s.value});setStatus('Access updated.')}catch(err){setStatus(niceErr(err))}
+});
+
+/* ---------- Pictures ---------- */
+function shrink(file,cb){
+  var r=new FileReader();
+  r.onerror=function(){setStatus('Could not read that picture.')};
+  r.onload=function(){
+    var img=new Image();
+    img.onerror=function(){setStatus('Could not read that picture.')};
+    img.onload=function(){
+      var m=360,s=Math.min(1,m/Math.max(img.width,img.height)),w=Math.max(1,Math.round(img.width*s)),h=Math.max(1,Math.round(img.height*s));
+      var c=document.createElement('canvas');c.width=w;c.height=h;
+      var x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,w,h);x.drawImage(img,0,0,w,h);
+      cb(c.toDataURL('image/jpeg',0.72));
+    };
+    img.src=r.result;
+  };
+  r.readAsDataURL(file);
+}
+
+/* ---------- Rows ---------- */
+function rowHtml(p,isSim,parentName){
+  var pr=p.retail-p.wholesale,cls=pr>=0?'pos':'neg';
+  var name=isSim?short(p.name,parentName):p.name;
+  var trash=!canEdit()?'':(pendingDel===p.id
+    ?'<button class="ib sure" data-a="del2" data-id="'+esc(p.id)+'">Sure?</button>'
+    :'<button class="ib" data-a="del" data-id="'+esc(p.id)+'" aria-label="Delete" title="Delete">'+ICON.del+'</button>');
+  var th=p.photo?'<button class="thb" data-a="zoom" data-id="'+esc(p.id)+'" aria-label="View picture"><img src="'+esc(p.photo)+'" alt=""></button>':'';
+  var icons=(canEdit()?'<button class="ib" data-a="edit" data-id="'+esc(p.id)+'" aria-label="Edit" title="Edit">'+ICON.edit+'</button>':'')
+    +((!isSim&&canAdd())?'<button class="ib add" data-a="sim" data-id="'+esc(p.id)+'" aria-label="Add similar product" title="Add similar product">'+ICON.add+'</button>':'')
+    +trash;
+  return '<div class="row'+(isSim?' sim':'')+'">'+th+'<div class="main">'+(isSim?'<span class="simlbl">similar product</span>':'')
+    +'<div class="nm">'+esc(name)+'</div>'+(p.note?'<span class="chip">'+esc(p.note)+'</span>':'')+'</div>'
+    +'<div class="vals"><span class="pc '+cls+'" title="Profit '+esc(money(pr))+'">'+pctTxt(p)+'</span>'
+    +'<span><i>W</i>'+money(p.wholesale)+'</span><span><i>R</i>'+money(p.retail)+'</span></div>'
+    +(icons?'<div class="ico">'+icons+'</div>':'')+'</div>';
+}
+function editorHtml(){
+  var d=inline.draft||{};
+  return '<form class="row editor" id="ed" autocomplete="off"><div class="eh">'+(inline.mode==='sim'?'Add a similar product':'Edit product')+'</div>'
+    +'<div class="full"><label>Product name</label><input name="name" required value="'+esc(d.name)+'"></div>'
+    +'<div><label>Wholesale price (W)</label><input name="ws" type="number" step="any" min="0" required inputmode="decimal" value="'+esc(d.ws)+'"></div>'
+    +'<div><label>Retail price (R)</label><input name="rt" type="number" step="any" min="0" required inputmode="decimal" value="'+esc(d.rt)+'"></div>'
+    +'<div><label>Tag (optional)</label><input name="nt" value="'+esc(d.nt)+'"></div>'
+    +'<div class="full"><label>Picture (optional)</label><div class="pr">'
+    +(d.photo?'<img src="'+esc(d.photo)+'" alt="">':'')
+    +'<label class="pick">'+(d.photo?'Change picture':'+ Add picture')+'<input type="file" accept="image/*"></label>'
+    +(d.photo?'<button type="button" class="ghost" data-a="rmphoto">Remove</button>':'')
+    +'</div></div>'
+    +'<div class="eb"><button type="submit">'+(inline.mode==='sim'?'Add similar product':'Save')+'</button><button type="button" class="ghost" data-a="cancel">Cancel</button></div></form>';
+}
+function grab(){
+  var ed=$('ed');if(!ed||!inline)return;
+  function v(n){return ed.querySelector('[name='+n+']').value}
+  inline.draft={name:v('name'),ws:v('ws'),rt:v('rt'),nt:v('nt'),photo:(inline.draft&&inline.draft.photo)||''};
+}
+
+/* ---------- Search ---------- */
+function norm(s){var t=String(s==null?'':s);try{t=t.normalize('NFC')}catch(e){}return t.toLowerCase().replace(/\s+/g,' ').trim()}
+var SEP=/[\s\-–—_,.\/()]/;
+function wordStart(s,q){var i=s.indexOf(q);while(i>-1){if(i===0||SEP.test(s.charAt(i-1)))return true;i=s.indexOf(q,i+1)}return false}
+// 0 = name starts with what you typed, 1 = a word in the name starts with it, 2 = every typed word starts a word, 3 = typed text found inside, -1 = no match
+function rank(p,q){
+  var n=norm(p.name),t=norm(p.note),toks=q.split(' ');
+  if(n.indexOf(q)===0)return 0;
+  if(wordStart(n,q))return 1;
+  var wa=(n+' '+t).split(/[\s\-–—_,.\/()]+/).filter(Boolean);
+  if(toks.every(function(k){return wa.some(function(w){return w.indexOf(k)===0})}))return 2;
+  var hay=n+' '+t;
+  if(toks.every(function(k){return hay.indexOf(k)>-1}))return 3;
+  return -1;
+}
+function searchHtml(q,editing,adding){
+  var byId={};items.forEach(function(p){byId[p.id]=p});
+  var all=items.map(function(p){return {p:p,r:rank(p,q)}});
+  var good=all.filter(function(x){return x.r>-1&&x.r<=2});
+  var list=good.length?good:all.filter(function(x){return x.r===3});
+  all.forEach(function(x){if(adding===x.p.id&&list.indexOf(x)<0)list.push(x)});
+  list.sort(function(a,b){return a.r-b.r||String(a.p.name).localeCompare(String(b.p.name))});
+  return list.map(function(x){
+    var p=x.p,isSim=!!(p.parent&&byId[p.parent]);
+    var h=editing===p.id?editorHtml():rowHtml(p,isSim,'');
+    if(adding===p.id)h+=editorHtml();
+    return h;
+  }).join('');
+}
+
+function render(){
+  if(!role||role==='pending')return;
+  grab();
+  var ids={};items.forEach(function(p){ids[p.id]=1});
+  var byName=function(a,b){return String(a.name).localeCompare(String(b.name))};
+  var tops=items.filter(function(p){return !p.parent||!ids[p.parent]}).sort(byName);
+  var q=norm($('q').value);
+  var editing=inline&&inline.mode==='edit'?inline.id:null, adding=inline&&inline.mode==='sim'?inline.id:null;
+  var html=q?searchHtml(q,editing,adding):tops.map(function(p){
+    var kids=items.filter(function(x){return x.parent===p.id}).sort(byName);
+    var h=editing===p.id?editorHtml():rowHtml(p,false);
+    if(adding===p.id)h+=editorHtml();
+    kids.forEach(function(k){h+=editing===k.id?editorHtml():rowHtml(k,true,p.name)});
+    return h;
+  }).join('');
+  $('rows').innerHTML=html||'<div class="empty">'+(items.length?'No products match your search.':(canAdd()?'No products yet. Add your first one above.':'No products yet.'))+'</div>';
+  $('sCount').textContent=items.length;
+  if(items.length){
+    var ms=items.map(pct);
+    $('sMargin').textContent=(Math.round(ms.reduce(function(a,b){return a+b},0)/ms.length*10)/10)+'%';
+    $('sBest').textContent=(Math.round(Math.max.apply(null,ms)*10)/10)+'%';
+  }else{$('sMargin').textContent='–';$('sBest').textContent='–'}
+}
+
+/* ---------- Saving ---------- */
+function newId(){return 'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+async function saveDoc(id,p){
+  try{await setDoc(doc(db,'products',id),p);setStatus('Saved.')}catch(e){setStatus('Could not save: '+niceErr(e))}
+}
+var savedCur=ls('oparanno_cur');if(savedCur){cur=savedCur;$('cur').value=cur}
+$('cur').addEventListener('input',function(){cur=this.value||'';ls('oparanno_cur',cur);render()});
+
+function setAdd(open){$('addcard').hidden=!open;$('tg').textContent=open?'– Close':'+ Add new product';if(open){try{$('addcard').scrollIntoView({block:'start',behavior:'smooth'})}catch(e){}$('name').focus()}}
+$('tg').addEventListener('click',function(){if(canAdd())setAdd($('addcard').hidden)});
+function showNew(){$('pw2').hidden=!newPhoto;if(newPhoto)$('pprev').src=newPhoto}
+$('pf').addEventListener('change',function(){
+  var f=this.files&&this.files[0];if(!f)return;
+  shrink(f,function(url){newPhoto=url;showNew()});this.value='';
+});
+$('prm').addEventListener('click',function(){newPhoto='';showNew()});
+$('f').addEventListener('submit',function(e){
+  e.preventDefault();if(!canAdd())return;
+  var p={name:$('name').value.trim(),wholesale:parseFloat($('ws').value),retail:parseFloat($('rt').value),note:$('nt').value.trim(),updated:Date.now()};
+  if(!p.name||isNaN(p.wholesale)||isNaN(p.retail))return;
+  if(newPhoto)p.photo=newPhoto;
+  saveDoc(newId(),p);$('f').reset();newPhoto='';showNew();setAdd(false);
+});
+['input','keyup','search','compositionend'].forEach(function(ev){$('q').addEventListener(ev,render)});
+
+$('rows').addEventListener('submit',function(e){
+  e.preventDefault();if(!inline)return;
+  grab();var d=inline.draft;
+  var p={name:String(d.name).trim(),wholesale:parseFloat(d.ws),retail:parseFloat(d.rt),note:String(d.nt).trim(),updated:Date.now()};
+  if(!p.name||isNaN(p.wholesale)||isNaN(p.retail))return;
+  if(d.photo)p.photo=d.photo;
+  if(inline.mode==='sim'){if(!canAdd())return;p.parent=inline.id;saveDoc(newId(),p)}
+  else{if(!canEdit())return;var old=items.find(function(x){return x.id===inline.id});if(old&&old.parent)p.parent=old.parent;saveDoc(inline.id,p)}
+  inline=null;render();
+});
+$('rows').addEventListener('change',function(e){
+  var t=e.target;if(!t||t.type!=='file'||!inline)return;
+  var f=t.files&&t.files[0];if(!f)return;
+  grab();
+  shrink(f,function(url){if(!inline)return;inline.draft.photo=url;render()});
+});
+function openEditor(mode,p){
+  inline={mode:mode,id:p.id,draft:mode==='edit'
+    ?{name:p.name,ws:p.wholesale,rt:p.retail,nt:p.note||'',photo:p.photo||''}
+    :{name:p.name+' – ',ws:'',rt:'',nt:'',photo:''}};
+  render();
+  var ed=$('ed');if(!ed)return;
+  var first=ed.querySelector('[name=name]');
+  try{ed.scrollIntoView({block:'center',behavior:'smooth'})}catch(e){}
+  first.focus();first.setSelectionRange(first.value.length,first.value.length);
+}
+$('rows').addEventListener('click',function(e){
+  var b=e.target.closest('button');if(!b)return;
+  var a=b.getAttribute('data-a');
+  if(a==='cancel'){inline=null;render();return}
+  if(a==='rmphoto'){grab();inline.draft.photo='';render();return}
+  var id=b.getAttribute('data-id');
+  var p=items.find(function(x){return x.id===id});
+  if(a==='edit'&&p&&canEdit())openEditor('edit',p);
+  else if(a==='sim'&&p&&canAdd())openEditor('sim',p);
+  else if(a==='zoom'&&p&&p.photo){$('lbi').src=p.photo;$('lbt').textContent=p.name;$('lb').hidden=false}
+  else if(a==='del'&&canEdit()){pendingDel=id;render();setTimeout(function(){if(pendingDel===id){pendingDel=null;render()}},4000)}
+  else if(a==='del2'&&canEdit()){
+    pendingDel=null;
+    var gone=items.filter(function(x){return x.id===id||x.parent===id}).map(function(x){return x.id});
+    Promise.all(gone.map(function(g){return deleteDoc(doc(db,'products',g))})).catch(function(err){setStatus('Could not delete: '+niceErr(err))});
+  }
+});
+$('lb').addEventListener('click',function(){this.hidden=true});
+
+/* ---------- Import from the old page (owner) ---------- */
+$('impgo').addEventListener('click',async()=>{
+  const m=$('impmsg');m.className='msg';m.textContent='';
+  if(!canEdit())return;
+  let data;
+  try{data=JSON.parse($('imp').value)}catch(e){m.textContent='That is not valid data. Paste exactly what the old page showed.';return}
+  if(!Array.isArray(data)||!data.length){m.textContent='No products found in that data.';return}
+  let n=0;
+  try{
+    for(const o of data){
+      if(!o||!o.name||isNaN(parseFloat(o.wholesale))||isNaN(parseFloat(o.retail)))continue;
+      const id=String(o.id||newId()).replace(/[\/\s]/g,'_');
+      const p={name:String(o.name),wholesale:parseFloat(o.wholesale),retail:parseFloat(o.retail),note:String(o.note||''),updated:Date.now()};
+      if(o.parent)p.parent=String(o.parent).replace(/[\/\s]/g,'_');
+      if(o.photo)p.photo=String(o.photo);
+      await setDoc(doc(db,'products',id),p);n++;
+    }
+    m.className='msg ok';m.textContent='Imported '+n+' product'+(n===1?'':'s')+'.';$('imp').value='';
+  }catch(e){m.textContent='Import stopped after '+n+': '+niceErr(e)}
+});
+</script>
+</body>
+</html>
