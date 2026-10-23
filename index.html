@@ -97,6 +97,7 @@ main[hidden],.screen[hidden],.badge[hidden]{display:none}
 .urow:last-child{border-bottom:0}
 .urow small{display:block;color:var(--muted)}
 .hint{color:var(--muted);font-size:.85rem;margin:0 0 10px}
+#suggestions .row{cursor:pointer}#suggestions .row:hover{background:var(--soft)}.historyline{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}.historyline:last-child{border-bottom:0}.chartbox{width:100%;overflow:hidden;margin:10px 0}.chartbox svg{width:100%;height:auto;display:block}
 </style>
 </head>
 <body>
@@ -151,19 +152,26 @@ main[hidden],.screen[hidden],.badge[hidden]{display:none}
   </div>
 
   <div class="card" id="addcard" hidden>
-    <div class="fh">Add a product</div>
+    <div class="fh">Add purchase / product</div>
     <form class="top" id="f" autocomplete="off">
-      <div style="grid-column:1/-1"><label for="name">Product name</label><input id="name" required placeholder="e.g. Phone charger"></div>
-      <div><label for="ws">Wholesale price (W)</label><input id="ws" type="number" step="any" min="0" required inputmode="decimal"></div>
-      <div><label for="rt">Retail price (R)</label><input id="rt" type="number" step="any" min="0" required inputmode="decimal"></div>
-      <div><label for="nt">Tag (optional)</label><input id="nt" placeholder="Supplier, size…"></div>
-      <div style="grid-column:1/-1"><label>Picture (optional)</label>
-        <div class="pp"><label class="pick">+ Add picture<input type="file" accept="image/*" id="pf"></label>
-          <span id="pw2" hidden><img id="pprev" alt=""> <button type="button" class="ghost" id="prm">Remove</button></span></div></div>
-      <div><button type="submit">Add product</button></div>
+      <div style="grid-column:1/-1;position:relative"><label for="name">Type product name</label><input id="name" required placeholder="Search existing product or type a new name" autocomplete="off"><div id="suggestions" class="list" style="display:none;position:absolute;z-index:8;left:0;right:0;top:100%;max-height:240px;overflow:auto"></div><p class="hint" id="pickhint">Choose an existing product to add a purchase to its history, or enter a new product name.</p></div>
+      <div id="newfields" style="display:contents">
+        <div><label for="ws">Wholesale price (W)</label><input id="ws" type="number" step="any" min="0" required inputmode="decimal"></div>
+        <div><label for="rt">Retail price (R)</label><input id="rt" type="number" step="any" min="0" required inputmode="decimal"></div>
+        <div><label for="nt">Tag (optional)</label><input id="nt" placeholder="Supplier, size…"></div>
+        <div style="grid-column:1/-1"><label>Picture (optional)</label><div class="pp"><label class="pick">+ Add picture<input type="file" accept="image/*" id="pf"></label><span id="pw2" hidden><img id="pprev" alt=""> <button type="button" class="ghost" id="prm">Remove</button></span></div></div>
+      </div>
+      <div><label for="pdate">Purchase date</label><input id="pdate" type="date" required></div>
+      <div><label for="pqty">Quantity</label><input id="pqty" type="number" min="0.001" step="any" value="1" required inputmode="decimal"></div>
+      <div><label for="punit">Unit</label><input id="punit" value="pcs" required placeholder="kg, pcs, box"></div>
+      <div><label for="pprice">Actual purchase price per unit</label><input id="pprice" type="number" min="0" step="any" required inputmode="decimal"></div>
+      <div><label for="pmarket">Market / shop (optional)</label><input id="pmarket" placeholder="Market or supplier"></div>
+      <div style="grid-column:1/-1"><label for="pnotes">Purchase notes (optional)</label><input id="pnotes" placeholder="Any notes"></div>
+      <div><button type="submit" id="savePurchase">Save</button></div>
     </form>
   </div>
 
+  <div class="card" id="detailcard" hidden><div id="detailcontent"></div><button type="button" class="ghost" id="closedetail">Close details</button></div>
   <div class="card" id="listcard">
     <div id="rows" class="list"></div>
   </div>
@@ -185,7 +193,7 @@ main[hidden],.screen[hidden],.badge[hidden]{display:none}
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,GoogleAuthProvider,signInWithPopup,signOut,sendPasswordResetEmail} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {getFirestore,collection,doc,getDoc,setDoc,updateDoc,writeBatch,onSnapshot} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {getFirestore,collection,doc,getDoc,setDoc,updateDoc,writeBatch,onSnapshot,query,where,orderBy} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // ====== Firebase settings for the "oparanno" project ======
 const firebaseConfig = {
@@ -211,6 +219,7 @@ const db = getFirestore(app);
 
 let user = null, role = 'public', items = [], inline = null, pendingDel = null, cur = '৳', newPhoto = '';
 let prods = [], costs = {}, costsReady = false, migrating = false, startedFor = null, loadErr = '';
+let purchases = [], unsubPurchases = null, selectedExisting = null, detailProductId = null;
 let unsubUser = null, unsubProducts = null, unsubCosts = null, unsubUsers = null;
 const canAdd = () => role === 'owner' || role === 'staff';
 const canEdit = () => role === 'owner';
@@ -261,8 +270,9 @@ $('out').addEventListener('click',()=>signOut(auth));
 $('pout').addEventListener('click',()=>signOut(auth));
 
 function stopData(){
-  [unsubProducts,unsubCosts,unsubUsers].forEach((u)=>{if(u)try{u()}catch(e){}});
-  unsubProducts=unsubCosts=unsubUsers=null;
+  [unsubProducts,unsubCosts,unsubUsers,unsubPurchases].forEach((u)=>{if(u)try{u()}catch(e){}});
+  unsubProducts=unsubCosts=unsubUsers=unsubPurchases=null; purchases=[]; selectedExisting=null; detailProductId=null;
+  $('detailcard').hidden=true;
   prods=[];costs={};costsReady=false;items=[];inline=null;startedFor=null;
 }
 let wantLogin = false;
@@ -296,7 +306,7 @@ function route(){
   $('subt').textContent=sees?'Price list – wholesale and retail price of every product in one place.':'Product price list';
   $('out').hidden=!user;$('signin').hidden=!!user;
   $('acc').hidden=!(user&&!staffish);
-  $('tg').hidden=!canAdd();if(!canAdd())$('addcard').hidden=true;
+  $('tg').hidden=!canEdit();if(!canEdit())$('addcard').hidden=true;$('tg').textContent=$('addcard').hidden?'+ Add': '– Close';
   $('team').hidden=role!=='owner';
   $('sMargin').parentNode.hidden=!sees;$('sBest').parentNode.hidden=!sees;
   const key=staffish?role:'public';
@@ -304,9 +314,17 @@ function route(){
     stopData();startedFor=key;
     startProducts();
     if(sees)startCosts();
-    if(role==='owner')startUsers();
+    if(role==='owner'){startUsers();startPurchases();}
   }
   rebuild();
+}
+function startPurchases(){
+  if(unsubPurchases)unsubPurchases();
+  unsubPurchases=onSnapshot(collection(db,'marketPurchases'),(snap)=>{
+    purchases=snap.docs.map((d)=>Object.assign({},d.data(),{id:d.id}));
+    purchases.sort((a,b)=>(Number(b.purchaseDate)||0)-(Number(a.purchaseDate)||0));
+    render(); if(detailProductId)renderDetail(detailProductId);
+  },(err)=>{setStatus('Could not load purchase history: '+niceErr(err));});
 }
 function startProducts(){
   unsubProducts=onSnapshot(collection(db,'products'),(snap)=>{
@@ -399,7 +417,7 @@ function rowHtml(p,isSim,parentName){
     ?'<button class="ib sure" data-a="del2" data-id="'+esc(p.id)+'">Sure?</button>'
     :'<button class="ib" data-a="del" data-id="'+esc(p.id)+'" aria-label="Delete" title="Delete">'+ICON.del+'</button>');
   var th=p.photo?'<button class="thb" data-a="zoom" data-id="'+esc(p.id)+'" aria-label="View picture"><img src="'+esc(p.photo)+'" alt=""></button>':'';
-  var icons=(canEdit()?'<button class="ib" data-a="edit" data-id="'+esc(p.id)+'" aria-label="Edit" title="Edit">'+ICON.edit+'</button>':'')
+  var icons=(canEdit()?'<button class="ib" data-a="history" data-id="'+esc(p.id)+'" title="Purchase history" aria-label="Purchase history">History</button><button class="ib" data-a="edit" data-id="'+esc(p.id)+'" aria-label="Edit" title="Edit">'+ICON.edit+'</button>':'')
     +((!isSim&&canAdd())?'<button class="ib add" data-a="sim" data-id="'+esc(p.id)+'" aria-label="Add similar product" title="Add similar product">'+ICON.add+'</button>':'')
     +trash;
   return '<div class="row'+(isSim?' sim':'')+'">'+th+'<div class="main">'+(isSim?'<span class="simlbl">similar product</span>':'')
@@ -497,7 +515,7 @@ async function saveProduct(id,p,w){
 var savedCur=ls('oparanno_cur');if(savedCur){cur=savedCur;$('cur').value=cur}
 $('cur').addEventListener('input',function(){cur=this.value||'';ls('oparanno_cur',cur);render()});
 
-function setAdd(open){$('addcard').hidden=!open;$('tg').textContent=open?'– Close':'+ Add new product';if(open){try{$('addcard').scrollIntoView({block:'start',behavior:'smooth'})}catch(e){}$('name').focus()}}
+function setAdd(open){$('addcard').hidden=!open;$('tg').textContent=open?'– Close':'+ Add';if(open){selectedExisting=null;toggleNewFields(true);$('pdate').value=dateToday();try{$('addcard').scrollIntoView({block:'start',behavior:'smooth'})}catch(e){}$('name').focus()}}
 $('tg').addEventListener('click',function(){if(canAdd())setAdd($('addcard').hidden)});
 function showNew(){$('pw2').hidden=!newPhoto;if(newPhoto)$('pprev').src=newPhoto}
 $('pf').addEventListener('change',function(){
@@ -505,14 +523,34 @@ $('pf').addEventListener('change',function(){
   shrink(f,function(url){newPhoto=url;showNew()});this.value='';
 });
 $('prm').addEventListener('click',function(){newPhoto='';showNew()});
-$('f').addEventListener('submit',function(e){
-  e.preventDefault();if(!canAdd())return;
-  var w=parseFloat($('ws').value);
-  var p={name:$('name').value.trim(),retail:parseFloat($('rt').value),note:$('nt').value.trim(),updated:Date.now()};
-  if(!p.name||isNaN(w)||isNaN(p.retail))return;
-  if(newPhoto)p.photo=newPhoto;
-  saveProduct(newId(),p,w);$('f').reset();newPhoto='';showNew();setAdd(false);
+function dateToday(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+$('pdate').value=dateToday();
+function matchingProducts(q){var nq=norm(q);if(!nq)return [];return items.map(function(p){return {p:p,r:rank(p,nq)}}).filter(function(x){return x.r>=0}).sort(function(a,b){return a.r-b.r||String(a.p.name).localeCompare(String(b.p.name))}).slice(0,8).map(function(x){return x.p})}
+function showSuggestions(){var box=$('suggestions'),q=$('name').value.trim();if(selectedExisting&&norm(selectedExisting.name)!==norm(q))selectedExisting=null;var found=matchingProducts(q);if(!q||!found.length){box.style.display='none';box.innerHTML='';$('pickhint').textContent=selectedExisting?'Purchase will be added to '+selectedExisting.name+' history.':'No existing match selected. If this is a new product, fill its wholesale and retail prices.';toggleNewFields(!selectedExisting);return}box.innerHTML=found.map(function(p){return '<div class="row" data-pick="'+esc(p.id)+'"><div class="main"><div class="nm">'+esc(p.name)+'</div><span class="simlbl">Existing product — select to add purchase history</span></div></div>'}).join('');box.style.display='block';$('pickhint').textContent='Select an existing product below, or continue with a new product.';toggleNewFields(!selectedExisting)}
+function toggleNewFields(show){$('newfields').style.display=show?'contents':'none';$('ws').required=show;$('rt').required=show;$('ws').disabled=!show;$('rt').disabled=!show;$('nt').disabled=!show;$('pf').disabled=!show}
+$('name').addEventListener('input',function(){selectedExisting=null;showSuggestions()});
+$('suggestions').addEventListener('click',function(e){var r=e.target.closest('[data-pick]');if(!r)return;selectedExisting=items.find(function(p){return p.id===r.getAttribute('data-pick')})||null;if(!selectedExisting)return;$('name').value=selectedExisting.name;$('suggestions').style.display='none';$('pickhint').textContent='Selected '+selectedExisting.name+'. Saving will add a purchase to its history; wholesale price will not change.';toggleNewFields(false);if(typeof selectedExisting.wholesale==='number')$('ws').value=selectedExisting.wholesale;if(selectedExisting.retail!=null)$('rt').value=selectedExisting.retail;$('pprice').focus()});
+$('f').addEventListener('submit',async function(e){
+  e.preventDefault();if(!canEdit()){setStatus('Only the owner can record purchases.');return}
+  var name=$('name').value.trim(),w=parseFloat($('ws').value),rt=parseFloat($('rt').value),qty=parseFloat($('pqty').value),price=parseFloat($('pprice').value),unit=$('punit').value.trim(),date=$('pdate').value;
+  if(!name||!date||!unit||!(qty>0)||!(price>=0))return;
+  var product=selectedExisting;
+  try{
+    if(!product){if(!(w>=0)||!(rt>=0)){setStatus('For a new product, enter wholesale and retail prices.');return}
+      var pid=newId(),np={name:name,retail:rt,note:$('nt').value.trim(),updated:Date.now()};if(newPhoto)np.photo=newPhoto;
+      const b=writeBatch(db);b.set(doc(db,'products',pid),np);b.set(doc(db,'costs',pid),{wholesale:w});await b.commit();product=Object.assign({},np,{id:pid,wholesale:w});
+    }
+    var purchase={productId:product.id,productName:product.name,purchaseDate:new Date(date+'T12:00:00').getTime(),quantity:qty,unit:unit,unitPrice:price,totalCost:Math.round(qty*price*100)/100,marketName:$('pmarket').value.trim(),notes:$('pnotes').value.trim(),createdAt:Date.now(),createdBy:user?user.uid:''};
+    await setDoc(doc(db,'marketPurchases',newId()),purchase);
+    setStatus('Purchase saved to '+product.name+' history. Product wholesale price was not changed.');$('f').reset();$('pdate').value=dateToday();$('pqty').value='1';$('punit').value='pcs';newPhoto='';showNew();selectedExisting=null;toggleNewFields(true);$('suggestions').style.display='none';setAdd(false);openDetail(product.id);
+  }catch(err){setStatus('Could not save purchase: '+niceErr(err))}
 });
+$('closedetail').addEventListener('click',function(){$('detailcard').hidden=true;detailProductId=null});
+$('rows').addEventListener('click',function(e){var b=e.target.closest('button');if(b&&b.getAttribute('data-a')==='history'){var p=items.find(function(x){return x.id===b.getAttribute('data-id')});if(p)openDetail(p.id)}});
+function openDetail(id){detailProductId=id;renderDetail(id);$('detailcard').hidden=false;try{$('detailcard').scrollIntoView({block:'start',behavior:'smooth'})}catch(e){}}
+function renderDetail(id){var p=items.find(function(x){return x.id===id});if(!p)return;var hist=purchases.filter(function(x){return x.productId===id}).sort(function(a,b){return (Number(a.purchaseDate)||0)-(Number(b.purchaseDate)||0)});var dates=hist.map(function(x){return Number(x.purchaseDate)||0}),vals=hist.map(function(x){return Number(x.unitPrice)||0});var chart='';if(hist.length>1){var min=Math.min.apply(null,vals),max=Math.max.apply(null,vals),range=max-min||1,pts=vals.map(function(v,i){return (20+i*260/(vals.length-1))+','+(100-(v-min)/range*75)}).join(' ');chart='<div class="chartbox"><svg viewBox="0 0 300 120" role="img" aria-label="Purchase price history chart"><line x1="20" y1="100" x2="280" y2="100" stroke="var(--line)"/><polyline points="'+pts+'" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>'+vals.map(function(v,i){return '<circle cx="'+(20+i*260/(vals.length-1))+'" cy="'+(100-(v-min)/range*75)+'" r="3" fill="var(--accent)"/>'}).join('')+'</svg></div>'}else if(hist.length===1){chart='<p class="hint">Add more purchases to see the price movement chart.</p>'}else{chart='<p class="hint">No purchase history yet.</p>'}
+var history=hist.slice().reverse().map(function(x){return '<div class="historyline"><div><b>'+esc(new Date(Number(x.purchaseDate)||0).toLocaleDateString())+'</b><div class="hint">'+esc(x.quantity)+' '+esc(x.unit)+(x.marketName?' · '+esc(x.marketName):'')+(x.notes?' · '+esc(x.notes):'')+'</div></div><div style="text-align:right"><b>'+money(Number(x.unitPrice)||0)+' / '+esc(x.unit)+'</b><div class="hint">Total '+money(Number(x.totalCost)||0)+'</div></div></div>'}).join('');
+$('detailcontent').innerHTML='<div class="fh">'+esc(p.name)+' — Purchase history</div><div class="stats"><div class="stat"><b>'+(hasW(p)?money(p.wholesale):'–')+'</b><span>Current wholesale</span></div><div class="stat"><b>'+money(p.retail)+'</b><span>Retail price</span></div><div class="stat"><b>'+pctTxt(p)+'</b><span>Profit %</span></div><div class="stat"><b>'+hist.length+'</b><span>Purchase count</span></div></div><div class="fh">Actual purchase price movement</div>'+chart+'<div class="fh">Price history</div>'+(history||'<p class="empty">No purchases recorded yet.</p>');}
 ['input','keyup','search','compositionend'].forEach(function(ev){$('q').addEventListener(ev,render)});
 
 $('rows').addEventListener('submit',function(e){
