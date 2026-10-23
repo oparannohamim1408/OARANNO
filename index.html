@@ -84,7 +84,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 input[type=email],input[type=password]{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;margin-bottom:10px}
 textarea{width:100%;min-height:90px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit}
 select{padding:8px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font:inherit}
-main[hidden],.screen[hidden]{display:none}
+main[hidden],.screen[hidden],.badge[hidden]{display:none}
 .screen{max-width:420px;margin:0 auto;padding:8vh 16px 40px}
 .gbtn{width:100%;background:var(--card);color:var(--text);border:1px solid var(--line);margin-bottom:14px}
 .msg{font-size:.85rem;min-height:1.3em;margin:6px 0 10px;color:var(--bad)}
@@ -135,7 +135,7 @@ main[hidden],.screen[hidden]{display:none}
 <main id="app" hidden>
   <div class="topbar">
     <div><h1>Oparanno Trading</h1>
-    <p class="sub">Price list – wholesale and retail price of every product in one place.</p></div>
+    <p class="sub" id="subt">Product price list</p></div>
     <div class="who"><span id="who"></span><span class="badge" id="rolebadge" hidden></span><button type="button" class="ghost" id="signin">Staff sign in</button><button type="button" class="ghost" id="out" hidden>Sign out</button></div>
   </div>
   <p class="hint" id="acc" hidden>You are signed in, but the owner has not given you staff access yet. You can only view the price list.</p>
@@ -210,7 +210,7 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 let user = null, role = 'public', items = [], inline = null, pendingDel = null, cur = '৳', newPhoto = '';
-let prods = [], costs = {}, costsReady = false, migrating = false, startedFor = null;
+let prods = [], costs = {}, costsReady = false, migrating = false, startedFor = null, loadErr = '';
 let unsubUser = null, unsubProducts = null, unsubCosts = null, unsubUsers = null;
 const canAdd = () => role === 'owner' || role === 'staff';
 const canEdit = () => role === 'owner';
@@ -293,6 +293,7 @@ function route(){
   const sees=canSeeCost();
   $('who').textContent=user?(user.displayName||user.email||''):'';
   $('rolebadge').hidden=!staffish;$('rolebadge').textContent=role||'';
+  $('subt').textContent=sees?'Price list – wholesale and retail price of every product in one place.':'Product price list';
   $('out').hidden=!user;$('signin').hidden=!!user;
   $('acc').hidden=!(user&&!staffish);
   $('tg').hidden=!canAdd();if(!canAdd())$('addcard').hidden=true;
@@ -309,9 +310,10 @@ function route(){
 }
 function startProducts(){
   unsubProducts=onSnapshot(collection(db,'products'),(snap)=>{
+    loadErr='';
     prods=snap.docs.map((d)=>Object.assign({},d.data(),{id:d.id}));
     rebuild();
-  },(err)=>setStatus(niceErr(err)));
+  },(err)=>{loadErr=niceErr(err);prods=[];rebuild()});
 }
 // Wholesale prices live in a separate "costs" collection that viewers cannot read.
 function startCosts(){
@@ -319,7 +321,7 @@ function startCosts(){
     costs={};
     snap.docs.forEach((d)=>{const w=d.data().wholesale;if(typeof w==='number')costs[d.id]=w});
     costsReady=true;rebuild();
-  },(err)=>setStatus(niceErr(err)));
+  },(err)=>{loadErr='Could not read wholesale prices: '+niceErr(err);costsReady=true;rebuild()});
 }
 function rebuild(){
   if(canSeeCost()&&!costsReady)return;
@@ -329,7 +331,7 @@ function rebuild(){
     else delete o.wholesale;
     return o;
   });
-  setStatus('');render();
+  setStatus(loadErr?('Problem: '+loadErr):'');render();
   if(role==='owner')migrate();
 }
 // Older products stored the wholesale price inside the product itself. Move it to the private area.
@@ -473,7 +475,7 @@ function render(){
     kids.forEach(function(k){h+=editing===k.id?editorHtml():rowHtml(k,true,p.name)});
     return h;
   }).join('');
-  $('rows').innerHTML=html||'<div class="empty">'+(items.length?'No products match your search.':(canAdd()?'No products yet. Add your first one above.':'No products yet.'))+'</div>';
+  $('rows').innerHTML=html||'<div class="empty">'+(loadErr&&!items.length?'Could not load the price list: '+esc(loadErr):(items.length?'No products match your search.':(canAdd()?'No products yet. Add your first one above.':'No products yet.')))+'</div>';
   $('sCount').textContent=items.length;
   var ms=items.map(pct).filter(function(v){return !isNaN(v)});
   if(ms.length){
