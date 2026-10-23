@@ -110,7 +110,7 @@ main[hidden],.screen[hidden]{display:none}
 
 <div class="screen" id="login" hidden>
   <h1>Oparanno Trading</h1>
-  <p class="sub">Sign in to see the price list.</p>
+  <p class="sub">Staff sign in</p>
   <button type="button" class="gbtn" id="gsign">Continue with Google</button>
   <form id="ef" autocomplete="on">
     <input type="email" id="em" placeholder="Email" required autocomplete="email">
@@ -122,6 +122,7 @@ main[hidden],.screen[hidden]{display:none}
     </div>
   </form>
   <div class="msg" id="amsg" role="status"></div>
+  <button type="button" class="ghost" id="backlist">← Back to the price list</button>
 </div>
 
 <div class="screen" id="pending" hidden>
@@ -135,8 +136,9 @@ main[hidden],.screen[hidden]{display:none}
   <div class="topbar">
     <div><h1>Oparanno Trading</h1>
     <p class="sub">Price list – wholesale and retail price of every product in one place.</p></div>
-    <div class="who"><span id="who"></span><span class="badge" id="rolebadge"></span><button type="button" class="ghost" id="out">Sign out</button></div>
+    <div class="who"><span id="who"></span><span class="badge" id="rolebadge" hidden></span><button type="button" class="ghost" id="signin">Staff sign in</button><button type="button" class="ghost" id="out" hidden>Sign out</button></div>
   </div>
+  <p class="hint" id="acc" hidden>You are signed in, but the owner has not given you staff access yet. You can only view the price list.</p>
   <div class="searchbar"><input id="q" placeholder="Search products…" aria-label="Search products"><span class="curw">Currency <input id="cur" class="cur" value="৳" maxlength="4" aria-label="Currency symbol"></span></div>
 
   <button type="button" class="addtoggle" id="tg">+ Add new product</button>
@@ -168,7 +170,7 @@ main[hidden],.screen[hidden]{display:none}
 
   <div class="card" id="team" hidden>
     <div class="fh">Team</div>
-    <p class="hint">New people sign up and wait here. Choose what each person can do: <b>Viewer</b> can only look, <b>Staff</b> can look and add products, <b>Pending</b> has no access.</p>
+    <p class="hint">Anyone can look at the price list without signing in (retail prices only). Staff sign in with Google. New people who sign in wait here: choose <b>Staff</b> to let them see wholesale prices and add products, or leave them on <b>No access</b>.</p>
     <div id="users"></div>
     <details style="margin-top:14px"><summary style="cursor:pointer;color:var(--accent);font-weight:600">Import products from the old page</summary>
       <p class="hint" style="margin-top:10px">Paste the exported data here, then press Import.</p>
@@ -183,7 +185,7 @@ main[hidden],.screen[hidden]{display:none}
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,GoogleAuthProvider,signInWithPopup,signOut,sendPasswordResetEmail} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {getFirestore,collection,doc,getDoc,setDoc,updateDoc,deleteDoc,onSnapshot} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {getFirestore,collection,doc,getDoc,setDoc,updateDoc,writeBatch,onSnapshot} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // ====== Firebase settings for the "oparanno" project ======
 const firebaseConfig = {
@@ -207,16 +209,19 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-let user = null, role = null, items = [], inline = null, pendingDel = null, cur = '৳', newPhoto = '';
-let unsubUser = null, unsubProducts = null, unsubUsers = null, appStarted = false;
+let user = null, role = 'public', items = [], inline = null, pendingDel = null, cur = '৳', newPhoto = '';
+let prods = [], costs = {}, costsReady = false, migrating = false, startedFor = null;
+let unsubUser = null, unsubProducts = null, unsubCosts = null, unsubUsers = null;
 const canAdd = () => role === 'owner' || role === 'staff';
 const canEdit = () => role === 'owner';
+const canSeeCost = () => role === 'owner' || role === 'staff';
 
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){}return null}
 function money(n){return cur+(Math.round(n*100)/100).toLocaleString(undefined,{maximumFractionDigits:2})}
-function pct(p){return p.wholesale>0?(p.retail-p.wholesale)/p.wholesale*100:0}
-function pctTxt(p){return (Math.round(pct(p)*10)/10)+'%'}
+function hasW(p){return typeof p.wholesale==='number'}
+function pct(p){return hasW(p)&&p.wholesale>0?(p.retail-p.wholesale)/p.wholesale*100:(hasW(p)?0:NaN)}
+function pctTxt(p){var v=pct(p);return isNaN(v)?'–':(Math.round(v*10)/10)+'%'}
 function setStatus(t){$('status').textContent=t}
 function short(n,pn){var s=pn+' – ';return n.indexOf(s)===0&&n.length>s.length?n.slice(s.length):n}
 function niceErr(e){
@@ -255,54 +260,108 @@ $('fp').addEventListener('click',async()=>{
 $('out').addEventListener('click',()=>signOut(auth));
 $('pout').addEventListener('click',()=>signOut(auth));
 
-function stopAll(){
-  [unsubUser,unsubProducts,unsubUsers].forEach((u)=>{if(u)try{u()}catch(e){}});
-  unsubUser=unsubProducts=unsubUsers=null;appStarted=false;items=[];role=null;inline=null;
+function stopData(){
+  [unsubProducts,unsubCosts,unsubUsers].forEach((u)=>{if(u)try{u()}catch(e){}});
+  unsubProducts=unsubCosts=unsubUsers=null;
+  prods=[];costs={};costsReady=false;items=[];inline=null;startedFor=null;
 }
+let wantLogin = false;
+$('signin').addEventListener('click',()=>{wantLogin=true;amsg('');show('login')});
+$('backlist').addEventListener('click',()=>{wantLogin=false;route()});
 
 onAuthStateChanged(auth,async(u)=>{
-  stopAll();user=u;
-  if(!u){show('login');return}
-  show('loading');
+  if(unsubUser){try{unsubUser()}catch(e){}unsubUser=null}
+  user=u;
+  if(!u){role='public';route();return}
+  wantLogin=false;
   try{
     const ref=doc(db,'users',u.uid);
     const s=await getDoc(ref);
     if(!s.exists())await setDoc(ref,{email:u.email||'',name:u.displayName||'',role:'pending',createdAt:Date.now()});
-    unsubUser=onSnapshot(ref,(snap)=>{role=snap.exists()?snap.data().role:'pending';route()},(err)=>{amsg(niceErr(err));show('login')});
-  }catch(e){amsg(niceErr(e));show('login')}
+    unsubUser=onSnapshot(ref,(snap)=>{
+      const r=snap.exists()?snap.data().role:'pending';
+      role=(r==='owner'||r==='staff')?r:'public';route();
+    },()=>{role='public';route()});
+  }catch(e){role='public';route();setStatus(niceErr(e))}
 });
 
+// Everyone can look at the price list (retail prices only). Staff and the owner sign in to do more.
 function route(){
-  if(role==='owner'||role==='staff'||role==='viewer'){
-    show('app');
-    $('who').textContent=(user.displayName||user.email||'');
-    $('rolebadge').textContent=role;
-    $('tg').hidden=!canAdd();if(!canAdd())$('addcard').hidden=true;
-    $('team').hidden=role!=='owner';
-    if(!appStarted){appStarted=true;startProducts();if(role==='owner')startUsers()}
-    else if(role==='owner'&&!unsubUsers)startUsers();
-    render();
-  }else{
-    show('pending');$('pmail').textContent=user.email||user.displayName||'';
+  if(wantLogin&&!user){show('login');return}
+  show('app');
+  const staffish=role==='owner'||role==='staff';
+  const sees=canSeeCost();
+  $('who').textContent=user?(user.displayName||user.email||''):'';
+  $('rolebadge').hidden=!staffish;$('rolebadge').textContent=role||'';
+  $('out').hidden=!user;$('signin').hidden=!!user;
+  $('acc').hidden=!(user&&!staffish);
+  $('tg').hidden=!canAdd();if(!canAdd())$('addcard').hidden=true;
+  $('team').hidden=role!=='owner';
+  $('sMargin').parentNode.hidden=!sees;$('sBest').parentNode.hidden=!sees;
+  const key=staffish?role:'public';
+  if(startedFor!==key){
+    stopData();startedFor=key;
+    startProducts();
+    if(sees)startCosts();
+    if(role==='owner')startUsers();
   }
+  rebuild();
 }
 function startProducts(){
   unsubProducts=onSnapshot(collection(db,'products'),(snap)=>{
-    items=snap.docs.map((d)=>Object.assign({},d.data(),{id:d.id}));
-    setStatus('');render();
+    prods=snap.docs.map((d)=>Object.assign({},d.data(),{id:d.id}));
+    rebuild();
   },(err)=>setStatus(niceErr(err)));
+}
+// Wholesale prices live in a separate "costs" collection that viewers cannot read.
+function startCosts(){
+  unsubCosts=onSnapshot(collection(db,'costs'),(snap)=>{
+    costs={};
+    snap.docs.forEach((d)=>{const w=d.data().wholesale;if(typeof w==='number')costs[d.id]=w});
+    costsReady=true;rebuild();
+  },(err)=>setStatus(niceErr(err)));
+}
+function rebuild(){
+  if(canSeeCost()&&!costsReady)return;
+  items=prods.map((p)=>{
+    const o=Object.assign({},p);
+    if(canSeeCost()){if(typeof costs[p.id]==='number')o.wholesale=costs[p.id]}
+    else delete o.wholesale;
+    return o;
+  });
+  setStatus('');render();
+  if(role==='owner')migrate();
+}
+// Older products stored the wholesale price inside the product itself. Move it to the private area.
+async function migrate(){
+  if(migrating)return;
+  const legacy=prods.filter((p)=>typeof p.wholesale==='number');
+  if(!legacy.length)return;
+  migrating=true;
+  try{
+    for(let i=0;i<legacy.length;i+=200){
+      const b=writeBatch(db);
+      legacy.slice(i,i+200).forEach((p)=>{
+        const rest=Object.assign({},p);delete rest.wholesale;delete rest.id;
+        b.set(doc(db,'costs',p.id),{wholesale:p.wholesale});
+        b.set(doc(db,'products',p.id),rest);
+      });
+      await b.commit();
+    }
+  }catch(e){setStatus('Could not move wholesale prices to the private area: '+niceErr(e))}
+  migrating=false;
 }
 
 /* ---------- Team (owner only) ---------- */
 function startUsers(){
   unsubUsers=onSnapshot(collection(db,'users'),(snap)=>{
     const list=snap.docs.map((d)=>Object.assign({},d.data(),{uid:d.id}));
-    const order={pending:0,staff:1,viewer:2,owner:3};
+    const order={pending:0,viewer:0,staff:1,owner:3};
     list.sort((a,b)=>(order[a.role]??4)-(order[b.role]??4)||String(a.email).localeCompare(String(b.email)));
     $('users').innerHTML=list.map((u)=>{
       const me=u.uid===user.uid||u.role==='owner';
       const sel=me?'<span class="badge">'+esc(u.role)+'</span>'
-        :'<select data-uid="'+esc(u.uid)+'" aria-label="Role">'+['pending','viewer','staff'].map((r)=>'<option value="'+r+'"'+(u.role===r?' selected':'')+'>'+r.charAt(0).toUpperCase()+r.slice(1)+'</option>').join('')+'</select>';
+        :'<select data-uid="'+esc(u.uid)+'" aria-label="Role">'+[['pending','No access (view only)'],['staff','Staff']].map((o)=>'<option value="'+o[0]+'"'+((u.role===o[0]||(o[0]==='pending'&&u.role==='viewer'))?' selected':'')+'>'+o[1]+'</option>').join('')+'</select>';
       return '<div class="urow"><div>'+esc(u.name||u.email||u.uid)+'<small>'+esc(u.email||'')+(u.uid===user.uid?' (you)':'')+'</small></div>'+sel+'</div>';
     }).join('')||'<p class="hint">No one else has signed up yet.</p>';
   },(err)=>{$('users').textContent=niceErr(err)});
@@ -332,7 +391,7 @@ function shrink(file,cb){
 
 /* ---------- Rows ---------- */
 function rowHtml(p,isSim,parentName){
-  var pr=p.retail-p.wholesale,cls=pr>=0?'pos':'neg';
+  var pr=hasW(p)?p.retail-p.wholesale:0,cls=pr>=0?'pos':'neg';
   var name=isSim?short(p.name,parentName):p.name;
   var trash=!canEdit()?'':(pendingDel===p.id
     ?'<button class="ib sure" data-a="del2" data-id="'+esc(p.id)+'">Sure?</button>'
@@ -343,8 +402,10 @@ function rowHtml(p,isSim,parentName){
     +trash;
   return '<div class="row'+(isSim?' sim':'')+'">'+th+'<div class="main">'+(isSim?'<span class="simlbl">similar product</span>':'')
     +'<div class="nm">'+esc(name)+'</div>'+(p.note?'<span class="chip">'+esc(p.note)+'</span>':'')+'</div>'
-    +'<div class="vals"><span class="pc '+cls+'" title="Profit '+esc(money(pr))+'">'+pctTxt(p)+'</span>'
-    +'<span><i>W</i>'+money(p.wholesale)+'</span><span><i>R</i>'+money(p.retail)+'</span></div>'
+    +(canSeeCost()
+      ?'<div class="vals"><span class="pc '+cls+'"'+(hasW(p)?' title="Profit '+esc(money(pr))+'"':'')+'>'+pctTxt(p)+'</span>'
+        +'<span><i>W</i>'+(hasW(p)?money(p.wholesale):'–')+'</span><span><i>R</i>'+money(p.retail)+'</span></div>'
+      :'<div class="vals"><span><i>R</i>'+money(p.retail)+'</span></div>')
     +(icons?'<div class="ico">'+icons+'</div>':'')+'</div>';
 }
 function editorHtml(){
@@ -414,8 +475,8 @@ function render(){
   }).join('');
   $('rows').innerHTML=html||'<div class="empty">'+(items.length?'No products match your search.':(canAdd()?'No products yet. Add your first one above.':'No products yet.'))+'</div>';
   $('sCount').textContent=items.length;
-  if(items.length){
-    var ms=items.map(pct);
+  var ms=items.map(pct).filter(function(v){return !isNaN(v)});
+  if(ms.length){
     $('sMargin').textContent=(Math.round(ms.reduce(function(a,b){return a+b},0)/ms.length*10)/10)+'%';
     $('sBest').textContent=(Math.round(Math.max.apply(null,ms)*10)/10)+'%';
   }else{$('sMargin').textContent='–';$('sBest').textContent='–'}
@@ -423,8 +484,13 @@ function render(){
 
 /* ---------- Saving ---------- */
 function newId(){return 'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
-async function saveDoc(id,p){
-  try{await setDoc(doc(db,'products',id),p);setStatus('Saved.')}catch(e){setStatus('Could not save: '+niceErr(e))}
+async function saveProduct(id,p,w){
+  try{
+    const b=writeBatch(db);
+    b.set(doc(db,'products',id),p);
+    if(canSeeCost())b.set(doc(db,'costs',id),{wholesale:w});
+    await b.commit();setStatus('Saved.');
+  }catch(e){setStatus('Could not save: '+niceErr(e))}
 }
 var savedCur=ls('oparanno_cur');if(savedCur){cur=savedCur;$('cur').value=cur}
 $('cur').addEventListener('input',function(){cur=this.value||'';ls('oparanno_cur',cur);render()});
@@ -439,21 +505,23 @@ $('pf').addEventListener('change',function(){
 $('prm').addEventListener('click',function(){newPhoto='';showNew()});
 $('f').addEventListener('submit',function(e){
   e.preventDefault();if(!canAdd())return;
-  var p={name:$('name').value.trim(),wholesale:parseFloat($('ws').value),retail:parseFloat($('rt').value),note:$('nt').value.trim(),updated:Date.now()};
-  if(!p.name||isNaN(p.wholesale)||isNaN(p.retail))return;
+  var w=parseFloat($('ws').value);
+  var p={name:$('name').value.trim(),retail:parseFloat($('rt').value),note:$('nt').value.trim(),updated:Date.now()};
+  if(!p.name||isNaN(w)||isNaN(p.retail))return;
   if(newPhoto)p.photo=newPhoto;
-  saveDoc(newId(),p);$('f').reset();newPhoto='';showNew();setAdd(false);
+  saveProduct(newId(),p,w);$('f').reset();newPhoto='';showNew();setAdd(false);
 });
 ['input','keyup','search','compositionend'].forEach(function(ev){$('q').addEventListener(ev,render)});
 
 $('rows').addEventListener('submit',function(e){
   e.preventDefault();if(!inline)return;
   grab();var d=inline.draft;
-  var p={name:String(d.name).trim(),wholesale:parseFloat(d.ws),retail:parseFloat(d.rt),note:String(d.nt).trim(),updated:Date.now()};
-  if(!p.name||isNaN(p.wholesale)||isNaN(p.retail))return;
+  var w=parseFloat(d.ws);
+  var p={name:String(d.name).trim(),retail:parseFloat(d.rt),note:String(d.nt).trim(),updated:Date.now()};
+  if(!p.name||isNaN(w)||isNaN(p.retail))return;
   if(d.photo)p.photo=d.photo;
-  if(inline.mode==='sim'){if(!canAdd())return;p.parent=inline.id;saveDoc(newId(),p)}
-  else{if(!canEdit())return;var old=items.find(function(x){return x.id===inline.id});if(old&&old.parent)p.parent=old.parent;saveDoc(inline.id,p)}
+  if(inline.mode==='sim'){if(!canAdd())return;p.parent=inline.id;saveProduct(newId(),p,w)}
+  else{if(!canEdit())return;var old=items.find(function(x){return x.id===inline.id});if(old&&old.parent)p.parent=old.parent;saveProduct(inline.id,p,w)}
   inline=null;render();
 });
 $('rows').addEventListener('change',function(e){
@@ -486,7 +554,8 @@ $('rows').addEventListener('click',function(e){
   else if(a==='del2'&&canEdit()){
     pendingDel=null;
     var gone=items.filter(function(x){return x.id===id||x.parent===id}).map(function(x){return x.id});
-    Promise.all(gone.map(function(g){return deleteDoc(doc(db,'products',g))})).catch(function(err){setStatus('Could not delete: '+niceErr(err))});
+    var b=writeBatch(db);gone.forEach(function(g){b.delete(doc(db,'products',g));b.delete(doc(db,'costs',g))});
+    b.commit().catch(function(err){setStatus('Could not delete: '+niceErr(err))});
   }
 });
 $('lb').addEventListener('click',function(){this.hidden=true});
@@ -500,17 +569,26 @@ $('impgo').addEventListener('click',async()=>{
   if(!Array.isArray(data)||!data.length){m.textContent='No products found in that data.';return}
   let n=0;
   try{
+    const rows=[];
     for(const o of data){
       if(!o||!o.name||isNaN(parseFloat(o.wholesale))||isNaN(parseFloat(o.retail)))continue;
       const id=String(o.id||newId()).replace(/[\/\s]/g,'_');
-      const p={name:String(o.name),wholesale:parseFloat(o.wholesale),retail:parseFloat(o.retail),note:String(o.note||''),updated:Date.now()};
+      const p={name:String(o.name),retail:parseFloat(o.retail),note:String(o.note||''),updated:Date.now()};
       if(o.parent)p.parent=String(o.parent).replace(/[\/\s]/g,'_');
       if(o.photo)p.photo=String(o.photo);
-      await setDoc(doc(db,'products',id),p);n++;
+      rows.push({id,p,w:parseFloat(o.wholesale)});
+    }
+    for(let i=0;i<rows.length;i+=100){
+      const b=writeBatch(db);
+      rows.slice(i,i+100).forEach((r)=>{b.set(doc(db,'products',r.id),r.p);b.set(doc(db,'costs',r.id),{wholesale:r.w})});
+      await b.commit();n+=Math.min(100,rows.length-i);
     }
     m.className='msg ok';m.textContent='Imported '+n+' product'+(n===1?'':'s')+'.';$('imp').value='';
   }catch(e){m.textContent='Import stopped after '+n+': '+niceErr(e)}
 });
+
+// Show the public price list straight away; sign-in state is applied as soon as Firebase answers.
+route();
 </script>
 </body>
 </html>
