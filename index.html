@@ -36,50 +36,44 @@ button.ghost{background:transparent;color:var(--text);border:1px solid var(--lin
 .live{font-size:.8rem;margin:10px 0 0;color:var(--muted)}
 .searchbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;gap:10px;align-items:center;background:var(--bg);padding:8px 0 12px;margin-bottom:6px}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
-.curw{color:var(--muted);font-size:.85rem;white-space:nowrap}
-.searchbar #q{flex:1;padding:12px 14px;font-size:1rem}
-.cur{width:64px!important;display:inline-block;padding:4px 6px!important;text-align:center}
+.searchbar #q{width:100%;flex:1;padding:12px 14px;font-size:1rem}
 .list{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--card)}
-.row{display:flex;align-items:center;gap:12px;padding:14px;border-bottom:1px solid var(--line)}
+
+/* --- Updated Ultra-Compact Card Design --- */
+.row{display:flex;flex-direction:column;gap:6px;padding:8px 10px;border-bottom:1px solid var(--line)}
 .row:last-child{border-bottom:0}
 .row.sim{background:var(--soft)}
-.thb{padding:0;border-radius:10px;background:var(--bg);border:1px solid var(--line);width:52px;height:52px;flex:none;overflow:hidden;line-height:0}
+.row-bottom{display:flex;align-items:center;justify-content:space-between;width:100%}
+.thb{padding:0;border-radius:6px;background:var(--bg);border:1px solid var(--line);width:38px;height:38px;flex:none;overflow:hidden;line-height:0}
 .thb img{width:100%;height:100%;object-fit:cover;display:block}
 .main{flex:1;min-width:0}
-.simlbl{display:block;font-size:.72rem;color:var(--muted);margin-bottom:2px}
-.nm{font-weight:600;font-size:1.05rem;overflow-wrap:anywhere}
-.chip{display:inline-block;margin-top:6px;padding:2px 10px;border:1px solid var(--line);border-radius:8px;font-size:.78rem;color:var(--muted)}
-.vals{display:flex;align-items:baseline;gap:14px;font-size:.95rem;font-variant-numeric:tabular-nums;white-space:nowrap}
-.vals i{font-style:normal;font-size:.72rem;color:var(--muted);margin-right:3px;font-weight:600}
-.pc{font-weight:700}
-.pos{color:var(--accent)}
-.neg{color:var(--bad)}
-.ico{display:flex;align-items:center;gap:2px;min-width:92px;justify-content:flex-end}
-.ib{background:transparent;border:0;padding:7px;border-radius:8px;color:var(--muted);display:inline-flex;align-items:center;line-height:0}
+.simlbl{display:block;font-size:.68rem;color:var(--muted);margin-bottom:1px}
+.nm{font-weight:600;font-size:.9rem;line-height:1.2;overflow-wrap:anywhere}
+.chip{display:inline-block;margin-left:6px;padding:1px 6px;border:1px solid var(--line);border-radius:6px;font-size:.7rem;color:var(--muted)}
+.vals{display:flex;align-items:center;gap:4px;font-size:.88rem;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--text)}
+.vals i{font-style:normal;font-size:.7rem;color:var(--muted);margin-right:2px}
+.ico{display:flex;align-items:center;gap:2px}
+.ib{background:transparent;border:0;padding:4px;border-radius:6px;color:var(--muted);display:inline-flex;align-items:center;line-height:0}
 .ib:hover,.ib:focus-visible{background:var(--soft);color:var(--text)}
 .ib.add{color:var(--text)}
-.ib.sure{color:var(--bad);font-size:.8rem;font-weight:700;line-height:1.2;padding:7px 8px}
-.ib svg{width:20px;height:20px}
-.editor{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;align-items:end;background:var(--soft);border-left:3px solid var(--accent)}
+.ib.sure{color:var(--bad);font-size:.75rem;font-weight:700;line-height:1.2;padding:4px 6px}
+.ib svg{width:18px;height:18px}
+/* ----------------------------------------- */
+
+.editor{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;align-items:end;background:var(--soft);border-left:3px solid var(--accent);padding:12px}
 .editor .eh{grid-column:1/-1;font-weight:600}
 .editor .full{grid-column:1/-1}
 .editor .eb{display:flex;gap:8px}
 .pr{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.pr img,.pp img{width:52px;height:52px;object-fit:cover;border-radius:10px;border:1px solid var(--line);display:block}
-.pick{display:inline-block;margin:0;padding:8px 12px;border:1px dashed var(--accent);border-radius:10px;color:var(--accent);font-weight:600;font-size:.85rem;cursor:pointer;position:relative;overflow:hidden}
+.pr img,.pp img{width:40px;height:40px;object-fit:cover;border-radius:8px;border:1px solid var(--line);display:block}
+.pick{display:inline-block;margin:0;padding:6px 10px;border:1px dashed var(--accent);border-radius:8px;color:var(--accent);font-weight:600;font-size:.8rem;cursor:pointer;position:relative;overflow:hidden}
 .pick input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;font-size:0}
 .pp{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .lb{position:fixed;inset:0;background:rgba(0,0,0,.82);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:20px;z-index:50}
 .lb[hidden]{display:none}
 .lb img{max-width:100%;max-height:78%;border-radius:12px;background:#fff}
 .lb span{color:#fff;font-weight:600}
-.empty{text-align:center;color:var(--muted);padding:28px 8px}
-@media (max-width:560px){
-  .row{flex-wrap:wrap}
-  .ico{order:2;min-width:0}
-  .main{order:1}
-  .vals{order:3;width:100%;justify-content:space-between}
-}
+.empty{text-align:center;color:var(--muted);padding:20px 8px}
 
 input[type=email],input[type=password]{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;margin-bottom:10px}
 textarea{width:100%;min-height:90px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit}
@@ -140,7 +134,9 @@ main[hidden],.screen[hidden],.badge[hidden]{display:none}
     <div class="who"><span id="who"></span><span class="badge" id="rolebadge" hidden></span><button type="button" class="ghost" id="signin">Staff sign in</button><button type="button" class="ghost" id="out" hidden>Sign out</button></div>
   </div>
   <p class="hint" id="acc" hidden>You are signed in, but the owner has not given you staff access yet. You can only view the price list.</p>
-  <div class="searchbar"><input id="q" placeholder="Search products…" aria-label="Search products"><span class="curw">Currency <input id="cur" class="cur" value="৳" maxlength="4" aria-label="Currency symbol"></span></div>
+  
+  <!-- Search bar without currency -->
+  <div class="searchbar"><input id="q" placeholder="Search products…" aria-label="Search products"></div>
 
   <button type="button" class="addtoggle" id="tg">+ Add new product</button>
   <p class="live" id="status"></p>
@@ -195,7 +191,6 @@ import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase
 import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,GoogleAuthProvider,signInWithPopup,signOut,sendPasswordResetEmail} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {getFirestore,collection,doc,getDoc,setDoc,updateDoc,writeBatch,onSnapshot,query,where,orderBy} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// ====== Firebase settings for the "oparanno" project ======
 const firebaseConfig = {
   apiKey: "AIzaSyBqtmeNjKlMA9Bllps7SYp2X2c-9hSoEAY",
   authDomain: "oparanno.firebaseapp.com",
@@ -204,7 +199,6 @@ const firebaseConfig = {
   messagingSenderId: "644746003028",
   appId: "1:644746003028:web:5eafb9e7eb01a149b823c1"
 };
-// =================================================================
 
 const $ = (id) => document.getElementById(id);
 const show = (name) => {
@@ -226,11 +220,9 @@ const canEdit = () => role === 'owner';
 const canSeeCost = () => role === 'owner' || role === 'staff';
 
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
-function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){}return null}
 function money(n){return cur+(Math.round(n*100)/100).toLocaleString(undefined,{maximumFractionDigits:2})}
 function hasW(p){return typeof p.wholesale==='number'}
 function pct(p){return hasW(p)&&p.wholesale>0?(p.retail-p.wholesale)/p.wholesale*100:(hasW(p)?0:NaN)}
-function pctTxt(p){var v=pct(p);return isNaN(v)?'–':(Math.round(v*10)/10)+'%'}
 function setStatus(t){$('status').textContent=t}
 function short(n,pn){var s=pn+' – ';return n.indexOf(s)===0&&n.length>s.length?n.slice(s.length):n}
 function niceErr(e){
@@ -242,16 +234,8 @@ function niceErr(e){
   if(c==='auth/invalid-email')return 'That email does not look right.';
   if(c==='auth/too-many-requests')return 'Too many tries. Please wait a little and try again.';
   if(c==='auth/popup-closed-by-user'||c==='auth/cancelled-popup-request')return '';
-  if(c==='auth/unauthorized-domain')return 'This website address is not allowed yet. In Firebase, open Authentication > Settings > Authorized domains and add it.';
-  if(c==='auth/operation-not-allowed')return 'This sign-in method is not turned on in Firebase yet (Authentication > Sign-in method).';
   return (e&&e.message)||'Something went wrong.';
 }
-
-const ICON={
-  edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
-  add:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
-  del:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 14h10l1-14"/><path d="M10 10v6M14 10v6"/></svg>'
-};
 
 /* ---------- Sign in ---------- */
 function amsg(t,ok){const m=$('amsg');m.textContent=t||'';m.className='msg'+(ok?' ok':'')}
@@ -295,7 +279,6 @@ onAuthStateChanged(auth,async(u)=>{
   }catch(e){role='public';route();setStatus(niceErr(e))}
 });
 
-// Everyone can look at the price list (retail prices only). Staff and the owner sign in to do more.
 function route(){
   if(wantLogin&&!user){show('login');return}
   show('app');
@@ -333,7 +316,6 @@ function startProducts(){
     rebuild();
   },(err)=>{loadErr=niceErr(err);prods=[];rebuild()});
 }
-// Wholesale prices live in a separate "costs" collection that viewers cannot read.
 function startCosts(){
   unsubCosts=onSnapshot(collection(db,'costs'),(snap)=>{
     costs={};
@@ -350,26 +332,6 @@ function rebuild(){
     return o;
   });
   setStatus(loadErr?('Problem: '+loadErr):'');render();
-  if(role==='owner')migrate();
-}
-// Older products stored the wholesale price inside the product itself. Move it to the private area.
-async function migrate(){
-  if(migrating)return;
-  const legacy=prods.filter((p)=>typeof p.wholesale==='number');
-  if(!legacy.length)return;
-  migrating=true;
-  try{
-    for(let i=0;i<legacy.length;i+=200){
-      const b=writeBatch(db);
-      legacy.slice(i,i+200).forEach((p)=>{
-        const rest=Object.assign({},p);delete rest.wholesale;delete rest.id;
-        b.set(doc(db,'costs',p.id),{wholesale:p.wholesale});
-        b.set(doc(db,'products',p.id),rest);
-      });
-      await b.commit();
-    }
-  }catch(e){setStatus('Could not move wholesale prices to the private area: '+niceErr(e))}
-  migrating=false;
 }
 
 /* ---------- Team (owner only) ---------- */
@@ -409,25 +371,23 @@ function shrink(file,cb){
   r.readAsDataURL(file);
 }
 
-/* ---------- Rows ---------- */
+/* ---------- Rows Layout (Title Top, Pic Left, Wholesale Price Right) ---------- */
 function rowHtml(p,isSim,parentName){
-  var pr=hasW(p)?p.retail-p.wholesale:0,cls=pr>=0?'pos':'neg';
   var name=isSim?short(p.name,parentName):p.name;
-  var trash=!canEdit()?'':(pendingDel===p.id
-    ?'<button class="ib sure" data-a="del2" data-id="'+esc(p.id)+'">Sure?</button>'
-    :'<button class="ib" data-a="del" data-id="'+esc(p.id)+'" aria-label="Delete" title="Delete">'+ICON.del+'</button>');
-  var th=p.photo?'<button class="thb" data-a="zoom" data-id="'+esc(p.id)+'" aria-label="View picture"><img src="'+esc(p.photo)+'" alt=""></button>':'';
-  var icons=(canEdit()?'<button class="ib" data-a="history" data-id="'+esc(p.id)+'" title="Purchase history" aria-label="Purchase history">History</button><button class="ib" data-a="edit" data-id="'+esc(p.id)+'" aria-label="Edit" title="Edit">'+ICON.edit+'</button>':'')
-    +((!isSim&&canAdd())?'<button class="ib add" data-a="sim" data-id="'+esc(p.id)+'" aria-label="Add similar product" title="Add similar product">'+ICON.add+'</button>':'')
-    +trash;
-  return '<div class="row'+(isSim?' sim':'')+'">'+th+'<div class="main">'+(isSim?'<span class="simlbl">similar product</span>':'')
-    +'<div class="nm">'+esc(name)+'</div>'+(p.note?'<span class="chip">'+esc(p.note)+'</span>':'')+'</div>'
-    +(canSeeCost()
-      ?'<div class="vals"><span class="pc '+cls+'"'+(hasW(p)?' title="Profit '+esc(money(pr))+'"':'')+'>'+pctTxt(p)+'</span>'
-        +'<span><i>W</i>'+(hasW(p)?money(p.wholesale):'–')+'</span><span><i>R</i>'+money(p.retail)+'</span></div>'
-      :'<div class="vals"><span><i>R</i>'+money(p.retail)+'</span></div>')
-    +(icons?'<div class="ico">'+icons+'</div>':'')+'</div>';
+  var th=p.photo?'<button class="thb" data-a="zoom" data-id="'+esc(p.id)+'" aria-label="View picture"><img src="'+esc(p.photo)+'" alt=""></button>':'<div class="thb"></div>';
+  
+  return '<div class="row'+(isSim?' sim':'')+'">'
+    +'<div class="main">'
+      +(isSim?'<span class="simlbl">similar product</span>':'')
+      +'<div class="nm">'+esc(name)+(p.note?'<span class="chip">'+esc(p.note)+'</span>':'')+'</div>'
+    +'</div>'
+    +'<div class="row-bottom">'
+      +th
+      +'<div class="vals"><span><i>W</i>'+(hasW(p)?money(p.wholesale):'–')+'</span></div>'
+    +'</div>'
+    +'</div>';
 }
+
 function editorHtml(){
   var d=inline.draft||{};
   return '<form class="row editor" id="ed" autocomplete="off"><div class="eh">'+(inline.mode==='sim'?'Add a similar product':'Edit product')+'</div>'
@@ -452,7 +412,6 @@ function grab(){
 function norm(s){var t=String(s==null?'':s);try{t=t.normalize('NFC')}catch(e){}return t.toLowerCase().replace(/\s+/g,' ').trim()}
 var SEP=/[\s\-–—_,.\/()]/;
 function wordStart(s,q){var i=s.indexOf(q);while(i>-1){if(i===0||SEP.test(s.charAt(i-1)))return true;i=s.indexOf(q,i+1)}return false}
-// 0 = name starts with what you typed, 1 = a word in the name starts with it, 2 = every typed word starts a word, 3 = typed text found inside, -1 = no match
 function rank(p,q){
   var n=norm(p.name),t=norm(p.note),toks=q.split(' ');
   if(n.indexOf(q)===0)return 0;
@@ -512,8 +471,6 @@ async function saveProduct(id,p,w){
     await b.commit();setStatus('Saved.');
   }catch(e){setStatus('Could not save: '+niceErr(e))}
 }
-var savedCur=ls('oparanno_cur');if(savedCur){cur=savedCur;$('cur').value=cur}
-$('cur').addEventListener('input',function(){cur=this.value||'';ls('oparanno_cur',cur);render()});
 
 function setAdd(open){$('addcard').hidden=!open;$('tg').textContent=open?'– Close':'+ Add';if(open){selectedExisting=null;toggleNewFields(true);$('pdate').value=dateToday();try{$('addcard').scrollIntoView({block:'start',behavior:'smooth'})}catch(e){}$('name').focus()}}
 $('tg').addEventListener('click',function(){if(canAdd())setAdd($('addcard').hidden)});
@@ -570,64 +527,8 @@ $('rows').addEventListener('change',function(e){
   grab();
   shrink(f,function(url){if(!inline)return;inline.draft.photo=url;render()});
 });
-function openEditor(mode,p){
-  inline={mode:mode,id:p.id,draft:mode==='edit'
-    ?{name:p.name,ws:p.wholesale,rt:p.retail,nt:p.note||'',photo:p.photo||''}
-    :{name:p.name+' – ',ws:'',rt:'',nt:'',photo:''}};
-  render();
-  var ed=$('ed');if(!ed)return;
-  var first=ed.querySelector('[name=name]');
-  try{ed.scrollIntoView({block:'center',behavior:'smooth'})}catch(e){}
-  first.focus();first.setSelectionRange(first.value.length,first.value.length);
-}
-$('rows').addEventListener('click',function(e){
-  var b=e.target.closest('button');if(!b)return;
-  var a=b.getAttribute('data-a');
-  if(a==='cancel'){inline=null;render();return}
-  if(a==='rmphoto'){grab();inline.draft.photo='';render();return}
-  var id=b.getAttribute('data-id');
-  var p=items.find(function(x){return x.id===id});
-  if(a==='edit'&&p&&canEdit())openEditor('edit',p);
-  else if(a==='sim'&&p&&canAdd())openEditor('sim',p);
-  else if(a==='zoom'&&p&&p.photo){$('lbi').src=p.photo;$('lbt').textContent=p.name;$('lb').hidden=false}
-  else if(a==='del'&&canEdit()){pendingDel=id;render();setTimeout(function(){if(pendingDel===id){pendingDel=null;render()}},4000)}
-  else if(a==='del2'&&canEdit()){
-    pendingDel=null;
-    var gone=items.filter(function(x){return x.id===id||x.parent===id}).map(function(x){return x.id});
-    var b=writeBatch(db);gone.forEach(function(g){b.delete(doc(db,'products',g));b.delete(doc(db,'costs',g))});
-    b.commit().catch(function(err){setStatus('Could not delete: '+niceErr(err))});
-  }
-});
 $('lb').addEventListener('click',function(){this.hidden=true});
 
-/* ---------- Import from the old page (owner) ---------- */
-$('impgo').addEventListener('click',async()=>{
-  const m=$('impmsg');m.className='msg';m.textContent='';
-  if(!canEdit())return;
-  let data;
-  try{data=JSON.parse($('imp').value)}catch(e){m.textContent='That is not valid data. Paste exactly what the old page showed.';return}
-  if(!Array.isArray(data)||!data.length){m.textContent='No products found in that data.';return}
-  let n=0;
-  try{
-    const rows=[];
-    for(const o of data){
-      if(!o||!o.name||isNaN(parseFloat(o.wholesale))||isNaN(parseFloat(o.retail)))continue;
-      const id=String(o.id||newId()).replace(/[\/\s]/g,'_');
-      const p={name:String(o.name),retail:parseFloat(o.retail),note:String(o.note||''),updated:Date.now()};
-      if(o.parent)p.parent=String(o.parent).replace(/[\/\s]/g,'_');
-      if(o.photo)p.photo=String(o.photo);
-      rows.push({id,p,w:parseFloat(o.wholesale)});
-    }
-    for(let i=0;i<rows.length;i+=100){
-      const b=writeBatch(db);
-      rows.slice(i,i+100).forEach((r)=>{b.set(doc(db,'products',r.id),r.p);b.set(doc(db,'costs',r.id),{wholesale:r.w})});
-      await b.commit();n+=Math.min(100,rows.length-i);
-    }
-    m.className='msg ok';m.textContent='Imported '+n+' product'+(n===1?'':'s')+'.';$('imp').value='';
-  }catch(e){m.textContent='Import stopped after '+n+': '+niceErr(e)}
-});
-
-// Show the public price list straight away; sign-in state is applied as soon as Firebase answers.
 route();
 </script>
 </body>
