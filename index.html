@@ -74,6 +74,26 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .lb img{max-width:100%;max-height:78%;border-radius:12px;background:#fff}
 .lb span{color:#fff;font-weight:600}
 .empty{text-align:center;color:var(--muted);padding:28px 8px}
+.row.card2{display:block;padding:14px}
+.row.card2.tap{cursor:pointer}
+.card2 .ptitle{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;font-weight:700;font-size:1.1rem;overflow-wrap:anywhere;margin-bottom:10px}
+.card2 .chev{color:var(--muted);font-size:.9rem;flex:none;padding-top:3px}
+.card2 .pbody{display:flex;align-items:center;gap:14px}
+.card2 .thb{width:76px;height:76px;border-radius:12px}
+.card2 .pside{display:flex;flex-direction:column;align-items:flex-start;gap:8px;min-width:0}
+.card2 .wline{font-size:1.2rem;font-weight:700;font-variant-numeric:tabular-nums}
+.card2 .wline i{font-style:normal;font-size:.75rem;color:var(--muted);margin-right:4px;font-weight:600}
+.card2 .hbtn{padding:6px 14px;font-size:.9rem}
+.card2 .pextra{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 14px}
+.card2 .pextra .ico{min-width:0}
+.hline{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.hline .hl-main{flex:1;min-width:0}
+.hline .hl-price{text-align:right}
+.chg{font-size:.8rem;font-weight:700}
+.chg.up{color:var(--accent)}
+.chg.down{color:var(--bad)}
+.chg.same{color:var(--muted)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;margin:4px 0 10px}
 @media (max-width:560px){
   .row{flex-wrap:wrap}
   .ico{order:2;min-width:0}
@@ -411,23 +431,33 @@ function shrink(file,cb){
 }
 
 /* ---------- Rows ---------- */
+var expanded = {};
 function rowHtml(p,isSim,parentName){
   var pr=hasW(p)?p.retail-p.wholesale:0,cls=pr>=0?'pos':'neg';
   var name=isSim?short(p.name,parentName):p.name;
+  var id=esc(p.id);
+  var lbl=isSim?'<span class="simlbl">similar product</span>':'';
+  var th=p.photo?'<button class="thb" data-a="zoom" data-id="'+id+'" aria-label="View picture"><img src="'+esc(p.photo)+'" alt=""></button>':'';
+  if(!canSeeCost()){
+    // Public view: name, picture and retail price only.
+    return '<div class="row card2'+(isSim?' sim':'')+'">'+lbl+'<div class="ptitle"><span>'+esc(name)+'</span></div>'
+      +'<div class="pbody">'+th+'<div class="pside"><div class="wline"><i>R</i>'+money(p.retail)+'</div>'+(p.note?'<span class="chip" style="margin-top:0">'+esc(p.note)+'</span>':'')+'</div></div></div>';
+  }
   var trash=!canEdit()?'':(pendingDel===p.id
-    ?'<button class="ib sure" data-a="del2" data-id="'+esc(p.id)+'">Sure?</button>'
-    :'<button class="ib" data-a="del" data-id="'+esc(p.id)+'" aria-label="Delete" title="Delete">'+ICON.del+'</button>');
-  var th=p.photo?'<button class="thb" data-a="zoom" data-id="'+esc(p.id)+'" aria-label="View picture"><img src="'+esc(p.photo)+'" alt=""></button>':'';
-  var icons=(canEdit()?'<button class="ib" data-a="history" data-id="'+esc(p.id)+'" title="Purchase history" aria-label="Purchase history">History</button>':'')+(canEdit()?'<button class="ib" data-a="edit" data-id="'+esc(p.id)+'" aria-label="Edit" title="Edit">'+ICON.edit+'</button>':'')
-    +((!isSim&&canAdd())?'<button class="ib add" data-a="sim" data-id="'+esc(p.id)+'" aria-label="Add similar product" title="Add similar product">'+ICON.add+'</button>':'')
+    ?'<button class="ib sure" data-a="del2" data-id="'+id+'">Sure?</button>'
+    :'<button class="ib" data-a="del" data-id="'+id+'" aria-label="Delete" title="Delete">'+ICON.del+'</button>');
+  var icons=(canEdit()?'<button class="ib" data-a="edit" data-id="'+id+'" aria-label="Edit" title="Edit">'+ICON.edit+'</button>':'')
+    +((!isSim&&canAdd())?'<button class="ib add" data-a="sim" data-id="'+id+'" aria-label="Add similar product" title="Add similar product">'+ICON.add+'</button>':'')
     +trash;
-  return '<div class="row'+(isSim?' sim':'')+'">'+th+'<div class="main">'+(isSim?'<span class="simlbl">similar product</span>':'')
-    +'<div class="nm">'+esc(name)+'</div>'+(p.note?'<span class="chip">'+esc(p.note)+'</span>':'')+'</div>'
-    +(canSeeCost()
-      ?'<div class="vals"><span class="pc '+cls+'"'+(hasW(p)?' title="Profit '+esc(money(pr))+'"':'')+'>'+pctTxt(p)+'</span>'
-        +'<span><i>W</i>'+(hasW(p)?money(p.wholesale):'–')+'</span><span><i>R</i>'+money(p.retail)+'</span></div>'
-      :'<div class="vals"><span><i>R</i>'+money(p.retail)+'</span></div>')
-    +(icons?'<div class="ico">'+icons+'</div>':'')+'</div>';
+  var isOpen=!!expanded[p.id];
+  return '<div class="row card2 tap'+(isSim?' sim':'')+'" data-id="'+id+'">'+lbl
+    +'<div class="ptitle"><span>'+esc(name)+'</span><span class="chev">'+(isOpen?'\u25B4':'\u25BE')+'</span></div>'
+    +'<div class="pbody">'+th+'<div class="pside"><div class="wline"><i>W</i>'+(hasW(p)?money(p.wholesale):'\u2013')+'</div>'
+    +(canEdit()?'<button class="ghost hbtn" data-a="history" data-id="'+id+'">History</button>':'')+'</div></div>'
+    +(isOpen?'<div class="pextra"><div class="vals"><span class="pc '+cls+'"'+(hasW(p)?' title="Profit '+esc(money(pr))+'"':'')+'>'+pctTxt(p)+'</span><span><i>R</i>'+money(p.retail)+'</span></div>'
+      +(p.note?'<span class="chip" style="margin-top:0">'+esc(p.note)+'</span>':'')
+      +(icons?'<div class="ico">'+icons+'</div>':'')+'</div>':'')
+    +'</div>';
 }
 function editorHtml(){
   var d=inline.draft||{};
@@ -548,10 +578,60 @@ $('f').addEventListener('submit',async function(e){
 });
 $('closedetail').addEventListener('click',function(){$('detailcard').hidden=true;detailProductId=null});
 $('rows').addEventListener('click',function(e){var b=e.target.closest('button');if(b&&b.getAttribute('data-a')==='history'){var p=items.find(function(x){return x.id===b.getAttribute('data-id')});if(p)openDetail(p.id)}});
+$('rows').addEventListener('click',function(e){
+  if(e.target.closest('button,input,select,textarea,form,a'))return;
+  var row=e.target.closest('.row.tap');if(!row)return;
+  var id=row.getAttribute('data-id');expanded[id]=!expanded[id];render();
+});
 function openDetail(id){detailProductId=id;renderDetail(id);$('detailcard').hidden=false;try{$('detailcard').scrollIntoView({block:'start',behavior:'smooth'})}catch(e){}}
-function renderDetail(id){var p=items.find(function(x){return x.id===id});if(!p)return;var hist=purchases.filter(function(x){return x.productId===id}).sort(function(a,b){return (Number(a.purchaseDate)||0)-(Number(b.purchaseDate)||0)});var dates=hist.map(function(x){return Number(x.purchaseDate)||0}),vals=hist.map(function(x){return Number(x.unitPrice)||0});var chart='';if(hist.length>1){var min=Math.min.apply(null,vals),max=Math.max.apply(null,vals),range=max-min||1,pts=vals.map(function(v,i){return (20+i*260/(vals.length-1))+','+(100-(v-min)/range*75)}).join(' ');chart='<div class="chartbox"><svg viewBox="0 0 300 120" role="img" aria-label="Purchase price history chart"><line x1="20" y1="100" x2="280" y2="100" stroke="var(--line)"/><polyline points="'+pts+'" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>'+vals.map(function(v,i){return '<circle cx="'+(20+i*260/(vals.length-1))+'" cy="'+(100-(v-min)/range*75)+'" r="3" fill="var(--accent)"/>'}).join('')+'</svg></div>'}else if(hist.length===1){chart='<p class="hint">Add more purchases to see the price movement chart.</p>'}else{chart='<p class="hint">No purchase history yet.</p>'}
-var history=hist.slice().reverse().map(function(x){return '<div class="historyline"><div><b>'+esc(new Date(Number(x.purchaseDate)||0).toLocaleDateString())+'</b><div class="hint">'+esc(x.quantity)+' '+esc(x.unit)+(x.marketName?' · '+esc(x.marketName):'')+(x.notes?' · '+esc(x.notes):'')+'</div></div><div style="text-align:right"><b>'+money(Number(x.unitPrice)||0)+' / '+esc(x.unit)+'</b><div class="hint">Total '+money(Number(x.totalCost)||0)+'</div></div></div>'}).join('');
-$('detailcontent').innerHTML='<div class="fh">'+esc(p.name)+' — Purchase history</div><div class="stats"><div class="stat"><b>'+(hasW(p)?money(p.wholesale):'–')+'</b><span>Current wholesale</span></div><div class="stat"><b>'+money(p.retail)+'</b><span>Retail price</span></div><div class="stat"><b>'+pctTxt(p)+'</b><span>Profit %</span></div><div class="stat"><b>'+hist.length+'</b><span>Purchase count</span></div></div><div class="fh">Actual purchase price movement</div>'+chart+'<div class="fh">Price history</div>'+(history||'<p class="empty">No purchases recorded yet.</p>');}
+var pendingPurchaseDel = null;
+function renderDetail(id){
+  var p=items.find(function(x){return x.id===id});if(!p)return;
+  var hist=purchases.filter(function(x){return x.productId===id}).sort(function(a,b){return (Number(a.purchaseDate)||0)-(Number(b.purchaseDate)||0)});
+  var vals=hist.map(function(x){return Number(x.unitPrice)||0});
+  var COL={up:'var(--accent)',down:'var(--bad)',same:'var(--muted)',first:'var(--muted)'};
+  function dir(i){if(i===0)return 'first';var d=vals[i]-vals[i-1];return d>0.0001?'up':(d<-0.0001?'down':'same')}
+  var chart='';
+  if(hist.length>1){
+    var min=Math.min.apply(null,vals),max=Math.max.apply(null,vals),range=max-min||1;
+    var X=function(i){return 20+i*260/(vals.length-1)},Y=function(v){return 100-(v-min)/range*75};
+    var segs='',dots='';
+    for(var i=1;i<vals.length;i++){segs+='<line x1="'+X(i-1)+'" y1="'+Y(vals[i-1])+'" x2="'+X(i)+'" y2="'+Y(vals[i])+'" stroke="'+COL[dir(i)]+'" stroke-width="3" stroke-linecap="round"/>'}
+    for(var j=0;j<vals.length;j++){dots+='<circle cx="'+X(j)+'" cy="'+Y(vals[j])+'" r="4" fill="'+COL[dir(j)]+'"/>'}
+    chart='<div class="chartbox"><svg viewBox="0 0 300 120" role="img" aria-label="Purchase price history chart"><line x1="20" y1="100" x2="280" y2="100" stroke="var(--line)"/>'+segs+dots+'</svg></div>'
+      +'<div class="legend"><span class="chg up">\u25B2 price went up</span><span class="chg down">\u25BC price went down</span></div>';
+  }else if(hist.length===1){chart='<p class="hint">Add more purchases to see the price movement chart.</p>'}
+  else{chart='<p class="hint">No purchase history yet.</p>'}
+  var lines='';
+  for(var k=hist.length-1;k>=0;k--){
+    var x=hist[k],d=dir(k),chg;
+    if(k===0){chg='<div class="chg same">First purchase</div>'}
+    else{
+      var diff=Math.abs(vals[k]-vals[k-1]),pc=vals[k-1]>0?diff/vals[k-1]*100:0;
+      chg='<div class="chg '+d+'">'+(d==='up'?'\u25B2 +':(d==='down'?'\u25BC \u2212':'= '))+money(diff)+' ('+(Math.round(pc*10)/10)+'%)</div>';
+    }
+    var del=pendingPurchaseDel===x.id
+      ?'<button class="ib sure" data-a="phdel2" data-pid="'+esc(x.id)+'">Sure?</button>'
+      :'<button class="ib" data-a="phdel" data-pid="'+esc(x.id)+'" aria-label="Delete this entry" title="Delete this entry">'+ICON.del+'</button>';
+    lines+='<div class="hline"><div class="hl-main"><b>'+esc(new Date(Number(x.purchaseDate)||0).toLocaleDateString())+'</b><div class="hint">'+esc(x.quantity)+' '+esc(x.unit)+(x.marketName?' \u00B7 '+esc(x.marketName):'')+(x.notes?' \u00B7 '+esc(x.notes):'')+'</div></div>'
+      +'<div class="hl-price"><b>'+money(Number(x.unitPrice)||0)+' / '+esc(x.unit)+'</b>'+chg+'<div class="hint">Total '+money(Number(x.totalCost)||0)+'</div></div>'
+      +'<div>'+del+'</div></div>';
+  }
+  $('detailcontent').innerHTML='<div class="fh">'+esc(p.name)+' \u2014 Purchase history</div>'
+    +'<div class="stats"><div class="stat"><b>'+(hasW(p)?money(p.wholesale):'\u2013')+'</b><span>Current wholesale</span></div><div class="stat"><b>'+money(p.retail)+'</b><span>Retail price</span></div><div class="stat"><b>'+pctTxt(p)+'</b><span>Profit %</span></div><div class="stat"><b>'+hist.length+'</b><span>Purchase count</span></div></div>'
+    +'<div class="fh">Actual purchase price movement</div>'+chart+'<div class="fh">Price history</div>'+(lines||'<p class="empty">No purchases recorded yet.</p>');
+}
+$('detailcontent').addEventListener('click',async function(e){
+  var b=e.target.closest('button');if(!b)return;
+  var a=b.getAttribute('data-a'),pid=b.getAttribute('data-pid');
+  if(a==='phdel'){pendingPurchaseDel=pid;if(detailProductId)renderDetail(detailProductId);setTimeout(function(){if(pendingPurchaseDel===pid){pendingPurchaseDel=null;if(detailProductId)renderDetail(detailProductId)}},4000)}
+  else if(a==='phdel2'&&canEdit()){
+    pendingPurchaseDel=null;
+    try{var bt=writeBatch(db);bt.delete(doc(db,'marketPurchases',pid));await bt.commit();setStatus('Entry deleted.')}
+    catch(err){setStatus('Could not delete: '+niceErr(err))}
+    if(detailProductId)renderDetail(detailProductId);
+  }
+});
 ['input','keyup','search','compositionend'].forEach(function(ev){$('q').addEventListener(ev,render)});
 
 $('rows').addEventListener('submit',function(e){
