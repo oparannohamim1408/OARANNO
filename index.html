@@ -306,7 +306,7 @@ function route(){
   $('subt').textContent=sees?'Price list – wholesale and retail price of every product in one place.':'Product price list';
   $('out').hidden=!user;$('signin').hidden=!!user;
   $('acc').hidden=!(user&&!staffish);
-  $('tg').hidden=!canEdit();if(!canEdit())$('addcard').hidden=true;$('tg').textContent=$('addcard').hidden?'+ Add': '– Close';
+  $('tg').hidden=!canAdd();if(!canAdd())$('addcard').hidden=true;$('tg').textContent=$('addcard').hidden?'+ Add': '– Close';
   $('team').hidden=role!=='owner';
   $('sMargin').parentNode.hidden=!sees;$('sBest').parentNode.hidden=!sees;
   const key=staffish?role:'public';
@@ -314,7 +314,8 @@ function route(){
     stopData();startedFor=key;
     startProducts();
     if(sees)startCosts();
-    if(role==='owner'){startUsers();startPurchases();}
+    if(role==='owner')startPurchases();
+    if(role==='owner')startUsers();
   }
   rebuild();
 }
@@ -417,7 +418,7 @@ function rowHtml(p,isSim,parentName){
     ?'<button class="ib sure" data-a="del2" data-id="'+esc(p.id)+'">Sure?</button>'
     :'<button class="ib" data-a="del" data-id="'+esc(p.id)+'" aria-label="Delete" title="Delete">'+ICON.del+'</button>');
   var th=p.photo?'<button class="thb" data-a="zoom" data-id="'+esc(p.id)+'" aria-label="View picture"><img src="'+esc(p.photo)+'" alt=""></button>':'';
-  var icons=(canEdit()?'<button class="ib" data-a="history" data-id="'+esc(p.id)+'" title="Purchase history" aria-label="Purchase history">History</button><button class="ib" data-a="edit" data-id="'+esc(p.id)+'" aria-label="Edit" title="Edit">'+ICON.edit+'</button>':'')
+  var icons=(canEdit()?'<button class="ib" data-a="history" data-id="'+esc(p.id)+'" title="Purchase history" aria-label="Purchase history">History</button>':'')+(canEdit()?'<button class="ib" data-a="edit" data-id="'+esc(p.id)+'" aria-label="Edit" title="Edit">'+ICON.edit+'</button>':'')
     +((!isSim&&canAdd())?'<button class="ib add" data-a="sim" data-id="'+esc(p.id)+'" aria-label="Add similar product" title="Add similar product">'+ICON.add+'</button>':'')
     +trash;
   return '<div class="row'+(isSim?' sim':'')+'">'+th+'<div class="main">'+(isSim?'<span class="simlbl">similar product</span>':'')
@@ -531,7 +532,7 @@ function toggleNewFields(show){$('newfields').style.display=show?'contents':'non
 $('name').addEventListener('input',function(){selectedExisting=null;showSuggestions()});
 $('suggestions').addEventListener('click',function(e){var r=e.target.closest('[data-pick]');if(!r)return;selectedExisting=items.find(function(p){return p.id===r.getAttribute('data-pick')})||null;if(!selectedExisting)return;$('name').value=selectedExisting.name;$('suggestions').style.display='none';$('pickhint').textContent='Selected '+selectedExisting.name+'. Saving will add a purchase to its history; wholesale price will not change.';toggleNewFields(false);if(typeof selectedExisting.wholesale==='number')$('ws').value=selectedExisting.wholesale;if(selectedExisting.retail!=null)$('rt').value=selectedExisting.retail;$('pprice').focus()});
 $('f').addEventListener('submit',async function(e){
-  e.preventDefault();if(!canEdit()){setStatus('Only the owner can record purchases.');return}
+  e.preventDefault();if(!canAdd()){setStatus('Only the owner or staff can record purchases.');return}
   var name=$('name').value.trim(),w=parseFloat($('ws').value),rt=parseFloat($('rt').value),qty=parseFloat($('pqty').value),price=parseFloat($('pprice').value),unit=$('punit').value.trim(),date=$('pdate').value;
   if(!name||!date||!unit||!(qty>0)||!(price>=0))return;
   var product=selectedExisting;
@@ -542,7 +543,7 @@ $('f').addEventListener('submit',async function(e){
     }
     var purchase={productId:product.id,productName:product.name,purchaseDate:new Date(date+'T12:00:00').getTime(),quantity:qty,unit:unit,unitPrice:price,totalCost:Math.round(qty*price*100)/100,marketName:$('pmarket').value.trim(),notes:$('pnotes').value.trim(),createdAt:Date.now(),createdBy:user?user.uid:''};
     await setDoc(doc(db,'marketPurchases',newId()),purchase);
-    setStatus('Purchase saved to '+product.name+' history. Product wholesale price was not changed.');$('f').reset();$('pdate').value=dateToday();$('pqty').value='1';$('punit').value='pcs';newPhoto='';showNew();selectedExisting=null;toggleNewFields(true);$('suggestions').style.display='none';setAdd(false);openDetail(product.id);
+    setStatus(canEdit()?('Purchase saved to '+product.name+' history. Product wholesale price was not changed.'):('Purchase saved for '+product.name+'.'));$('f').reset();$('pdate').value=dateToday();$('pqty').value='1';$('punit').value='pcs';newPhoto='';showNew();selectedExisting=null;toggleNewFields(true);$('suggestions').style.display='none';setAdd(false);if(canEdit())openDetail(product.id);
   }catch(err){setStatus('Could not save purchase: '+niceErr(err))}
 });
 $('closedetail').addEventListener('click',function(){$('detailcard').hidden=true;detailProductId=null});
