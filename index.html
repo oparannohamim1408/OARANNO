@@ -3,7 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Oparanno Trading – Price List</title>
+<title>Oparanno – Just simply happy</title>
+<meta name="description" content="Oparanno – just simply happy. Browse our products and ask us on WhatsApp.">
+<meta name="theme-color" content="#5C0F22">
+<meta property="og:title" content="Oparanno – Just simply happy">
+<meta property="og:description" content="Browse our products and ask us on WhatsApp.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%235C0F22'/%3E%3Ccircle cx='32' cy='32' r='19' fill='none' stroke='white' stroke-width='8'/%3E%3Ccircle cx='26' cy='28' r='2.4' fill='white'/%3E%3Ccircle cx='38' cy='28' r='2.4' fill='white'/%3E%3Cpath d='M25 36q7 7 14 0' fill='none' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
 :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
 --bg:#f6f7f4;--card:#fff;--text:#1d2420;--muted:#6b7570;--line:#e2e6e0;--accent:#1f7a4d;--accent-t:#fff;--bad:#b3392f;--soft:#eef4f0}
@@ -97,6 +103,40 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .askbtn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:999px;background:#25D366;color:#06371c;font-weight:700;font-size:.95rem;text-decoration:none;line-height:1.2}
 .askbtn:hover,.askbtn:focus-visible{background:#1fbd5a;outline:2px solid var(--text);outline-offset:2px}
 .askbtn svg{flex:none}
+[hidden]{display:none!important}
+.brand{order:-1;background:#5C0F22;border-radius:14px;overflow:hidden;margin-bottom:12px}
+.brandbar{display:flex;align-items:center;gap:12px;padding:12px 14px}
+.blogo{flex:none;width:40px;height:40px}
+.bname{flex:1;font-size:1.35rem;font-weight:700;color:#FFFFFF;letter-spacing:.2px}
+.bwa{display:inline-flex;color:#FFFFFF;padding:6px;border-radius:50%}
+.bwa:hover,.bwa:focus-visible{background:rgba(255,255,255,.18)}
+.bwa svg{width:26px;height:26px}
+.tagline{padding:0 14px 12px 66px;color:#000000;font-size:.95rem;font-weight:500}
+.sess{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:.85rem;color:var(--muted);margin-bottom:8px}
+.foot{order:9;margin-top:18px;padding-top:14px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:10px;align-items:center;font-size:.85rem;color:var(--muted)}
+.igl{display:inline-flex;align-items:center;gap:8px;color:var(--text);text-decoration:none;font-weight:600}
+.igl svg{width:20px;height:20px}
+.foot2{display:flex;gap:12px;align-items:center}
+.linkbtn{background:transparent;color:var(--muted);border:0;padding:4px;font-size:.78rem;text-decoration:underline;font-weight:400;cursor:pointer}
+.list.pubgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;border:0;border-radius:0;overflow:visible;background:transparent}
+.pubgrid .empty{grid-column:1/-1}
+#listcard.pub{background:transparent;border:0;padding:0}
+.pc2{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.pc2 .pimg{position:relative;aspect-ratio:1/1;background:#F7E8EB;display:flex;align-items:center;justify-content:center}
+.pc2 .pimgbtn{padding:0;border:0;background:transparent;width:100%;height:100%;border-radius:0;display:block;line-height:0}
+.pc2 .pimgbtn img{width:100%;height:100%;object-fit:cover;display:block}
+.pc2 .pimgph{color:#5C0F22;opacity:.55;display:flex;align-items:center;justify-content:center}
+.pc2.out .pimg img{opacity:.5}
+.bdgs{position:absolute;top:8px;left:8px;display:flex;flex-direction:column;gap:4px;align-items:flex-start}
+.bdg{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;line-height:1.3}
+.bdg-new{background:#2B6CB0;color:#FFFFFF}
+.bdg-offer{background:#C53030;color:#FFFFFF}
+.bdg-in{background:#DFF5E5;color:#14532D}
+.bdg-out{background:#EDEDED;color:#333333}
+.pc2 .pinfo{padding:10px 10px 12px;display:flex;flex-direction:column;align-items:flex-start;gap:6px;flex:1}
+.pc2 .pname{font-weight:700;font-size:.95rem;line-height:1.3;overflow-wrap:anywhere}
+.pc2 .pprice{font-size:1.1rem;font-weight:700}
+.pc2 .askbtn{justify-content:center;margin-top:auto;align-self:stretch;padding:8px 8px;white-space:nowrap}
 @media (max-width:560px){
   .row{flex-wrap:wrap}
   .ico{order:2;min-width:0}
@@ -157,6 +197,15 @@ main[hidden],.screen[hidden],.badge[hidden]{display:none}
 </div>
 
 <main id="app" hidden>
+  <header class="brand" id="brand" hidden>
+    <div class="brandbar">
+      <svg class="blogo" viewBox="0 0 64 64" role="img" aria-label="Oparanno logo"><circle cx="32" cy="32" r="30" fill="#FFFFFF"/><circle cx="32" cy="32" r="20" fill="none" stroke="#5C0F22" stroke-width="8"/><circle cx="26" cy="28" r="2.4" fill="#5C0F22"/><circle cx="38" cy="28" r="2.4" fill="#5C0F22"/><path d="M25 36q7 7 14 0" fill="none" stroke="#5C0F22" stroke-width="3" stroke-linecap="round"/></svg>
+      <span class="bname">Oparanno</span>
+      <a class="bwa" href="https://wa.me/8801342054583?text=Hello!%20I%20would%20like%20to%20know%20more%20about%20your%20products." target="_blank" rel="noopener noreferrer" aria-label="Message us on WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9l-5.05.9"/><path d="M9 10a.5.5 0 0 0 1 0v-1a.5.5 0 0 0-1 0v1a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1"/></svg></a>
+    </div>
+    <div class="tagline">Just simply happy.</div>
+  </header>
+  <div class="sess" id="sess" hidden><span id="sessmail"></span><button type="button" class="ghost" id="out2">Sign out</button></div>
   <div class="topbar">
     <div><h1>Oparanno Trading</h1>
     <p class="sub" id="subt">Product price list</p></div>
@@ -182,6 +231,8 @@ main[hidden],.screen[hidden],.badge[hidden]{display:none}
         <div><label for="ws">Wholesale price (W)</label><input id="ws" type="number" step="any" min="0" required inputmode="decimal"></div>
         <div><label for="rt">Retail price (R)</label><input id="rt" type="number" step="any" min="0" required inputmode="decimal"></div>
         <div><label for="nt">Tag (optional)</label><input id="nt" placeholder="Supplier, size…"></div>
+        <div><label for="pstock">Availability</label><select id="pstock"><option value="">Not set</option><option value="in">In stock</option><option value="out">Out of stock</option></select></div>
+        <div><label for="plabel">Label</label><select id="plabel"><option value="">None</option><option value="new">New</option><option value="offer">Offer</option></select></div>
         <div style="grid-column:1/-1"><label>Picture (optional)</label><div class="pp"><label class="pick">+ Add picture<input type="file" accept="image/*" id="pf"></label><span id="pw2" hidden><img id="pprev" alt=""> <button type="button" class="ghost" id="prm">Remove</button></span></div></div>
       </div>
       <div><label for="pdate">Purchase date</label><input id="pdate" type="date" required></div>
@@ -210,6 +261,10 @@ main[hidden],.screen[hidden],.badge[hidden]{display:none}
       <div class="msg" id="impmsg"></div>
     </details>
   </div>
+  <footer class="foot" id="foot">
+    <a class="igl" href="https://www.instagram.com/oparanno" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="12" cy="12" r="3"/><line x1="16.5" y1="7.5" x2="16.5" y2="7.501"/></svg><span>Instagram · oparanno</span></a>
+    <div class="foot2"><span>Oparanno</span><button type="button" class="linkbtn" id="signin2">Staff sign in</button></div>
+  </footer>
 </main>
 <div class="lb" id="lb" hidden><img id="lbi" alt=""><span id="lbt"></span></div>
 
@@ -302,6 +357,8 @@ function stopData(){
 let wantLogin = false;
 $('signin').addEventListener('click',()=>{wantLogin=true;amsg('');show('login')});
 $('backlist').addEventListener('click',()=>{wantLogin=false;route()});
+$('signin2').addEventListener('click',()=>{wantLogin=true;amsg('');show('login')});
+$('out2').addEventListener('click',()=>signOut(auth));
 
 onAuthStateChanged(auth,async(u)=>{
   if(unsubUser){try{unsubUser()}catch(e){}unsubUser=null}
@@ -330,7 +387,16 @@ function route(){
   $('subt').textContent=sees?'Price list – wholesale and retail price of every product in one place.':'Product price list';
   $('out').hidden=!user;$('signin').hidden=!!user;
   $('acc').hidden=!(user&&!staffish);
-  $('tg').hidden=!canAdd();if(!canAdd())$('addcard').hidden=true;$('tg').textContent=$('addcard').hidden?'+ Add': '– Close';
+  $('tg').hidden=!canAdd();if(!canAdd())$('addcard').hidden=true;
+  document.querySelector('.topbar').hidden=!staffish;
+  $('brand').hidden=staffish;
+  $('sess').hidden=!(user&&!staffish);
+  $('sessmail').textContent=user?(user.displayName||user.email||''):'';
+  document.querySelector('.stats').hidden=!staffish;
+  document.querySelector('.curw').hidden=!staffish;
+  $('rows').classList.toggle('pubgrid',!staffish);
+  $('listcard').classList.toggle('pub',!staffish);
+  $('signin2').hidden=!!user;$('tg').textContent=$('addcard').hidden?'+ Add': '– Close';
   $('team').hidden=role!=='owner';
   $('sMargin').parentNode.hidden=!sees;$('sBest').parentNode.hidden=!sees;
   const key=staffish?role:'public';
@@ -438,9 +504,21 @@ function shrink(file,cb){
 var expanded = {};
 // WhatsApp Business number for the public "Ask" button (country code first, no + or spaces).
 var WA_NUMBER = '8801342054583';
-function askLink(p){
-  var msg='Hello! I would like to ask about: '+p.name+' (Price: '+money(p.retail)+'). Is it available?';
-  return '<a class="askbtn" href="https://wa.me/'+WA_NUMBER+'?text='+encodeURIComponent(msg)+'" target="_blank" rel="noopener noreferrer" aria-label="Ask about '+esc(p.name)+' on WhatsApp">'+ICON.chat+'Ask</a>';
+function askLink(p,out){
+  var msg=out?('Hello! I would like to ask when this will be available again: '+p.name+' (Price: '+money(p.retail)+').'):('Hello! I would like to ask about: '+p.name+' (Price: '+money(p.retail)+'). Is it available?');
+  return '<a class="askbtn" href="https://wa.me/'+WA_NUMBER+'?text='+encodeURIComponent(msg)+'" target="_blank" rel="noopener noreferrer" aria-label="Ask about '+esc(p.name)+' on WhatsApp">'+ICON.chat+(out?'Ask when back':'Ask')+'</a>';
+}
+function pubIcon(){return '<svg viewBox="0 0 48 48" width="46" height="46" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 17h28l-2.2 22a3 3 0 0 1-3 2.7H15.2a3 3 0 0 1-3-2.7L10 17z"/><path d="M17 17v-3a7 7 0 0 1 14 0v3"/><path d="M19.5 28c1.2 2.2 3 3.2 4.5 3.2s3.3-1 4.5-3.2"/></svg>'}
+function pubCard(p){
+  var id=esc(p.id),out=p.stock==='out',badges='';
+  if(p.label==='new')badges+='<span class="bdg bdg-new">New</span>';
+  if(p.label==='offer')badges+='<span class="bdg bdg-offer">Offer</span>';
+  if(p.stock==='in')badges+='<span class="bdg bdg-in">In stock</span>';
+  if(out)badges+='<span class="bdg bdg-out">Out of stock</span>';
+  var img=p.photo?'<button class="pimgbtn" data-a="zoom" data-id="'+id+'" aria-label="View picture of '+esc(p.name)+'"><img src="'+esc(p.photo)+'" alt="'+esc(p.name)+'"></button>':'<div class="pimgph">'+pubIcon()+'</div>';
+  return '<div class="pc2'+(out?' out':'')+'"><div class="pimg">'+img+(badges?'<div class="bdgs">'+badges+'</div>':'')+'</div>'
+    +'<div class="pinfo"><div class="pname">'+esc(p.name)+'</div><div class="pprice">'+money(p.retail)+'</div>'
+    +(p.note?'<span class="chip" style="margin-top:0">'+esc(p.note)+'</span>':'')+askLink(p,out)+'</div></div>';
 }
 function rowHtml(p,isSim,parentName){
   var pr=hasW(p)?p.retail-p.wholesale:0,cls=pr>=0?'pos':'neg';
@@ -448,11 +526,7 @@ function rowHtml(p,isSim,parentName){
   var id=esc(p.id);
   var lbl=isSim?'<span class="simlbl">similar product</span>':'';
   var th=p.photo?'<button class="thb" data-a="zoom" data-id="'+id+'" aria-label="View picture"><img src="'+esc(p.photo)+'" alt=""></button>':'';
-  if(!canSeeCost()){
-    // Public view: name, picture and retail price only.
-    return '<div class="row card2'+(isSim?' sim':'')+'">'+lbl+'<div class="ptitle"><span>'+esc(name)+'</span></div>'
-      +'<div class="pbody">'+th+'<div class="pside"><div class="wline"><i>R</i>'+money(p.retail)+'</div>'+(p.note?'<span class="chip" style="margin-top:0">'+esc(p.note)+'</span>':'')+askLink(p)+'</div></div></div>';
-  }
+  if(!canSeeCost())return pubCard(p);
   var trash=!canEdit()?'':(pendingDel===p.id
     ?'<button class="ib sure" data-a="del2" data-id="'+id+'">Sure?</button>'
     :'<button class="ib" data-a="del" data-id="'+id+'" aria-label="Delete" title="Delete">'+ICON.del+'</button>');
@@ -476,6 +550,8 @@ function editorHtml(){
     +'<div><label>Wholesale price (W)</label><input name="ws" type="number" step="any" min="0" required inputmode="decimal" value="'+esc(d.ws)+'"></div>'
     +'<div><label>Retail price (R)</label><input name="rt" type="number" step="any" min="0" required inputmode="decimal" value="'+esc(d.rt)+'"></div>'
     +'<div><label>Tag (optional)</label><input name="nt" value="'+esc(d.nt)+'"></div>'
+    +'<div><label>Availability</label><select name="stock"><option value="">Not set</option><option value="in"'+(d.stock==='in'?' selected':'')+'>In stock</option><option value="out"'+(d.stock==='out'?' selected':'')+'>Out of stock</option></select></div>'
+    +'<div><label>Label</label><select name="label"><option value="">None</option><option value="new"'+(d.label==='new'?' selected':'')+'>New</option><option value="offer"'+(d.label==='offer'?' selected':'')+'>Offer</option></select></div>'
     +'<div class="full"><label>Picture (optional)</label><div class="pr">'
     +(d.photo?'<img src="'+esc(d.photo)+'" alt="">':'')
     +'<label class="pick">'+(d.photo?'Change picture':'+ Add picture')+'<input type="file" accept="image/*"></label>'
@@ -486,7 +562,7 @@ function editorHtml(){
 function grab(){
   var ed=$('ed');if(!ed||!inline)return;
   function v(n){return ed.querySelector('[name='+n+']').value}
-  inline.draft={name:v('name'),ws:v('ws'),rt:v('rt'),nt:v('nt'),photo:(inline.draft&&inline.draft.photo)||''};
+  inline.draft={name:v('name'),ws:v('ws'),rt:v('rt'),nt:v('nt'),stock:v('stock'),label:v('label'),photo:(inline.draft&&inline.draft.photo)||''};
 }
 
 /* ---------- Search ---------- */
@@ -578,7 +654,7 @@ $('f').addEventListener('submit',async function(e){
   var product=selectedExisting;
   try{
     if(!product){if(!(w>=0)||!(rt>=0)){setStatus('For a new product, enter wholesale and retail prices.');return}
-      var pid=newId(),np={name:name,retail:rt,note:$('nt').value.trim(),updated:Date.now()};if(newPhoto)np.photo=newPhoto;
+      var pid=newId(),np={name:name,retail:rt,note:$('nt').value.trim(),updated:Date.now()};if(newPhoto)np.photo=newPhoto;if($('pstock').value)np.stock=$('pstock').value;if($('plabel').value)np.label=$('plabel').value;
       const b=writeBatch(db);b.set(doc(db,'products',pid),np);b.set(doc(db,'costs',pid),{wholesale:w});await b.commit();product=Object.assign({},np,{id:pid,wholesale:w});
     }
     var purchase={productId:product.id,productName:product.name,purchaseDate:new Date(date+'T12:00:00').getTime(),quantity:qty,unit:unit,unitPrice:price,totalCost:Math.round(qty*price*100)/100,marketName:$('pmarket').value.trim(),notes:$('pnotes').value.trim(),createdAt:Date.now(),createdBy:user?user.uid:''};
@@ -651,6 +727,7 @@ $('rows').addEventListener('submit',function(e){
   var p={name:String(d.name).trim(),retail:parseFloat(d.rt),note:String(d.nt).trim(),updated:Date.now()};
   if(!p.name||isNaN(w)||isNaN(p.retail))return;
   if(d.photo)p.photo=d.photo;
+  if(d.stock)p.stock=d.stock;if(d.label)p.label=d.label;
   if(inline.mode==='sim'){if(!canAdd())return;p.parent=inline.id;saveProduct(newId(),p,w)}
   else{if(!canEdit())return;var old=items.find(function(x){return x.id===inline.id});if(old&&old.parent)p.parent=old.parent;saveProduct(inline.id,p,w)}
   inline=null;render();
@@ -663,8 +740,8 @@ $('rows').addEventListener('change',function(e){
 });
 function openEditor(mode,p){
   inline={mode:mode,id:p.id,draft:mode==='edit'
-    ?{name:p.name,ws:p.wholesale,rt:p.retail,nt:p.note||'',photo:p.photo||''}
-    :{name:p.name+' – ',ws:'',rt:'',nt:'',photo:''}};
+    ?{name:p.name,ws:p.wholesale,rt:p.retail,nt:p.note||'',stock:p.stock||'',label:p.label||'',photo:p.photo||''}
+    :{name:p.name+' – ',ws:'',rt:'',nt:'',stock:'',label:'',photo:''}};
   render();
   var ed=$('ed');if(!ed)return;
   var first=ed.querySelector('[name=name]');
