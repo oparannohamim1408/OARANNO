@@ -178,6 +178,11 @@ main[hidden],.screen[hidden],.badge[hidden]{display:none}
 .msg{font-size:.85rem;min-height:1.3em;margin:6px 0 10px;color:var(--bad)}
 .msg.ok{color:var(--accent)}
 .topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.arrange-controls{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:0 0 10px}
+.arrange-controls[hidden]{display:none}
+.arrange-note{font-size:.82rem;color:var(--muted);margin:0}
+.arrange-btn{padding:5px 9px;min-width:34px}
+.arrange-active{background:var(--accent);color:var(--accent-t);border-color:var(--accent)}
 .who{font-size:.8rem;color:var(--muted);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .badge{display:inline-block;padding:1px 9px;border-radius:999px;background:var(--soft);border:1px solid var(--line);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--text)}
 #team{order:6}
@@ -247,6 +252,7 @@ main[hidden],.screen[hidden],.badge[hidden]{display:none}
     <div class="who"><span id="who"></span><span class="badge" id="rolebadge" hidden></span><button type="button" class="ghost" id="signin">Staff sign in</button><button type="button" class="ghost" id="out" hidden>Sign out</button></div>
   </div>
   <p class="hint" id="acc" hidden>You are signed in, but the owner has not given you staff access yet. You can only view the price list.</p>
+  <div class="arrange-controls" id="arrangeControls" hidden><button type="button" class="ghost" id="arrangeToggle">Arrange products</button><p class="arrange-note" id="arrangeNote" hidden>Use ↑ / ↓ to reorder products. Changes are saved automatically and appear on the Viewer Page.</p></div>
   <div class="searchbar"><input id="q" placeholder="Search products…" aria-label="Search products"><span class="curw">Currency <input id="cur" class="cur" value="৳" maxlength="4" aria-label="Currency symbol"></span></div>
 
   <section class="cats" id="cats" hidden aria-label="Categories">
@@ -338,6 +344,7 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 let user = null, role = 'public', items = [], inline = null, pendingDel = null, cur = '৳', newPhoto = '';
+let arrangeMode = false, arrangeBusy = false;
 let prods = [], costs = {}, costsReady = false, migrating = false, startedFor = null, loadErr = '';
 let purchases = [], unsubPurchases = null, selectedExisting = null, detailProductId = null;
 let unsubUser = null, unsubProducts = null, unsubCosts = null, unsubUsers = null;
@@ -430,6 +437,10 @@ function route(){
   $('out').hidden=!user;$('signin').hidden=!!user;
   $('acc').hidden=!(user&&!staffish);
   $('tg').hidden=!canAdd();if(!canAdd())$('addcard').hidden=true;
+  $('arrangeControls').hidden=!staffish; if(!staffish)arrangeMode=false;
+  $('arrangeToggle').textContent=arrangeMode?'Finish arranging':'Arrange products';
+  $('arrangeToggle').classList.toggle('arrange-active',arrangeMode);
+  $('arrangeNote').hidden=!arrangeMode;
   document.querySelector('.topbar').hidden=!staffish;
   document.body.classList.toggle('pubmode',!staffish);
   document.querySelector('.searchbar').hidden=!staffish;
@@ -578,6 +589,7 @@ function rowHtml(p,isSim,parentName){
   var trash=!canEdit()?'':(pendingDel===p.id
     ?'<button class="ib sure" data-a="del2" data-id="'+id+'">Sure?</button>'
     :'<button class="ib" data-a="del" data-id="'+id+'" aria-label="Delete" title="Delete">'+ICON.del+'</button>');
+  var arrange=arrangeMode?'<div class="arrange-arrows"><button type="button" class="ghost arrange-btn" data-a="move-up" data-id="'+id+'" aria-label="Move up" title="Move up" '+(arrangeBusy?'disabled':'')+'>↑</button><button type="button" class="ghost arrange-btn" data-a="move-down" data-id="'+id+'" aria-label="Move down" title="Move down" '+(arrangeBusy?'disabled':'')+'>↓</button></div>':'';
   var icons=(canEdit()?'<button class="ib" data-a="edit" data-id="'+id+'" aria-label="Edit" title="Edit">'+ICON.edit+'</button>':'')
     +((!isSim&&canAdd())?'<button class="ib add" data-a="sim" data-id="'+id+'" aria-label="Add similar product" title="Add similar product">'+ICON.add+'</button>':'')
     +trash;
@@ -586,7 +598,7 @@ function rowHtml(p,isSim,parentName){
     +'<div class="ptitle"><span>'+esc(name)+'</span><span class="chev">'+(isOpen?'\u25B4':'\u25BE')+'</span></div>'
     +'<div class="pbody">'+th+'<div class="pside"><div class="wline"><i>W</i>'+(hasW(p)?money(p.wholesale):'\u2013')+'</div>'
     +(canEdit()?'<button class="ghost hbtn" data-a="history" data-id="'+id+'">History</button>':'')+'</div></div>'
-    +(isOpen?'<div class="pextra"><div class="vals"><span class="pc '+cls+'"'+(hasW(p)?' title="Profit '+esc(money(pr))+'"':'')+'>'+pctTxt(p)+'</span><span><i>R</i>'+money(p.retail)+'</span></div>'
+    +(arrange?arrange:'')+(isOpen?'<div class="pextra"><div class="vals"><span class="pc '+cls+'"'+(hasW(p)?' title="Profit '+esc(money(pr))+'"':'')+'>'+pctTxt(p)+'</span><span><i>R</i>'+money(p.retail)+'</span></div>'
       +(p.category?'<span class="chip" style="margin-top:0">'+esc(CATS[p.category]||p.category)+'</span>':'')
       +(p.note?'<span class="chip" style="margin-top:0">'+esc(p.note)+'</span>':'')
       +(icons?'<div class="ico">'+icons+'</div>':'')+'</div>':'')
@@ -649,12 +661,12 @@ function render(){
   if(!role||role==='pending')return;
   grab();
   var ids={};items.forEach(function(p){ids[p.id]=1});
-  var byName=function(a,b){return String(a.name).localeCompare(String(b.name))};
-  var tops=items.filter(function(p){return !p.parent||!ids[p.parent]}).sort(byName);
+  var byOrder=function(a,b){var ao=Number(a.sortOrder),bo=Number(b.sortOrder);var av=Number.isFinite(ao),bv=Number.isFinite(bo);if(av&&bv&&ao!==bo)return ao-bo;if(av!==bv)return av?-1:1;return String(a.name).localeCompare(String(b.name))};
+  var tops=items.filter(function(p){return !p.parent||!ids[p.parent]}).sort(byOrder);
   var q=norm($('q').value);
   var editing=inline&&inline.mode==='edit'?inline.id:null, adding=inline&&inline.mode==='sim'?inline.id:null;
   var html=q?searchHtml(q,editing,adding):tops.map(function(p){
-    var kids=items.filter(function(x){return x.parent===p.id}).sort(byName);
+    var kids=items.filter(function(x){return x.parent===p.id}).sort(byOrder);
     var okP=catOk(p),okKids=kids.filter(catOk);
     if(!okP&&!okKids.length&&adding!==p.id&&editing!==p.id)return '';
     var h=(okP||editing===p.id)?(editing===p.id?editorHtml():rowHtml(p,false)):'';
@@ -800,7 +812,27 @@ function openEditor(mode,p){
   try{ed.scrollIntoView({block:'center',behavior:'smooth'})}catch(e){}
   first.focus();first.setSelectionRange(first.value.length,first.value.length);
 }
+$('arrangeToggle').addEventListener('click',function(){arrangeMode=!arrangeMode;render();});
+async function moveProduct(id, direction){
+  if(!canAdd()||!arrangeMode||arrangeBusy)return;
+  var current=items.find(function(p){return p.id===id});if(!current)return;
+  var siblings=items.filter(function(p){return (p.parent||'')===(current.parent||'')}).sort(function(a,b){
+    var ao=Number(a.sortOrder),bo=Number(b.sortOrder),av=Number.isFinite(ao),bv=Number.isFinite(bo);
+    if(av&&bv&&ao!==bo)return ao-bo;if(av!==bv)return av?-1:1;return String(a.name).localeCompare(String(b.name));
+  });
+  var from=siblings.findIndex(function(p){return p.id===id}),to=from+direction;
+  if(from<0||to<0||to>=siblings.length)return;
+  var moved=siblings.splice(from,1)[0];siblings.splice(to,0,moved);
+  arrangeBusy=true;render();
+  try{
+    var b=writeBatch(db);siblings.forEach(function(p,i){b.update(doc(db,'products',p.id),{sortOrder:i+1})});
+    await b.commit();setStatus('Product order saved. Viewer Page will show the same order.');
+  }catch(err){setStatus('Could not save product order: '+niceErr(err));}
+  finally{arrangeBusy=false;render();}
+}
 $('rows').addEventListener('click',function(e){
+  var move=e.target.closest('button[data-a="move-up"],button[data-a="move-down"]');
+  if(move){e.stopPropagation();moveProduct(move.getAttribute('data-id'),move.getAttribute('data-a')==='move-up'?-1:1);return;}
   var b=e.target.closest('button');if(!b)return;
   var a=b.getAttribute('data-a');
   if(a==='cancel'){inline=null;render();return}
