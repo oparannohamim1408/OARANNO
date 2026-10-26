@@ -471,7 +471,7 @@ function route(){
   document.querySelector('.searchbar').hidden=true;
   $('brand').hidden=false;
   $('menuBtn').hidden=!staffish;
-  $('waHeader').hidden=false;
+  $('waHeader').hidden=staffish;
   $('staffMenu').hidden=true;
   $('menuBtn').setAttribute('aria-expanded','false');
   $('sess').hidden=!(user&&!staffish);
@@ -624,7 +624,7 @@ function rowHtml(p,isSim,parentName){
   var wline='<div class="staff-wholesale"><small>Wholesale</small> '+(hasW(p)?money(p.wholesale):'–')+'</div>';
   return '<div class="pc2 staff-product'+(out?' out':'')+'"><div class="pimg">'+img+(badges?'<div class="bdgs">'+badges+'</div>':'')+'</div>'
     +'<div class="pinfo"><div class="pname">'+esc(name)+'</div><div class="pprice">'+money(p.retail)+'</div>'
-    +(p.note?'<span class="chip" style="margin-top:0">'+esc(p.note)+'</span>':'')+askLink(p,out)+'</div>'
+    +(p.note?'<span class="chip" style="margin-top:0">'+esc(p.note)+'</span>':'')+'</div>'
     +'<div class="staff-product-extra">'+wline
     +(canSeeCost()?'<button class="ghost hbtn" data-a="history" data-id="'+id+'">History</button>':'')
     +(icons?'<div class="ico">'+icons+'</div>':'')+arrange+'</div></div>';
