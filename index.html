@@ -110,8 +110,13 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 body.pubmode{--bg:#FFFFFF;--card:#FFFFFF;--text:#1A1A1A;--muted:#6B6B6B;--line:#E5E5E5;--soft:#F4F4F6;--accent:#C20019;--accent-t:#FFFFFF}
 .brand{order:-1;background:#C20019;border-radius:18px;padding:10px;margin-bottom:14px}
 .btop{display:flex;align-items:flex-end;gap:12px}
-.logotile{flex:none;width:72px;height:64px;background:#F6F1E6;border-radius:14px 14px 0 0;display:flex;align-items:center;justify-content:center}
-.logotile svg{width:48px;height:48px}
+.logotile{flex:none;width:72px;height:72px;background:transparent;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.logotile svg{width:64px;height:64px}
+.logotile svg{display:block}
+.logotile svg .ring{fill:none;stroke:#FFFFFF}
+.logotile svg .face{fill:#FFFFFF}
+.logotile svg .feature{fill:#C20019}
+.logotile svg .smile{fill:none;stroke:#C20019}
 .bright{flex:1;display:flex;align-items:center;gap:6px;min-width:0;align-self:center}
 .bname{flex:1;min-width:0;font-family:"Cormorant Garamond",Georgia,"Times New Roman",serif;font-weight:700;font-size:clamp(1.15rem,5.2vw,1.7rem);letter-spacing:.04em;color:#FFFFFF;line-height:1;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bicons{display:flex;align-items:center;gap:2px}
@@ -221,14 +226,11 @@ main[hidden],.screen[hidden],.badge[hidden]{display:none}
 <div class="screen" id="login" hidden>
   <h1>Oparanno Trading</h1>
   <p class="sub">Staff sign in</p>
-  <button type="button" class="gbtn" id="gsign">Continue with Google</button>
+  <p class="hint">Enter your staff email and we’ll send you a secure sign-in link. No password needed.</p>
   <form id="ef" autocomplete="on">
-    <input type="email" id="em" placeholder="Email" required autocomplete="email">
-    <input type="password" id="pw" placeholder="Password (at least 6 characters)" required minlength="6" autocomplete="current-password">
+    <input type="email" id="em" placeholder="Staff email" required autocomplete="email">
     <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button type="submit" id="si">Sign in</button>
-      <button type="button" class="ghost" id="su">Create account</button>
-      <button type="button" class="ghost" id="fp">Forgot password?</button>
+      <button type="submit" id="si">Send sign-in link</button>
     </div>
   </form>
   <div class="msg" id="amsg" role="status"></div>
@@ -245,7 +247,7 @@ main[hidden],.screen[hidden],.badge[hidden]{display:none}
 <main id="app" hidden>
   <header class="brand" id="brand" hidden>
     <div class="btop">
-      <div class="logotile"><svg viewBox="0 0 64 64" role="img" aria-label="Oparanno logo"><circle cx="32" cy="32" r="29" fill="none" stroke="#C20019" stroke-width="2.6"/><circle cx="32" cy="32" r="21" fill="none" stroke="#C20019" stroke-width="6"/><circle cx="26.5" cy="28" r="2.4" fill="#C20019"/><circle cx="37.5" cy="28" r="2.4" fill="#C20019"/><path d="M25.5 35.5q6.5 6.5 13 0" fill="none" stroke="#C20019" stroke-width="3" stroke-linecap="round"/></svg></div>
+      <div class="logotile"><svg viewBox="0 0 64 64" role="img" aria-label="Oparanno logo"><circle class="ring" cx="32" cy="32" r="29" stroke-width="3.8"/><circle class="ring" cx="32" cy="32" r="23" stroke-width="4.8"/><circle class="ring" cx="32" cy="32" r="17.5" stroke-width="3.8"/><circle class="face" cx="32" cy="32" r="13.5"/><circle class="feature" cx="27.5" cy="29" r="2.1"/><circle class="feature" cx="36.5" cy="29" r="2.1"/><path class="smile" d="M26.5 35q5.5 6 11 0" stroke-width="2.8" stroke-linecap="round"/></svg></div>
       <div class="bright">
         <span class="bname">Oparanno</span>
         <div class="bicons">
@@ -341,7 +343,7 @@ main[hidden],.screen[hidden],.badge[hidden]{display:none}
 
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,GoogleAuthProvider,signInWithPopup,signOut,sendPasswordResetEmail} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {getAuth,onAuthStateChanged,sendSignInLinkToEmail,isSignInWithEmailLink,signInWithEmailLink,signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {getFirestore,collection,doc,getDoc,setDoc,updateDoc,writeBatch,onSnapshot,query,where,orderBy} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // ====== Firebase settings for the "oparanno" project ======
@@ -404,19 +406,28 @@ const ICON={
   del:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 14h10l1-14"/><path d="M10 10v6M14 10v6"/></svg>'
 };
 
-/* ---------- Sign in ---------- */
+/* ---------- Passwordless staff sign-in by email link ---------- */
 function amsg(t,ok){const m=$('amsg');m.textContent=t||'';m.className='msg'+(ok?' ok':'')}
-$('gsign').addEventListener('click',async()=>{amsg('');try{await signInWithPopup(auth,new GoogleAuthProvider())}catch(e){amsg(niceErr(e))}});
-$('ef').addEventListener('submit',async(e)=>{e.preventDefault();amsg('');try{await signInWithEmailAndPassword(auth,$('em').value.trim(),$('pw').value)}catch(err){amsg(niceErr(err))}});
-$('su').addEventListener('click',async()=>{
-  amsg('');const em=$('em').value.trim(),pw=$('pw').value;
-  if(!em||pw.length<6){amsg('Type your email and a password of at least 6 characters first.');return}
-  try{await createUserWithEmailAndPassword(auth,em,pw)}catch(err){amsg(niceErr(err))}
+const emailLinkSettings={url:window.location.origin+window.location.pathname,handleCodeInApp:true};
+$('ef').addEventListener('submit',async(e)=>{
+  e.preventDefault();amsg('');const em=$('em').value.trim();
+  if(!em){amsg('Enter your staff email first.');return}
+  try{
+    await sendSignInLinkToEmail(auth,em,emailLinkSettings);
+    ls('emailForSignIn',em);
+    amsg('Sign-in link sent. Check your inbox (and spam folder), then open the link to sign in.',true);
+  }catch(err){amsg(niceErr(err))}
 });
-$('fp').addEventListener('click',async()=>{
-  const em=$('em').value.trim();if(!em){amsg('Type your email first, then press Forgot password.');return}
-  try{await sendPasswordResetEmail(auth,em);amsg('Password reset email sent. Please check your inbox.',true)}catch(err){amsg(niceErr(err))}
-});
+if(isSignInWithEmailLink(auth,window.location.href)){
+  let email=ls('emailForSignIn');
+  if(!email)email=window.prompt('Confirm the email address where you received the sign-in link:');
+  if(email){
+    signInWithEmailLink(auth,email.trim(),window.location.href).then(()=>{
+      ls('emailForSignIn','');
+      window.history.replaceState({},document.title,window.location.pathname);
+    }).catch(err=>amsg(niceErr(err)));
+  }else{show('login');amsg('Enter the same email address that received the sign-in link to finish signing in.')}
+}
 $('out').addEventListener('click',()=>signOut(auth));
 $('pout').addEventListener('click',()=>signOut(auth));
 
