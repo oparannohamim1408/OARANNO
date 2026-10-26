@@ -191,6 +191,23 @@ main[hidden],.screen[hidden],.badge[hidden]{display:none}
 .urow small{display:block;color:var(--muted)}
 .hint{color:var(--muted);font-size:.85rem;margin:0 0 10px}
 #suggestions .row{cursor:pointer}#suggestions .row:hover{background:var(--soft)}.historyline{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}.historyline:last-child{border-bottom:0}.chartbox{width:100%;overflow:hidden;margin:10px 0}.chartbox svg{width:100%;height:auto;display:block}
+.staff-menu-trigger{position:relative}
+.bicons{position:relative}
+.staff-menu{position:absolute;right:0;top:calc(100% + 8px);z-index:30;min-width:205px;background:#FFFFFF;color:#202020;border:1px solid #E5E5E5;border-radius:14px;padding:6px;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+.staff-menu[hidden]{display:none}
+.staff-menu button{display:flex;align-items:center;gap:10px;width:100%;padding:11px 12px;background:#FFFFFF;color:#202020;text-align:left;border-radius:9px;font-size:.9rem;font-weight:600}
+.staff-menu button:hover,.staff-menu button:focus-visible{background:#F4F4F6}
+.staff-menu button span{width:20px;text-align:center;font-size:1.1rem}
+.menu-sep{height:1px;background:#E5E5E5;margin:5px 3px}
+.staff-product-extra{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 12px 12px;background:#230509;color:#FFFFFF;border-top:1px solid rgba(255,255,255,.15)}
+.staff-product-extra .staff-wholesale{font-weight:700;font-size:.95rem;margin-right:auto}
+.staff-product-extra .staff-wholesale small{font-size:.72rem;color:#F2D6DB;margin-right:4px}
+.staff-product-extra .ghost{color:#FFFFFF;border-color:rgba(255,255,255,.45);padding:6px 10px;font-size:.82rem}
+.staff-product-extra .ib{color:#FFFFFF}
+.staff-product-extra .arrange-arrows{display:flex;gap:4px;width:100%}
+.staff-product-extra .arrange-arrows button{color:#FFFFFF;border-color:rgba(255,255,255,.45)}
+#arrangeControls{display:none!important}
+
 </style>
 </head>
 <body>
@@ -234,7 +251,15 @@ main[hidden],.screen[hidden],.badge[hidden]{display:none}
         <span class="bname">Oparanno</span>
         <div class="bicons">
           <button type="button" class="bic" id="bsearchbtn" aria-label="Search products"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M21 21l-5.2-5.2"/></svg></button>
-          <a class="bic" href="https://wa.me/8801342054583?text=Hello!%20I%20would%20like%20to%20know%20more%20about%20your%20products." target="_blank" rel="noopener noreferrer" aria-label="Message us on WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9l-5.05.9"/><path d="M9 10a.5.5 0 0 0 1 0v-1a.5.5 0 0 0-1 0v1a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1"/></svg></a>
+          <a class="bic" id="waHeader" href="https://wa.me/8801342054583?text=Hello!%20I%20would%20like%20to%20know%20more%20about%20your%20products." target="_blank" rel="noopener noreferrer" aria-label="Message us on WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9l-5.05.9"/><path d="M9 10a.5.5 0 0 0 1 0v-1a.5.5 0 0 0-1 0v1a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1"/></svg></a>
+          <button type="button" class="bic staff-menu-trigger" id="menuBtn" aria-label="Management menu" aria-expanded="false" hidden><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg></button>
+          <div class="staff-menu" id="staffMenu" hidden>
+            <button type="button" data-menu="new"><span>＋</span> New Product Add</button>
+            <button type="button" data-menu="buy"><span>↗</span> Buy Entry</button>
+            <button type="button" data-menu="arrange"><span>↕</span> Product Arrange</button>
+            <div class="menu-sep"></div>
+            <button type="button" data-menu="signout"><span>↪</span> Sign out</button>
+          </div>
         </div>
       </div>
     </div>
@@ -436,21 +461,25 @@ function route(){
   $('subt').textContent=sees?'Price list – wholesale and retail price of every product in one place.':'Product price list';
   $('out').hidden=!user;$('signin').hidden=!!user;
   $('acc').hidden=!(user&&!staffish);
-  $('tg').hidden=!canAdd();if(!canAdd())$('addcard').hidden=true;
-  $('arrangeControls').hidden=!staffish; if(!staffish)arrangeMode=false;
+  $('tg').hidden=true;if(!canAdd())$('addcard').hidden=true;
+  $('arrangeControls').hidden=true; if(!staffish)arrangeMode=false;
   $('arrangeToggle').textContent=arrangeMode?'Finish arranging':'Arrange products';
   $('arrangeToggle').classList.toggle('arrange-active',arrangeMode);
   $('arrangeNote').hidden=!arrangeMode;
-  document.querySelector('.topbar').hidden=!staffish;
-  document.body.classList.toggle('pubmode',!staffish);
-  document.querySelector('.searchbar').hidden=!staffish;
-  $('brand').hidden=staffish;
+  document.querySelector('.topbar').hidden=true;
+  document.body.classList.add('pubmode');
+  document.querySelector('.searchbar').hidden=true;
+  $('brand').hidden=false;
+  $('menuBtn').hidden=!staffish;
+  $('waHeader').hidden=false;
+  $('staffMenu').hidden=true;
+  $('menuBtn').setAttribute('aria-expanded','false');
   $('sess').hidden=!(user&&!staffish);
   $('sessmail').textContent=user?(user.displayName||user.email||''):'';
-  document.querySelector('.stats').hidden=!staffish;
+  document.querySelector('.stats').hidden=true;
   document.querySelector('.curw').hidden=!staffish;
-  $('rows').classList.toggle('pubgrid',!staffish);
-  $('listcard').classList.toggle('pub',!staffish);
+  $('rows').classList.add('pubgrid');
+  $('listcard').classList.add('pub');
   $('signin2').hidden=!!user;$('tg').textContent=$('addcard').hidden?'+ Add': '– Close';
   $('team').hidden=role!=='owner';
   $('sMargin').parentNode.hidden=!sees;$('sBest').parentNode.hidden=!sees;
@@ -459,7 +488,7 @@ function route(){
     stopData();startedFor=key;
     startProducts();
     if(sees)startCosts();
-    if(role==='owner')startPurchases();
+    if(role==='owner'||role==='staff')startPurchases();
     if(role==='owner')startUsers();
   }
   syncCats();
@@ -580,29 +609,25 @@ function pubCard(p){
     +(p.note?'<span class="chip" style="margin-top:0">'+esc(p.note)+'</span>':'')+askLink(p,out)+'</div></div>';
 }
 function rowHtml(p,isSim,parentName){
-  var pr=hasW(p)?p.retail-p.wholesale:0,cls=pr>=0?'pos':'neg';
-  var name=isSim?short(p.name,parentName):p.name;
-  var id=esc(p.id);
-  var lbl=isSim?'<span class="simlbl">similar product</span>':'';
-  var th=p.photo?'<button class="thb" data-a="zoom" data-id="'+id+'" aria-label="View picture"><img src="'+esc(p.photo)+'" alt=""></button>':'';
   if(!canSeeCost())return pubCard(p);
-  var trash=!canEdit()?'':(pendingDel===p.id
-    ?'<button class="ib sure" data-a="del2" data-id="'+id+'">Sure?</button>'
-    :'<button class="ib" data-a="del" data-id="'+id+'" aria-label="Delete" title="Delete">'+ICON.del+'</button>');
+  var id=esc(p.id),out=p.stock==='out',badges='';
+  if(p.label==='new')badges+='<span class="bdg bdg-new">New</span>';
+  if(p.label==='offer')badges+='<span class="bdg bdg-offer">Offer</span>';
+  if(p.stock==='in')badges+='<span class="bdg bdg-in">In stock</span>';
+  if(out)badges+='<span class="bdg bdg-out">Out of stock</span>';
+  var name=isSim?short(p.name,parentName):p.name;
+  var img=p.photo?'<button class="pimgbtn" data-a="zoom" data-id="'+id+'" aria-label="View picture of '+esc(name)+'"><img src="'+esc(p.photo)+'" alt="'+esc(name)+'"></button>':'<div class="pimgph">'+pubIcon()+'</div>';
   var arrange=arrangeMode?'<div class="arrange-arrows"><button type="button" class="ghost arrange-btn" data-a="move-up" data-id="'+id+'" aria-label="Move up" title="Move up" '+(arrangeBusy?'disabled':'')+'>↑</button><button type="button" class="ghost arrange-btn" data-a="move-down" data-id="'+id+'" aria-label="Move down" title="Move down" '+(arrangeBusy?'disabled':'')+'>↓</button></div>':'';
+  var trash=!canEdit()?'':(pendingDel===p.id?'<button class="ib sure" data-a="del2" data-id="'+id+'">Sure?</button>':'<button class="ib" data-a="del" data-id="'+id+'" aria-label="Delete" title="Delete">'+ICON.del+'</button>');
   var icons=(canEdit()?'<button class="ib" data-a="edit" data-id="'+id+'" aria-label="Edit" title="Edit">'+ICON.edit+'</button>':'')
-    +((!isSim&&canAdd())?'<button class="ib add" data-a="sim" data-id="'+id+'" aria-label="Add similar product" title="Add similar product">'+ICON.add+'</button>':'')
-    +trash;
-  var isOpen=!!expanded[p.id];
-  return '<div class="row card2 tap'+(isSim?' sim':'')+'" data-id="'+id+'">'+lbl
-    +'<div class="ptitle"><span>'+esc(name)+'</span><span class="chev">'+(isOpen?'\u25B4':'\u25BE')+'</span></div>'
-    +'<div class="pbody">'+th+'<div class="pside"><div class="wline"><i>W</i>'+(hasW(p)?money(p.wholesale):'\u2013')+'</div>'
-    +(canEdit()?'<button class="ghost hbtn" data-a="history" data-id="'+id+'">History</button>':'')+'</div></div>'
-    +(arrange?arrange:'')+(isOpen?'<div class="pextra"><div class="vals"><span class="pc '+cls+'"'+(hasW(p)?' title="Profit '+esc(money(pr))+'"':'')+'>'+pctTxt(p)+'</span><span><i>R</i>'+money(p.retail)+'</span></div>'
-      +(p.category?'<span class="chip" style="margin-top:0">'+esc(CATS[p.category]||p.category)+'</span>':'')
-      +(p.note?'<span class="chip" style="margin-top:0">'+esc(p.note)+'</span>':'')
-      +(icons?'<div class="ico">'+icons+'</div>':'')+'</div>':'')
-    +'</div>';
+    +((!isSim&&canAdd())?'<button class="ib add" data-a="sim" data-id="'+id+'" aria-label="Add similar product" title="Add similar product">'+ICON.add+'</button>':'')+trash;
+  var wline='<div class="staff-wholesale"><small>Wholesale</small> '+(hasW(p)?money(p.wholesale):'–')+'</div>';
+  return '<div class="pc2 staff-product'+(out?' out':'')+'"><div class="pimg">'+img+(badges?'<div class="bdgs">'+badges+'</div>':'')+'</div>'
+    +'<div class="pinfo"><div class="pname">'+esc(name)+'</div><div class="pprice">'+money(p.retail)+'</div>'
+    +(p.note?'<span class="chip" style="margin-top:0">'+esc(p.note)+'</span>':'')+askLink(p,out)+'</div>'
+    +'<div class="staff-product-extra">'+wline
+    +(canSeeCost()?'<button class="ghost hbtn" data-a="history" data-id="'+id+'">History</button>':'')
+    +(icons?'<div class="ico">'+icons+'</div>':'')+arrange+'</div></div>';
 }
 function editorHtml(){
   var d=inline.draft||{};
@@ -723,7 +748,7 @@ $('f').addEventListener('submit',async function(e){
     }
     var purchase={productId:product.id,productName:product.name,purchaseDate:new Date(date+'T12:00:00').getTime(),quantity:qty,unit:unit,unitPrice:price,totalCost:Math.round(qty*price*100)/100,marketName:$('pmarket').value.trim(),notes:$('pnotes').value.trim(),createdAt:Date.now(),createdBy:user?user.uid:''};
     await setDoc(doc(db,'marketPurchases',newId()),purchase);
-    setStatus(canEdit()?('Purchase saved to '+product.name+' history. Product wholesale price was not changed.'):('Purchase saved for '+product.name+'.'));$('f').reset();$('pdate').value=dateToday();$('pqty').value='1';$('punit').value='pcs';newPhoto='';showNew();selectedExisting=null;toggleNewFields(true);$('suggestions').style.display='none';setAdd(false);if(canEdit())openDetail(product.id);
+    setStatus(canEdit()?('Purchase saved to '+product.name+' history. Product wholesale price was not changed.'):('Purchase saved for '+product.name+'.'));$('f').reset();$('pdate').value=dateToday();$('pqty').value='1';$('punit').value='pcs';newPhoto='';showNew();selectedExisting=null;toggleNewFields(true);$('suggestions').style.display='none';setAdd(false);if(canSeeCost())openDetail(product.id);
   }catch(err){setStatus('Could not save purchase: '+niceErr(err))}
 });
 $('closedetail').addEventListener('click',function(){$('detailcard').hidden=true;detailProductId=null});
@@ -760,9 +785,9 @@ function renderDetail(id){
       var diff=Math.abs(vals[k]-vals[k-1]),pc=vals[k-1]>0?diff/vals[k-1]*100:0;
       chg='<div class="chg '+d+'">'+(d==='up'?'\u25B2 +':(d==='down'?'\u25BC \u2212':'= '))+money(diff)+' ('+(Math.round(pc*10)/10)+'%)</div>';
     }
-    var del=pendingPurchaseDel===x.id
+    var del=!canEdit()?'':(pendingPurchaseDel===x.id
       ?'<button class="ib sure" data-a="phdel2" data-pid="'+esc(x.id)+'">Sure?</button>'
-      :'<button class="ib" data-a="phdel" data-pid="'+esc(x.id)+'" aria-label="Delete this entry" title="Delete this entry">'+ICON.del+'</button>';
+      :'<button class="ib" data-a="phdel" data-pid="'+esc(x.id)+'" aria-label="Delete this entry" title="Delete this entry">'+ICON.del+'</button>');
     lines+='<div class="hline"><div class="hl-main"><b>'+esc(new Date(Number(x.purchaseDate)||0).toLocaleDateString())+'</b><div class="hint">'+esc(x.quantity)+' '+esc(x.unit)+(x.marketName?' \u00B7 '+esc(x.marketName):'')+(x.notes?' \u00B7 '+esc(x.notes):'')+'</div></div>'
       +'<div class="hl-price"><b>'+money(Number(x.unitPrice)||0)+' / '+esc(x.unit)+'</b>'+chg+'<div class="hint">Total '+money(Number(x.totalCost)||0)+'</div></div>'
       +'<div>'+del+'</div></div>';
@@ -883,10 +908,10 @@ $('impgo').addEventListener('click',async()=>{
 function syncCats(){
   var staffish=role==='owner'||role==='staff';
   var searching=norm($('q').value)!=='';
-  $('cats').hidden=staffish||searching;
+  $('cats').hidden=searching;
   $('cbar').hidden=!(curCat&&!staffish&&!searching);
   $('cname').textContent=curCat?(CATS[curCat]||''):'';
-  $('cchips').hidden=!staffish;
+  $('cchips').hidden=true;
   [].forEach.call($('cchips').children,function(b){b.classList.toggle('on',b.getAttribute('data-c')===curCat)});
 }
 function openSearch(){$('brand').classList.add('searching');$('q2').focus()}
@@ -899,6 +924,26 @@ function setCat(c){
   render();syncCats();
   if(curCat&&!$('listcard').hidden){try{$('listcard').scrollIntoView({behavior:'smooth',block:'start'})}catch(e){}}
 }
+$('menuBtn').addEventListener('click',function(e){
+  e.stopPropagation();var open=$('staffMenu').hidden;$('staffMenu').hidden=!open;this.setAttribute('aria-expanded',String(open));
+});
+document.addEventListener('click',function(e){if(!e.target.closest('#staffMenu')&&!e.target.closest('#menuBtn')){$('staffMenu').hidden=true;$('menuBtn').setAttribute('aria-expanded','false')}});
+$('staffMenu').addEventListener('click',function(e){
+  var b=e.target.closest('button[data-menu]');if(!b)return;
+  var action=b.getAttribute('data-menu');$('staffMenu').hidden=true;$('menuBtn').setAttribute('aria-expanded','false');
+  if(action==='signout'){signOut(auth);return;}
+  if(action==='new'){
+    if(!canAdd())return;
+    setAdd(true);$('addcard').scrollIntoView({block:'start',behavior:'smooth'});$('name').focus();
+  }else if(action==='buy'){
+    if(!canAdd())return;
+    setAdd(true);setTimeout(function(){$('pdate').scrollIntoView({block:'center',behavior:'smooth'});$('pdate').focus()},50);
+  }else if(action==='arrange'){
+    if(!canAdd())return;
+    arrangeMode=!arrangeMode;render();setStatus(arrangeMode?'Product arrange mode is on. Use arrows on product cards.':'Product arrange mode is off.');
+    if(arrangeMode)$('listcard').scrollIntoView({block:'start',behavior:'smooth'});
+  }
+});
 $('bsearchbtn').addEventListener('click',openSearch);
 $('bback').addEventListener('click',function(){closeSearch(false)});
 $('bclear').addEventListener('click',function(){$('q2').value='';$('q').value='';render();syncCats();$('q2').focus()});
