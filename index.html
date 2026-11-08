@@ -335,24 +335,16 @@ main>.sess,main>.topbar,main>.hint,main>.live,main>.searchbar,main>.cchips,main>
   </div>
 
   <div class="card" id="addcard" hidden>
-    <div class="fh">Add purchase / product</div>
+    <div class="fh">Buy Entry</div>
     <form class="top" id="f" autocomplete="off">
-      <div style="grid-column:1/-1;position:relative"><label for="name">Type product name</label><input id="name" required placeholder="Search existing product or type a new name" autocomplete="off"><div id="suggestions" class="list" style="display:none;position:absolute;z-index:8;left:0;right:0;top:100%;max-height:240px;overflow:auto"></div><p class="hint" id="pickhint">Choose an existing product to add a purchase to its history, or enter a new product name.</p></div>
-      <div id="newfields" style="display:contents">
-        <div><label for="ws">Wholesale price (W)</label><input id="ws" type="number" step="any" min="0" required inputmode="decimal"></div>
-        <div><label for="rt">Retail price (R)</label><input id="rt" type="number" step="any" min="0" required inputmode="decimal"></div>
-        <div><label for="nt">Tag (optional)</label><input id="nt" placeholder="Supplier, size…"></div>
-        <div><label for="pstock">Availability</label><select id="pstock"><option value="">Not set</option><option value="in">In stock</option><option value="out">Out of stock</option></select></div>
-        <div><label for="plabel">Label</label><select id="plabel"><option value="">None</option><option value="new">New</option><option value="offer">Offer</option></select></div>
-        <div><label for="pcat">Category</label><select id="pcat"><option value="">Not set</option><option value="perfume">Perfume</option><option value="edibles">Edibles</option><option value="cosmetics">Cosmetics</option><option value="gadgets">Gadgets</option></select></div>
-        <div style="grid-column:1/-1"><label>Picture (optional)</label><div class="pp"><label class="pick">+ Add picture<input type="file" accept="image/*" id="pf"></label><span id="pw2" hidden><img id="pprev" alt=""> <button type="button" class="ghost" id="prm">Remove</button></span></div></div>
-      </div>
-      <div><label for="pdate">Purchase date</label><input id="pdate" type="date" required></div>
+      <div style="grid-column:1/-1;position:relative"><label for="name">Product</label><input id="name" required placeholder="Type to search a product" autocomplete="off"><div id="suggestions" class="list" style="display:none;position:absolute;z-index:8;left:0;right:0;top:100%;max-height:240px;overflow:auto"></div><p class="hint" id="pickhint">Choose a product that is already added. New products are added in Product Management, Material, Product.</p></div>
       <div><label for="pqty">Quantity</label><input id="pqty" type="number" min="0.001" step="any" value="1" required inputmode="decimal"></div>
-      <div><label for="punit">Unit</label><input id="punit" value="pcs" required placeholder="kg, pcs, box"></div>
-      <div><label for="pprice">Actual purchase price per unit</label><input id="pprice" type="number" min="0" step="any" required inputmode="decimal"></div>
-      <div><label for="pmarket">Market / shop (optional)</label><input id="pmarket" placeholder="Market or supplier"></div>
-      <div style="grid-column:1/-1"><label for="pnotes">Purchase notes (optional)</label><input id="pnotes" placeholder="Any notes"></div>
+      <div><label for="punit">Unit</label><select id="punit" style="width:100%"><option value="pcs">pcs</option><option value="box">box</option></select></div>
+      <div><label for="pprice">Price per pcs / box</label><input id="pprice" type="number" min="0" step="any" required inputmode="decimal"></div>
+      <div><label>Total</label><div id="ptotal" style="padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--soft)">0</div></div>
+      <div style="grid-column:1/-1"><label for="pmarket">Shop</label><input id="pmarket" required placeholder="Which shop did you buy from?"></div>
+      <div><label for="pdate">Date</label><input id="pdate" type="date" required></div>
+      <div style="grid-column:1/-1"><label for="pnotes">Note (optional)</label><input id="pnotes" placeholder="Any note"></div>
       <div><button type="submit" id="savePurchase">Save</button></div>
     </form>
   </div>
@@ -871,34 +863,31 @@ $('cur').addEventListener('input',function(){cur=this.value||'';ls('oparanno_cur
 
 function setAdd(open){$('addcard').hidden=!open;$('tg').textContent=open?'– Close':'+ Add';if(open){selectedExisting=null;toggleNewFields(true);$('pdate').value=dateToday();try{$('addcard').scrollIntoView({block:'start',behavior:'smooth'})}catch(e){}$('name').focus()}}
 $('tg').addEventListener('click',function(){if(canAdd())setAdd($('addcard').hidden)});
-function showNew(){$('pw2').hidden=!newPhoto;if(newPhoto)$('pprev').src=newPhoto}
-$('pf').addEventListener('change',function(){
-  var f=this.files&&this.files[0];if(!f)return;
-  shrink(f,function(url){newPhoto=url;showNew()});this.value='';
-});
-$('prm').addEventListener('click',function(){newPhoto='';showNew()});
+function showNew(){}
 function dateToday(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 $('pdate').value=dateToday();
 function matchingProducts(q){var nq=norm(q);if(!nq)return [];return items.map(function(p){return {p:p,r:rank(p,nq)}}).filter(function(x){return x.r>=0}).sort(function(a,b){return a.r-b.r||String(a.p.name).localeCompare(String(b.p.name))}).slice(0,8).map(function(x){return x.p})}
-function showSuggestions(){var box=$('suggestions'),q=$('name').value.trim();if(selectedExisting&&norm(selectedExisting.name)!==norm(q))selectedExisting=null;var found=matchingProducts(q);if(!q||!found.length){box.style.display='none';box.innerHTML='';$('pickhint').textContent=selectedExisting?'Purchase will be added to '+selectedExisting.name+' history.':'No existing match selected. If this is a new product, fill its wholesale and retail prices.';toggleNewFields(!selectedExisting);return}box.innerHTML=found.map(function(p){return '<div class="row" data-pick="'+esc(p.id)+'"><div class="main"><div class="nm">'+esc(p.name)+'</div><span class="simlbl">Existing product — select to add purchase history</span></div></div>'}).join('');box.style.display='block';$('pickhint').textContent='Select an existing product below, or continue with a new product.';toggleNewFields(!selectedExisting)}
-function toggleNewFields(show){$('newfields').style.display=show?'contents':'none';$('ws').required=show;$('rt').required=show;$('ws').disabled=!show;$('rt').disabled=!show;$('nt').disabled=!show;$('pf').disabled=!show}
+function showSuggestions(){var box=$('suggestions'),q=$('name').value.trim();if(selectedExisting&&norm(selectedExisting.name)!==norm(q))selectedExisting=null;var found=matchingProducts(q);if(!q||!found.length){box.style.display='none';box.innerHTML='';$('pickhint').textContent=selectedExisting?'Purchase will be added to '+selectedExisting.name+' history.':'Select a product from the list. New products are added in Product Management, Material, Product.';toggleNewFields(!selectedExisting);return}box.innerHTML=found.map(function(p){return '<div class="row" data-pick="'+esc(p.id)+'"><div class="main"><div class="nm">'+esc(p.name)+'</div><span class="simlbl">Tap to select</span></div></div>'}).join('');box.style.display='block';$('pickhint').textContent='Select a product from the list below.';toggleNewFields(!selectedExisting)}
+function toggleNewFields(show){}
 $('name').addEventListener('input',function(){selectedExisting=null;showSuggestions()});
-$('suggestions').addEventListener('click',function(e){var r=e.target.closest('[data-pick]');if(!r)return;selectedExisting=items.find(function(p){return p.id===r.getAttribute('data-pick')})||null;if(!selectedExisting)return;$('name').value=selectedExisting.name;$('suggestions').style.display='none';$('pickhint').textContent='Selected '+selectedExisting.name+'. Saving will add a purchase to its history; wholesale price will not change.';toggleNewFields(false);if(typeof selectedExisting.wholesale==='number')$('ws').value=selectedExisting.wholesale;if(selectedExisting.retail!=null)$('rt').value=selectedExisting.retail;$('pprice').focus()});
+$('suggestions').addEventListener('click',function(e){var r=e.target.closest('[data-pick]');if(!r)return;selectedExisting=items.find(function(p){return p.id===r.getAttribute('data-pick')})||null;if(!selectedExisting)return;$('name').value=selectedExisting.name;$('suggestions').style.display='none';$('pickhint').textContent='Selected '+selectedExisting.name+'. Saving will add a purchase to its history; wholesale price will not change.';toggleNewFields(false);$('pprice').focus()});
 $('f').addEventListener('submit',async function(e){
   e.preventDefault();if(!canAdd()){setStatus('Only the owner or staff can record purchases.');return}
-  var name=$('name').value.trim(),w=parseFloat($('ws').value),rt=parseFloat($('rt').value),qty=parseFloat($('pqty').value),price=parseFloat($('pprice').value),unit=$('punit').value.trim(),date=$('pdate').value;
-  if(!name||!date||!unit||!(qty>0)||!(price>=0))return;
+  var qty=parseFloat($('pqty').value),price=parseFloat($('pprice').value),unit=$('punit').value,date=$('pdate').value,shop=$('pmarket').value.trim();
   var product=selectedExisting;
+  if(!product){setStatus('Select a product from the list first. New products are added in Product Management, Material, Product.');return}
+  if(!date||!unit||!shop||!(qty>0)||!(price>=0))return;
   try{
-    if(!product){if(!(w>=0)||!(rt>=0)){setStatus('For a new product, enter wholesale and retail prices.');return}
-      var pid=newId(),np={name:name,retail:rt,note:$('nt').value.trim(),updated:Date.now()};if(newPhoto)np.photo=newPhoto;if($('pstock').value)np.stock=$('pstock').value;if($('plabel').value)np.label=$('plabel').value;if($('pcat').value)np.category=$('pcat').value;
-      const b=writeBatch(db);b.set(doc(db,'products',pid),np);b.set(doc(db,'costs',pid),{wholesale:w});await b.commit();product=Object.assign({},np,{id:pid,wholesale:w});
-    }
-    var purchase={productId:product.id,productName:product.name,purchaseDate:new Date(date+'T12:00:00').getTime(),quantity:qty,unit:unit,unitPrice:price,totalCost:Math.round(qty*price*100)/100,marketName:$('pmarket').value.trim(),notes:$('pnotes').value.trim(),createdAt:Date.now(),createdBy:user?user.uid:''};
+    var purchase={productId:product.id,productName:product.name,purchaseDate:new Date(date+'T12:00:00').getTime(),quantity:qty,unit:unit,unitPrice:price,totalCost:Math.round(qty*price*100)/100,marketName:shop,notes:$('pnotes').value.trim(),createdAt:Date.now(),createdBy:user?user.uid:''};
     await setDoc(doc(db,'marketPurchases',newId()),purchase);
-    setStatus(canEdit()?('Purchase saved to '+product.name+' history. Product wholesale price was not changed.'):('Purchase saved for '+product.name+'.'));$('f').reset();$('pdate').value=dateToday();$('pqty').value='1';$('punit').value='pcs';newPhoto='';showNew();selectedExisting=null;toggleNewFields(true);$('suggestions').style.display='none';setAdd(false);if(canSeeCost())openDetail(product.id);
+    setStatus(canEdit()?('Purchase saved to '+product.name+' history. Product wholesale price was not changed.'):('Purchase saved for '+product.name+'.'));
+    $('f').reset();$('pdate').value=dateToday();$('pqty').value='1';$('punit').value='pcs';updatePTotal();selectedExisting=null;$('suggestions').style.display='none';setAdd(false);
+    if(canSeeCost())openDetail(product.id);
   }catch(err){setStatus('Could not save purchase: '+niceErr(err))}
 });
+function updatePTotal(){var q=parseFloat($('pqty').value),pr=parseFloat($('pprice').value);$('ptotal').textContent=money((q>0&&pr>=0)?Math.round(q*pr*100)/100:0)}
+['pqty','pprice'].forEach(function(id){$(id).addEventListener('input',updatePTotal)});
+updatePTotal();
 $('closedetail').addEventListener('click',function(){$('detailcard').hidden=true;detailProductId=null});
 $('rows').addEventListener('click',function(e){var b=e.target.closest('button');if(b&&b.getAttribute('data-a')==='history'){var p=items.find(function(x){return x.id===b.getAttribute('data-id')});if(p)openDetail(p.id)}});
 $('rows').addEventListener('click',function(e){
