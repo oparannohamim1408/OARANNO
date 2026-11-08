@@ -217,6 +217,11 @@ body{overflow-x:clip}
 main>.sess,main>.topbar,main>.hint,main>.live,main>.searchbar,main>.cchips,main>.foot{padding-left:12px;padding-right:12px}
 
 /* Notes */
+.nadd{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.nlinkbtn{background:transparent;box-shadow:none;line-height:inherit;font-family:inherit}
+#nLinkForm{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:10px;margin:10px 0}
+#nLinkForm input{margin-bottom:8px}
+#nLinkForm .nact{margin-top:2px}
 .npanel{position:fixed;inset:0;z-index:60;background:var(--bg);color:var(--text);display:flex;flex-direction:column}
 .nhead{background:#C20019;color:#fff;display:flex;align-items:center;gap:6px;padding:calc(8px + env(safe-area-inset-top,0px)) 10px 8px}
 .nhead .bic{font-size:1.5rem;line-height:1;font-weight:600}
@@ -378,8 +383,17 @@ main>.sess,main>.topbar,main>.hint,main>.live,main>.searchbar,main>.cchips,main>
       <label for="nX">Note</label>
       <textarea id="nX" placeholder="Write here…"></textarea>
       <label>Files (Photoshop, photos, documents…)</label>
-      <label class="pick">+ Add file<input type="file" id="nF" multiple></label>
+      <div class="nadd">
+        <label class="pick">+ Add file<input type="file" id="nF" multiple></label>
+        <button type="button" class="pick nlinkbtn" id="nLinkBtn">+ Add link</button>
+      </div>
+      <div id="nLinkForm" hidden>
+        <input id="nLN" placeholder="Link name (optional)" autocomplete="off">
+        <input id="nLU" placeholder="Paste link (Google Drive, Dropbox…)" inputmode="url" autocapitalize="off" autocomplete="off" spellcheck="false">
+        <div class="nact"><button type="button" id="nLinkAdd">Add</button><button type="button" class="ghost" id="nLinkCancel">Cancel</button></div>
+      </div>
       <div id="nFiles"></div>
+      <div id="nLinks"></div>
       <div class="msg" id="nMsg" role="status"></div>
       <div class="nact">
         <button type="button" id="nSave">Save</button>
@@ -1043,6 +1057,7 @@ function nmsg(t,ok){const m=$('nMsg');m.textContent=t||'';m.className='msg'+(ok?
 function noteErr(e){
   const c=(e&&e.code)||'';
   if(c==='permission-denied')return 'Notes are not allowed yet. Add the notes rule in Firebase (Firestore Database > Rules).';
+  if(c==='storage/no-start')return 'File upload is not working because Firebase Storage is not turned on (it needs the Blaze plan). Remove the file with ✕ and use Add link instead. Your text and links are still here.';
   if(c==='storage/unauthorized')return 'File upload is not allowed yet. Add the notes rule in Firebase (Storage > Rules).';
   if(c==='storage/retry-limit-exceeded'||c==='storage/canceled')return 'Upload stopped. Check your internet and try again.';
   if(c.indexOf('storage/')===0)return 'File upload failed ('+c+'). Check that Firebase Storage is turned on.';
@@ -1076,19 +1091,20 @@ function showNoteList(){
 function renderNoteList(){
   if(!notes.length){$('nList').innerHTML='<p class="hint">No notes yet. Tap + to add one.</p>';return}
   $('nList').innerHTML=notes.map(function(n){
-    const fc=(n.files||[]).length;
+    const fc=(n.files||[]).length,lc=(n.links||[]).length;
     return '<div class="ncard" data-id="'+esc(n.id)+'" tabindex="0"><b>'+esc(n.title||'Untitled')+'</b>'
       +(n.text?'<p>'+esc(n.text)+'</p>':'')
-      +'<small>'+(fc?fc+' file'+(fc>1?'s':'')+' · ':'')+esc(new Date(n.updatedAt||0).toLocaleDateString())+'</small></div>';
+      +'<small>'+(fc?fc+' file'+(fc>1?'s':'')+' · ':'')+(lc?lc+' link'+(lc>1?'s':'')+' · ':'')+esc(new Date(n.updatedAt||0).toLocaleDateString())+'</small></div>';
   }).join('');
 }
 function openNoteEditor(n){
-  curNote=n?{id:n.id,createdAt:n.createdAt,files:(n.files||[]).slice()}:{id:doc(collection(db,'notes')).id,createdAt:0,files:[],isNew:true};
+  curNote=n?{id:n.id,createdAt:n.createdAt,files:(n.files||[]).slice(),links:(n.links||[]).slice()}:{id:doc(collection(db,'notes')).id,createdAt:0,files:[],links:[],isNew:true};
   pendingFiles=[];removedFiles=[];
   $('nT').value=n?(n.title||''):'';$('nX').value=n?(n.text||''):'';
   nmsg('');$('nDel').hidden=!n;$('nTitle').textContent=n?'Edit note':'New note';
   $('nList').hidden=true;$('nEdit').hidden=false;$('nNew').hidden=true;
-  renderNoteFiles();$('nT').focus();
+  $('nLinkForm').hidden=true;$('nLN').value='';$('nLU').value='';
+  renderNoteFiles();renderNoteLinks();$('nT').focus();
 }
 function renderNoteFiles(){
   const rows=[];
@@ -1106,6 +1122,19 @@ function renderNoteFiles(){
       +'<button type="button" class="nx" data-k="new" data-i="'+i+'" aria-label="Remove file">✕</button></div>');
   });
   $('nFiles').innerHTML=rows.join('');
+}
+function normLink(u){
+  u=(u||'').trim();if(!u)return '';
+  if(!/^https?:\/\//i.test(u))u='https://'+u;
+  try{const x=new URL(u);if(!x.hostname||x.hostname.indexOf('.')<0)return '';return x.href}catch(e){return ''}
+}
+function renderNoteLinks(){
+  $('nLinks').innerHTML=curNote.links.map(function(l,i){
+    return '<div class="nfile"><div class="nico">🔗</div>'
+      +'<div class="nmeta"><span>'+esc(l.name||l.url)+'</span><small>'+esc((function(){try{return new URL(l.url).hostname}catch(e){return l.url}})())+'</small></div>'
+      +'<a href="'+esc(l.url)+'" target="_blank" rel="noopener noreferrer">Open</a>'
+      +'<button type="button" class="nx nlx" data-i="'+i+'" aria-label="Remove link">✕</button></div>';
+  }).join('');
 }
 function setNoteBusy(b){['nSave','nCancel','nDel','nBack','nNew'].forEach(function(id){$(id).disabled=b})}
 
@@ -1133,10 +1162,28 @@ $('nFiles').addEventListener('click',function(e){
   else{try{URL.revokeObjectURL(pendingFiles[i].url)}catch(x){}pendingFiles.splice(i,1)}
   renderNoteFiles();
 });
+$('nLinkBtn').addEventListener('click',function(){
+  const f=$('nLinkForm');f.hidden=!f.hidden;if(!f.hidden)$('nLU').focus();
+});
+$('nLinkCancel').addEventListener('click',function(){$('nLinkForm').hidden=true;$('nLN').value='';$('nLU').value=''});
+$('nLinkAdd').addEventListener('click',function(){
+  if(!curNote)return;
+  const url=normLink($('nLU').value);
+  if(!url){nmsg('Please paste a valid link.');return}
+  let name=$('nLN').value.trim();
+  if(!name){try{name=new URL(url).hostname}catch(e){name=url}}
+  curNote.links.push({name:name,url:url});
+  $('nLN').value='';$('nLU').value='';$('nLinkForm').hidden=true;nmsg('');
+  renderNoteLinks();
+});
+$('nLinks').addEventListener('click',function(e){
+  const b=e.target.closest('.nlx');if(!b||notesBusy||!curNote)return;
+  curNote.links.splice(Number(b.getAttribute('data-i')),1);renderNoteLinks();
+});
 $('nSave').addEventListener('click',async function(){
   if(notesBusy||!curNote||!user)return;
   const title=$('nT').value.trim(),text=$('nX').value.trim();
-  if(!title&&!text&&!curNote.files.length&&!pendingFiles.length){nmsg('Write something or add a file first.');return}
+  if(!title&&!text&&!curNote.files.length&&!curNote.links.length&&!pendingFiles.length){nmsg('Write something or add a file first.');return}
   notesBusy=true;setNoteBusy(true);nmsg('');
   try{
     const total=pendingFiles.length;let done=0;
@@ -1146,7 +1193,12 @@ $('nSave').addEventListener('click',async function(){
       const r=sref(storage,path);
       await new Promise(function(res,rej){
         const t=uploadBytesResumable(r,f,{contentType:f.type||'application/octet-stream'});
-        t.on('state_changed',function(s){nmsg('Uploading file '+(done+1)+' of '+total+': '+Math.round(s.bytesTransferred/(s.totalBytes||1)*100)+'%',true)},rej,res);
+        let started=false;
+        const timer=setTimeout(function(){if(!started){try{t.cancel()}catch(x){}rej({code:'storage/no-start'})}},20000);
+        t.on('state_changed',function(s){
+          if(s.bytesTransferred>0){started=true;clearTimeout(timer)}
+          nmsg('Uploading file '+(done+1)+' of '+total+': '+Math.round(s.bytesTransferred/(s.totalBytes||1)*100)+'%',true);
+        },function(e){clearTimeout(timer);rej(e)},function(){clearTimeout(timer);res()});
       });
       const url=await getDownloadURL(r);
       curNote.files.push({name:f.name,size:f.size,type:f.type||'',path:path,url:url});
@@ -1154,7 +1206,7 @@ $('nSave').addEventListener('click',async function(){
       pendingFiles.shift();done++;
     }
     const now=Date.now();
-    await setDoc(doc(db,'notes',curNote.id),{uid:user.uid,title:title,text:text,files:curNote.files,createdAt:curNote.createdAt||now,updatedAt:now});
+    await setDoc(doc(db,'notes',curNote.id),{uid:user.uid,title:title,text:text,files:curNote.files,links:curNote.links,createdAt:curNote.createdAt||now,updatedAt:now});
     for(const rf of removedFiles){try{await deleteObject(sref(storage,rf.path))}catch(x){}}
     removedFiles=[];notesBusy=false;setNoteBusy(false);showNoteList();
   }catch(err){nmsg(noteErr(err));renderNoteFiles()}
