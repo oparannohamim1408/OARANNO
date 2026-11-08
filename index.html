@@ -216,6 +216,17 @@ body{overflow-x:clip}
 /* Keep text rows readable with the narrower page side gap */
 main>.sess,main>.topbar,main>.hint,main>.live,main>.searchbar,main>.cchips,main>.foot{padding-left:12px;padding-right:12px}
 
+/* Product Management */
+.pmb{display:flex;align-items:center;justify-content:space-between;width:100%;text-align:left;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:10px;font-size:1rem;font-weight:600;box-shadow:none}
+.pmb small{display:block;color:var(--muted);font-weight:400;font-size:.8rem;margin-top:2px}
+.pmb i{font-style:normal;color:var(--muted);font-size:1.3rem}
+.pmtog{display:flex;align-items:center;gap:8px;color:var(--text);font-size:.9rem;margin:8px 0}
+.pmtog input{width:auto;margin:0}
+#pmProd label,#cForm label{margin-top:8px}
+#pmProd select,#cForm select{width:100%}
+.ppic{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.ppic img{width:64px;height:64px;object-fit:cover;border-radius:10px}
+
 /* Notes */
 .nadd{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .nlinkbtn{background:transparent;box-shadow:none;line-height:inherit;font-family:inherit}
@@ -284,9 +295,7 @@ main>.sess,main>.topbar,main>.hint,main>.live,main>.searchbar,main>.cchips,main>
           <a class="bic" id="waHeader" href="https://wa.me/8801342054583?text=Hello!%20I%20would%20like%20to%20know%20more%20about%20your%20products." target="_blank" rel="noopener noreferrer" aria-label="Message us on WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9l-5.05.9"/><path d="M9 10a.5.5 0 0 0 1 0v-1a.5.5 0 0 0-1 0v1a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1"/></svg></a>
           <button type="button" class="bic staff-menu-trigger" id="menuBtn" aria-label="Management menu" aria-expanded="false" hidden><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg></button>
           <div class="staff-menu" id="staffMenu" hidden>
-            <button type="button" data-menu="new"><span>＋</span> New Product Add</button>
-            <button type="button" data-menu="buy"><span>↗</span> Buy Entry</button>
-            <button type="button" data-menu="arrange"><span>↕</span> Product Arrange</button>
+            <button type="button" data-menu="pm"><span>▦</span> Product Management</button>
             <button type="button" data-menu="notes"><span>✎</span> Note</button>
             <div class="menu-sep"></div>
             <button type="button" data-menu="signout"><span>↪</span> Sign out</button>
@@ -369,6 +378,63 @@ main>.sess,main>.topbar,main>.hint,main>.live,main>.searchbar,main>.cchips,main>
     <div class="foot2"><span>Oparanno</span><button type="button" class="linkbtn" id="signin2">Staff sign in</button></div>
   </footer>
 </main>
+<div class="npanel" id="pm" hidden role="dialog" aria-label="Product Management">
+  <div class="nhead">
+    <button type="button" class="bic" id="pmBack" aria-label="Back">&larr;</button>
+    <span class="ntitle" id="pmTitle">Product Management</span>
+  </div>
+  <div class="nbody" id="pmBody">
+    <div id="pmHome">
+      <button type="button" class="pmb" data-pm="mat"><span>Material<small>Product, Card, Inner craft, Outer craft</small></span><i>›</i></button>
+      <button type="button" class="pmb" data-pm="arrange"><span>Product Arrange<small>Move products up or down</small></span><i>›</i></button>
+      <button type="button" class="pmb" data-pm="buy"><span>Buy Entry<small>Record a purchase</small></span><i>›</i></button>
+    </div>
+    <div id="pmMat" hidden>
+      <button type="button" class="pmb" data-pm="prod"><span>Product<small>Add a new product</small></span><i>›</i></button>
+      <button type="button" class="pmb" data-pm="card"><span>Card<small>Name, picture, price</small></span><i>›</i></button>
+      <button type="button" class="pmb" data-pm="inner"><span>Inner craft<small>Name, picture, price</small></span><i>›</i></button>
+      <button type="button" class="pmb" data-pm="outer"><span>Outer craft<small>Name, picture, price</small></span><i>›</i></button>
+    </div>
+    <div id="pmProd" hidden>
+      <form id="pnForm" autocomplete="off">
+        <label for="pnN">Name</label>
+        <input id="pnN" required placeholder="Product name">
+        <label for="pnD">Description (optional)</label>
+        <textarea id="pnD" style="min-height:80px" placeholder="About this product"></textarea>
+        <label for="pnW">Wholesale price</label>
+        <input id="pnW" type="number" step="any" min="0" required inputmode="decimal">
+        <label for="pnR">Retail price</label>
+        <input id="pnR" type="number" step="any" min="0" required inputmode="decimal">
+        <label for="pnO">Offer price (optional)</label>
+        <input id="pnO" type="number" step="any" min="0" inputmode="decimal">
+        <label for="pnC">Category</label>
+        <select id="pnC"></select>
+        <label for="pnU">Customisation</label>
+        <select id="pnU"></select>
+        <label>Picture (optional)</label>
+        <div class="ppic"><label class="pick">+ Add picture<input type="file" accept="image/*" id="pnF"></label><span id="pnPw" hidden><img id="pnImg" alt=""> <button type="button" class="ghost" id="pnRm">Remove</button></span></div>
+        <label class="pmtog"><input type="checkbox" id="pnHN"> Hide from normal list</label>
+        <label class="pmtog"><input type="checkbox" id="pnHG"> Hide from Gift page</label>
+        <div class="nact"><button type="submit" id="pnSave">Save product</button></div>
+      </form>
+    </div>
+    <div id="pmCraft" hidden>
+      <div id="cTop"><button type="button" class="pick nlinkbtn" id="cAddBtn">+ Add new</button></div>
+      <div id="cList"></div>
+      <div id="cForm" hidden>
+        <label for="cN">Name</label>
+        <input id="cN" placeholder="Name" autocomplete="off">
+        <label for="cP">Price</label>
+        <input id="cP" type="number" step="any" min="0" inputmode="decimal">
+        <label>Picture</label>
+        <div class="ppic"><label class="pick">+ Add picture<input type="file" accept="image/*" id="cF"></label><span id="cPw" hidden><img id="cImg" alt=""> <button type="button" class="ghost" id="cRm">Remove</button></span></div>
+        <label class="pmtog"><input type="checkbox" id="cH"> Hide from Gift page</label>
+        <div class="nact"><button type="button" id="cSave">Save</button><button type="button" class="ghost" id="cCancel">Cancel</button><button type="button" class="ghost" id="cDel" hidden>Delete</button></div>
+      </div>
+    </div>
+    <div class="msg" id="pmMsg" role="status"></div>
+  </div>
+</div>
 <div class="npanel" id="notes" hidden role="dialog" aria-label="Notes">
   <div class="nhead">
     <button type="button" class="bic" id="nBack" aria-label="Back">&larr;</button>
@@ -438,7 +504,7 @@ let user = null, role = 'public', items = [], inline = null, pendingDel = null, 
 let arrangeMode = false, arrangeBusy = false;
 let prods = [], costs = {}, costsReady = false, migrating = false, startedFor = null, loadErr = '';
 let purchases = [], unsubPurchases = null, selectedExisting = null, detailProductId = null;
-let unsubUser = null, unsubProducts = null, unsubCosts = null, unsubUsers = null, unsubNotes = null;
+let unsubUser = null, unsubProducts = null, unsubCosts = null, unsubUsers = null, unsubNotes = null, unsubCraft = null;
 const canAdd = () => role === 'owner' || role === 'staff';
 const canEdit = () => role === 'owner';
 const canSeeCost = () => role === 'owner' || role === 'staff';
@@ -498,8 +564,8 @@ $('out').addEventListener('click',()=>signOut(auth));
 $('pout').addEventListener('click',()=>signOut(auth));
 
 function stopData(){
-  [unsubProducts,unsubCosts,unsubUsers,unsubPurchases,unsubNotes].forEach((u)=>{if(u)try{u()}catch(e){}});
-  unsubProducts=unsubCosts=unsubUsers=unsubPurchases=unsubNotes=null; closeNotes(); purchases=[]; selectedExisting=null; detailProductId=null;
+  [unsubProducts,unsubCosts,unsubUsers,unsubPurchases,unsubNotes,unsubCraft].forEach((u)=>{if(u)try{u()}catch(e){}});
+  unsubProducts=unsubCosts=unsubUsers=unsubPurchases=unsubNotes=unsubCraft=null; closeNotes(); closePM(); purchases=[]; selectedExisting=null; detailProductId=null;
   $('detailcard').hidden=true;
   prods=[];costs={};costsReady=false;items=[];inline=null;startedFor=null;
 }
@@ -594,7 +660,7 @@ function startCosts(){
 }
 function rebuild(){
   if(canSeeCost()&&!costsReady)return;
-  items=prods.map((p)=>{
+  items=prods.filter((p)=>canSeeCost()||!p.hideNormal).map((p)=>{
     const o=Object.assign({},p);
     if(canSeeCost()){if(typeof costs[p.id]==='number')o.wholesale=costs[p.id]}
     else delete o.wholesale;
@@ -664,6 +730,7 @@ function shrink(file,cb){
 var expanded = {};
 var curCat = '';
 var CATS = {perfume:'Perfume',edibles:'Edibles',cosmetics:'Cosmetics',gadgets:'Gadgets'};
+var CUSTOM = {text:'Text',textpic:'Text and Picture',pic:'Picture'};
 function catOk(p){return !curCat||(curCat==='none'?!p.category:p.category===curCat)}
 // WhatsApp Business number for the public "Ask" button (country code first, no + or spaces).
 var WA_NUMBER = '8801342054583';
@@ -690,6 +757,8 @@ function rowHtml(p,isSim,parentName){
   if(p.label==='offer')badges+='<span class="bdg bdg-offer">Offer</span>';
   if(p.stock==='in')badges+='<span class="bdg bdg-in">In stock</span>';
   if(out)badges+='<span class="bdg bdg-out">Out of stock</span>';
+  if(p.hideNormal)badges+='<span class="bdg bdg-out">Hidden</span>';
+  if(p.hideGift)badges+='<span class="bdg bdg-out">Gift hidden</span>';
   var name=isSim?short(p.name,parentName):p.name;
   var img=p.photo?'<button class="pimgbtn" data-a="zoom" data-id="'+id+'" aria-label="View picture of '+esc(name)+'"><img src="'+esc(p.photo)+'" alt="'+esc(name)+'"></button>':'<div class="pimgph">'+pubIcon()+'</div>';
   var arrange=arrangeMode?'<div class="arrange-arrows"><button type="button" class="ghost arrange-btn" data-a="move-up" data-id="'+id+'" aria-label="Move up" title="Move up" '+(arrangeBusy?'disabled':'')+'>↑</button><button type="button" class="ghost arrange-btn" data-a="move-down" data-id="'+id+'" aria-label="Move down" title="Move down" '+(arrangeBusy?'disabled':'')+'>↓</button></div>':'';
@@ -714,6 +783,10 @@ function editorHtml(){
     +'<div><label>Availability</label><select name="stock"><option value="">Not set</option><option value="in"'+(d.stock==='in'?' selected':'')+'>In stock</option><option value="out"'+(d.stock==='out'?' selected':'')+'>Out of stock</option></select></div>'
     +'<div><label>Label</label><select name="label"><option value="">None</option><option value="new"'+(d.label==='new'?' selected':'')+'>New</option><option value="offer"'+(d.label==='offer'?' selected':'')+'>Offer</option></select></div>'
     +'<div><label>Category</label><select name="cat"><option value="">Not set</option>'+Object.keys(CATS).map(function(k){return '<option value="'+k+'"'+(d.cat===k?' selected':'')+'>'+CATS[k]+'</option>'}).join('')+'</select></div>'
+    +'<div class="full"><label>Description (optional)</label><textarea name="desc" style="min-height:70px">'+esc(d.desc)+'</textarea></div>'
+    +'<div><label>Offer price (optional)</label><input name="offer" type="number" step="any" min="0" inputmode="decimal" value="'+esc(d.offer)+'"></div>'
+    +'<div><label>Customisation</label><select name="custom" style="width:100%"><option value="">None</option>'+Object.keys(CUSTOM).map(function(k){return '<option value="'+k+'"'+(d.custom===k?' selected':'')+'>'+CUSTOM[k]+'</option>'}).join('')+'</select></div>'
+    +'<div class="full"><label class="pmtog"><input type="checkbox" name="hn"'+(d.hn?' checked':'')+'> Hide from normal list</label><label class="pmtog"><input type="checkbox" name="hg"'+(d.hg?' checked':'')+'> Hide from Gift page</label></div>'
     +'<div class="full"><label>Picture (optional)</label><div class="pr">'
     +(d.photo?'<img src="'+esc(d.photo)+'" alt="">':'')
     +'<label class="pick">'+(d.photo?'Change picture':'+ Add picture')+'<input type="file" accept="image/*"></label>'
@@ -724,7 +797,7 @@ function editorHtml(){
 function grab(){
   var ed=$('ed');if(!ed||!inline)return;
   function v(n){return ed.querySelector('[name='+n+']').value}
-  inline.draft={name:v('name'),ws:v('ws'),rt:v('rt'),nt:v('nt'),stock:v('stock'),label:v('label'),cat:v('cat'),photo:(inline.draft&&inline.draft.photo)||''};
+  inline.draft={name:v('name'),ws:v('ws'),rt:v('rt'),nt:v('nt'),stock:v('stock'),label:v('label'),cat:v('cat'),desc:v('desc'),offer:v('offer'),custom:v('custom'),hn:ed.querySelector('[name=hn]').checked,hg:ed.querySelector('[name=hg]').checked,photo:(inline.draft&&inline.draft.photo)||''};
 }
 
 /* ---------- Search ---------- */
@@ -892,6 +965,10 @@ $('rows').addEventListener('submit',function(e){
   if(!p.name||isNaN(w)||isNaN(p.retail))return;
   if(d.photo)p.photo=d.photo;
   if(d.stock)p.stock=d.stock;if(d.label)p.label=d.label;if(d.cat)p.category=d.cat;
+  if(String(d.desc||'').trim())p.description=String(d.desc).trim();
+  var ofp=parseFloat(d.offer);if(!isNaN(ofp)&&ofp>=0)p.offer=ofp;
+  if(d.custom)p.custom=d.custom;
+  if(d.hn)p.hideNormal=true;if(d.hg)p.hideGift=true;
   if(inline.mode==='sim'){if(!canAdd())return;p.parent=inline.id;saveProduct(newId(),p,w)}
   else{if(!canEdit())return;var old=items.find(function(x){return x.id===inline.id});if(old&&old.parent)p.parent=old.parent;saveProduct(inline.id,p,w)}
   inline=null;render();
@@ -904,8 +981,8 @@ $('rows').addEventListener('change',function(e){
 });
 function openEditor(mode,p){
   inline={mode:mode,id:p.id,draft:mode==='edit'
-    ?{name:p.name,ws:p.wholesale,rt:p.retail,nt:p.note||'',stock:p.stock||'',label:p.label||'',cat:p.category||'',photo:p.photo||''}
-    :{name:p.name+' – ',ws:'',rt:'',nt:'',stock:'',label:'',cat:p.category||'',photo:''}};
+    ?{name:p.name,ws:p.wholesale,rt:p.retail,nt:p.note||'',stock:p.stock||'',label:p.label||'',cat:p.category||'',desc:p.description||'',offer:(typeof p.offer==='number'?p.offer:''),custom:p.custom||'',hn:!!p.hideNormal,hg:!!p.hideGift,photo:p.photo||''}
+    :{name:p.name+' – ',ws:'',rt:'',nt:'',stock:'',label:'',cat:p.category||'',desc:'',offer:'',custom:p.custom||'',hn:false,hg:false,photo:''}};
   render();
   var ed=$('ed');if(!ed)return;
   var first=ed.querySelector('[name=name]');
@@ -1013,6 +1090,9 @@ $('staffMenu').addEventListener('click',function(e){
   }else if(action==='buy'){
     if(!canAdd())return;
     setAdd(true);setTimeout(function(){$('pdate').scrollIntoView({block:'center',behavior:'smooth'});$('pdate').focus()},50);
+  }else if(action==='pm'){
+    if(!canAdd())return;
+    openPM();
   }else if(action==='notes'){
     if(!canAdd())return;
     openNotes();
@@ -1222,6 +1302,142 @@ $('nDel').addEventListener('click',async function(){
     notesBusy=false;setNoteBusy(false);showNoteList();
   }catch(err){nmsg(noteErr(err))}
   finally{notesBusy=false;setNoteBusy(false)}
+});
+
+
+/* ---------- Product Management ---------- */
+let craft=[],craftKind='card',craftEdit=null,craftPhoto='',pnPhoto='',pmView='home';
+const CRAFT_LABEL={card:'Card',inner:'Inner craft',outer:'Outer craft'};
+function pmMsg(t,ok){const m=$('pmMsg');m.textContent=t||'';m.className='msg'+(ok?' ok':'')}
+function craftErr(e){
+  if(e&&e.code==='permission-denied')return 'Not allowed yet. Add the craftItems rule in Firebase (Firestore Database > Rules).';
+  return niceErr(e)||'Something went wrong. Please try again.';
+}
+function pmShow(v){
+  pmView=v;
+  const map={home:'pmHome',mat:'pmMat',prod:'pmProd',craft:'pmCraft'};
+  Object.keys(map).forEach(function(k){$(map[k]).hidden=(k!==v)});
+  $('pmTitle').textContent=v==='home'?'Product Management':v==='mat'?'Material':v==='prod'?'New product':CRAFT_LABEL[craftKind];
+  pmMsg('');$('pmBody').scrollTop=0;
+}
+function openPM(){
+  if(!canAdd())return;
+  const c=$('pnC');
+  if(!c.options.length){
+    c.innerHTML='<option value="">Not set</option>'+Object.keys(CATS).map(function(k){return '<option value="'+k+'">'+CATS[k]+'</option>'}).join('');
+    $('pnU').innerHTML='<option value="">None</option>'+Object.keys(CUSTOM).map(function(k){return '<option value="'+k+'">'+CUSTOM[k]+'</option>'}).join('');
+  }
+  $('pm').hidden=false;document.body.style.overflow='hidden';pmShow('home');
+}
+function closePM(){
+  const p=$('pm');if(!p)return;
+  p.hidden=true;document.body.style.overflow='';
+  if(unsubCraft){try{unsubCraft()}catch(e){}unsubCraft=null}
+  craftEdit=null;
+}
+function startCraft(){
+  if(unsubCraft){try{unsubCraft()}catch(e){}}
+  unsubCraft=onSnapshot(collection(db,'craftItems'),function(snap){
+    craft=snap.docs.map(function(d){return Object.assign({id:d.id},d.data())});
+    if(pmView==='craft'&&!craftEdit)renderCraftList();
+  },function(err){$('cList').innerHTML='<p class="hint">'+esc(craftErr(err))+'</p>'});
+}
+function renderCraftList(){
+  const list=craft.filter(function(x){return x.kind===craftKind}).sort(function(a,b){return (a.createdAt||0)-(b.createdAt||0)});
+  if(!list.length){$('cList').innerHTML='<p class="hint">Nothing here yet. Tap + Add new.</p>';return}
+  $('cList').innerHTML=list.map(function(x){
+    return '<div class="nfile" data-id="'+esc(x.id)+'" style="cursor:pointer">'
+      +(x.photo?'<img src="'+esc(x.photo)+'" alt="">':'<div class="nico">🎁</div>')
+      +'<div class="nmeta"><span>'+esc(x.name)+'</span><small>'+esc(money(Number(x.price)||0))+(x.hidden?' · Hidden from Gift page':'')+'</small></div><i style="color:var(--muted);font-style:normal">›</i></div>';
+  }).join('');
+}
+function showCraftPic(){$('cPw').hidden=!craftPhoto;if(craftPhoto)$('cImg').src=craftPhoto}
+function openCraftForm(x){
+  craftEdit=x?x:{id:newId(),isNew:true};craftPhoto=x&&x.photo?x.photo:'';
+  $('cN').value=x?(x.name||''):'';$('cP').value=x&&x.price!=null?x.price:'';$('cH').checked=!!(x&&x.hidden);
+  $('cDel').hidden=!x;showCraftPic();pmMsg('');
+  $('cForm').hidden=false;$('cList').hidden=true;$('cTop').hidden=true;$('cN').focus();
+}
+function closeCraftForm(){craftEdit=null;$('cForm').hidden=true;$('cList').hidden=false;$('cTop').hidden=false;renderCraftList()}
+function showPnPic(){$('pnPw').hidden=!pnPhoto;if(pnPhoto)$('pnImg').src=pnPhoto}
+
+$('pmBack').addEventListener('click',function(){
+  if(pmView==='craft'&&craftEdit){closeCraftForm();return}
+  if(pmView==='prod'||pmView==='craft'){pmShow('mat');return}
+  if(pmView==='mat'){pmShow('home');return}
+  closePM();
+});
+$('pm').addEventListener('click',function(e){
+  const b=e.target.closest('[data-pm]');if(!b)return;
+  const a=b.getAttribute('data-pm');
+  if(a==='mat'){pmShow('mat')}
+  else if(a==='prod'){pmShow('prod')}
+  else if(a==='card'||a==='inner'||a==='outer'){craftKind=a;craftEdit=null;$('cForm').hidden=true;$('cList').hidden=false;$('cTop').hidden=false;pmShow('craft');renderCraftList();startCraft()}
+  else if(a==='buy'){
+    closePM();setAdd(true);setTimeout(function(){$('pdate').scrollIntoView({block:'center',behavior:'smooth'});$('pdate').focus()},50);
+  }else if(a==='arrange'){
+    closePM();arrangeMode=!arrangeMode;render();
+    setStatus(arrangeMode?'Product arrange mode is on. Use arrows on product cards.':'Product arrange mode is off.');
+    if(arrangeMode)$('listcard').scrollIntoView({block:'start',behavior:'smooth'});
+  }
+});
+$('cAddBtn').addEventListener('click',function(){openCraftForm(null)});
+$('cList').addEventListener('click',function(e){
+  const r=e.target.closest('.nfile');if(!r)return;
+  const x=craft.find(function(i){return i.id===r.getAttribute('data-id')});if(x)openCraftForm(x);
+});
+$('cCancel').addEventListener('click',closeCraftForm);
+$('cF').addEventListener('change',function(){
+  const f=this.files&&this.files[0];if(!f)return;
+  shrink(f,function(url){craftPhoto=url;showCraftPic()});this.value='';
+});
+$('cRm').addEventListener('click',function(){craftPhoto='';showCraftPic()});
+$('cSave').addEventListener('click',async function(){
+  if(!craftEdit||!canAdd())return;
+  const name=$('cN').value.trim(),price=parseFloat($('cP').value);
+  if(!name){pmMsg('Enter a name.');return}
+  if(isNaN(price)||price<0){pmMsg('Enter a price.');return}
+  const now=Date.now();
+  const d={kind:craftKind,name:name,price:price,hidden:$('cH').checked,createdAt:craftEdit.createdAt||now,updatedAt:now};
+  if(craftPhoto)d.photo=craftPhoto;
+  $('cSave').disabled=true;
+  try{await setDoc(doc(db,'craftItems',craftEdit.id),d);closeCraftForm();pmMsg('Saved.',true)}
+  catch(err){pmMsg('Could not save: '+craftErr(err))}
+  finally{$('cSave').disabled=false}
+});
+$('cDel').addEventListener('click',async function(){
+  if(!craftEdit||craftEdit.isNew)return;
+  if(!window.confirm('Delete this '+CRAFT_LABEL[craftKind].toLowerCase()+'?'))return;
+  try{await deleteDoc(doc(db,'craftItems',craftEdit.id));closeCraftForm();pmMsg('Deleted.',true)}
+  catch(err){pmMsg('Could not delete: '+craftErr(err))}
+});
+
+$('pnF').addEventListener('change',function(){
+  const f=this.files&&this.files[0];if(!f)return;
+  shrink(f,function(url){pnPhoto=url;showPnPic()});this.value='';
+});
+$('pnRm').addEventListener('click',function(){pnPhoto='';showPnPic()});
+$('pnForm').addEventListener('submit',async function(e){
+  e.preventDefault();
+  if(!canAdd()){pmMsg('Only the owner or staff can add products.');return}
+  const name=$('pnN').value.trim(),w=parseFloat($('pnW').value),rt=parseFloat($('pnR').value);
+  if(!name||isNaN(w)||isNaN(rt)||w<0||rt<0){pmMsg('Enter the name, wholesale price and retail price.');return}
+  const p={name:name,retail:rt,updated:Date.now()};
+  const ds=$('pnD').value.trim();if(ds)p.description=ds;
+  const of=parseFloat($('pnO').value);if(!isNaN(of)&&of>=0)p.offer=of;
+  if($('pnC').value)p.category=$('pnC').value;
+  if($('pnU').value)p.custom=$('pnU').value;
+  if($('pnHN').checked)p.hideNormal=true;
+  if($('pnHG').checked)p.hideGift=true;
+  if(pnPhoto)p.photo=pnPhoto;
+  $('pnSave').disabled=true;
+  try{
+    const id=newId(),b=writeBatch(db);
+    b.set(doc(db,'products',id),p);b.set(doc(db,'costs',id),{wholesale:w});
+    await b.commit();
+    $('pnForm').reset();pnPhoto='';showPnPic();pmMsg('Product saved.',true);
+  }catch(err){pmMsg('Could not save: '+niceErr(err))}
+  finally{$('pnSave').disabled=false}
 });
 
 // Show the public price list straight away; sign-in state is applied as soon as Firebase answers.
