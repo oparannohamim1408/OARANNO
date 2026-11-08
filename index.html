@@ -21,7 +21,7 @@
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *,*::before,*::after{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.4}
-main{max-width:960px;margin:0 auto;padding:20px 4px 48px;display:flex;flex-direction:column}
+main{max-width:960px;margin:0 auto;padding:6px 4px 48px;display:flex;flex-direction:column}
 h1{font-size:1.5rem;margin:0 0 2px}
 .sub{color:var(--muted);margin:0 0 18px;font-size:.95rem}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px}
@@ -108,16 +108,16 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .askbtn svg{flex:none}
 [hidden]{display:none!important}
 body.pubmode{--bg:#FFFFFF;--card:#FFFFFF;--text:#1A1A1A;--muted:#6B6B6B;--line:#E5E5E5;--soft:#F4F4F6;--accent:#C20019;--accent-t:#FFFFFF}
-.brand{order:-1;background:#C20019;border-radius:18px;padding:10px 22px;margin-bottom:14px}
-.btop{display:flex;align-items:flex-end;gap:12px}
+.brand{order:-1;background:#C20019;border-radius:18px;padding:4px 14px;margin-bottom:8px}
+.btop{display:flex;align-items:flex-end;gap:8px}
 .logotile{flex:none;width:72px;height:72px;background:#C20019;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center}
 .logotile img{display:block;width:72px;height:72px;object-fit:cover;border-radius:50%}
 .bright{flex:1;display:flex;align-items:center;gap:6px;min-width:0;align-self:center}
-.bname{flex:1;min-width:0;font-family:"Cormorant Garamond",Georgia,"Times New Roman",serif;font-weight:700;font-size:clamp(1.15rem,5.2vw,1.7rem);letter-spacing:.04em;color:#FFFFFF;line-height:1;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bname{flex:1;min-width:0;font-family:"Cormorant Garamond",Georgia,"Times New Roman",serif;font-weight:700;font-size:clamp(1.3rem,6vw,2rem);letter-spacing:.04em;color:#FFFFFF;line-height:1;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bicons{display:flex;align-items:center;gap:2px}
-.bic{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:50%;color:#FFFFFF;background:transparent;border:0;padding:0;cursor:pointer;text-decoration:none}
+.bic{display:inline-flex;align-items:center;justify-content:center;width:50px;height:50px;border-radius:50%;color:#FFFFFF;background:transparent;border:0;padding:0;cursor:pointer;text-decoration:none}
 .bic:hover,.bic:focus-visible{background:rgba(255,255,255,.2)}
-.bic svg{width:26px;height:26px}
+.bic svg{width:32px;height:32px}
 .bsearch{display:none;align-items:center;gap:4px}
 .brand.searching .btop{display:none}
 .brand.searching .bsearch{display:flex}
@@ -141,7 +141,7 @@ body.pubmode{--bg:#FFFFFF;--card:#FFFFFF;--text:#1A1A1A;--muted:#6B6B6B;--line:#
 .igl svg{width:20px;height:20px}
 .foot2{display:flex;gap:12px;align-items:center}
 .linkbtn{background:transparent;color:var(--muted);border:0;padding:4px;font-size:.78rem;text-decoration:underline;font-weight:400;cursor:pointer}
-.list.pubgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;border:0;border-radius:0;overflow:visible;background:transparent}
+.list.pubgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;border:0;border-radius:0;overflow:visible;background:transparent}
 .pubgrid .empty{grid-column:1/-1}
 #listcard.pub{background:transparent;border:0;padding:0}
 .pc2{background:#230509;border-radius:18px;overflow:hidden;display:flex;flex-direction:column}
@@ -211,7 +211,7 @@ main[hidden],.screen[hidden],.badge[hidden]{display:none}
 /* Red background above the line: top, both sides, around the OPARANNO bar */
 body{overflow-x:clip}
 .brand{position:relative;isolation:isolate;z-index:40}
-.brand::before{content:"";position:absolute;z-index:-1;left:50%;width:100vw;transform:translateX(-50%);top:calc(-20px - env(safe-area-inset-top,0px));bottom:-12px;background:#C20019;pointer-events:none}
+.brand::before{content:"";position:absolute;z-index:-1;left:50%;width:100vw;transform:translateX(-50%);top:calc(-6px - env(safe-area-inset-top,0px));bottom:-4px;background:#C20019;pointer-events:none}
 
 /* Keep text rows readable with the narrower page side gap */
 main>.sess,main>.topbar,main>.hint,main>.live,main>.searchbar,main>.cchips,main>.foot{padding-left:12px;padding-right:12px}
