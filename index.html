@@ -263,6 +263,17 @@ main>.sess,main>.topbar,main>.hint,main>.live,main>.searchbar,main>.cchips,main>
 .ocard .oex input{margin:0;flex:1;min-width:90px}
 .ocard textarea{min-height:50px;margin:8px 0 0}
 
+
+/* Product card Order button and more order stages */
+.prow{display:flex;gap:6px;margin-top:auto;align-self:stretch;width:100%}
+.prow .askbtn{flex:1;margin-top:0;align-self:auto;padding:9px 6px}
+.obtn{flex:1;display:inline-flex;align-items:center;justify-content:center;padding:9px 6px;border-radius:999px;background:#FFFFFF;color:#C20019;font-weight:700;font-size:.95rem;line-height:1.2}
+.ostat.s-collection,.ostat.s-crafting,.ostat.s-ready,.ostat.s-ondelivery{background:#E6E3FA;color:#3B2F8F;border-color:#C5BEEE}
+.ostat.s-receive,.ostat.s-archived{background:#E6F0E6;color:#2B5A33;border-color:#BBD5BE}
+.ostat.s-issues{background:#FFE4CC;color:#8A3F00;border-color:#F2BE8E}
+.ocard select{width:100%;margin-top:8px}
+.otype{font-size:.75rem;border-radius:999px;padding:2px 8px;background:var(--soft);border:1px solid var(--line);margin-left:6px;font-weight:600}
+
 /* Product Management */
 .pmb{display:flex;align-items:center;justify-content:space-between;width:100%;text-align:left;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:10px;font-size:1rem;font-weight:600;box-shadow:none}
 .pmb small{display:block;color:var(--muted);font-weight:400;font-size:.8rem;margin-top:2px}
@@ -537,6 +548,38 @@ main>.sess,main>.topbar,main>.hint,main>.live,main>.searchbar,main>.cchips,main>
   </div>
   <div class="nbody"><div id="moList"></div></div>
 </div>
+<div class="npanel" id="porder" hidden role="dialog" aria-label="Order this">
+  <div class="nhead">
+    <button type="button" class="bic" id="poBack" aria-label="Back">&larr;</button>
+    <span class="ntitle">Order this</span>
+  </div>
+  <div class="nbody">
+    <div id="poForm">
+      <div id="poSum"></div>
+      <div class="gq"><button type="button" data-poq="minus" aria-label="Less">−</button><b id="poQ">1</b><button type="button" data-poq="plus" aria-label="More">+</button></div>
+      <label for="poN">Name</label>
+      <input id="poN" autocomplete="name">
+      <label for="poP">Phone</label>
+      <input id="poP" inputmode="tel" autocomplete="tel">
+      <label for="poA">Address</label>
+      <textarea id="poA" style="min-height:90px" autocomplete="street-address"></textarea>
+      <div class="ocard" style="margin-top:12px"><div class="ol">Payment: <b>Cash on delivery</b></div><div class="ol" style="font-size:1.05rem">Total to pay on delivery: <b id="poTotal"></b></div></div>
+      <div class="msg" id="poMsg" role="status"></div>
+      <div class="nact"><button type="button" id="poPlace">Place order</button></div>
+    </div>
+    <div id="poDone" hidden>
+      <h3 style="margin:0 0 6px">Order received</h3>
+      <p class="hint">Thank you! We will call you to confirm your order. You pay cash on delivery. You can follow it in My Orders.</p>
+      <div class="nact"><button type="button" id="poToOrders">My Orders</button><button type="button" class="ghost" id="poClose">Close</button></div>
+    </div>
+  </div>
+</div>
+<div class="gmodal" id="pchoice" hidden><div>
+  <h3 id="pcTitle" style="margin:0 0 10px"></h3>
+  <button type="button" class="pmb" id="pcGift"><span>Order to gift<small>Add it to a gift with a card and wrapping</small></span><i>›</i></button>
+  <button type="button" class="pmb" id="pcThis"><span>Order this<small>Just this product, cash on delivery</small></span><i>›</i></button>
+  <div class="nact"><button type="button" class="ghost" id="pcCancel">Cancel</button></div>
+</div></div>
 <div class="gmodal" id="gsheet" hidden><div id="gsBody"></div></div>
 <div class="gmodal" id="gpop" hidden><div>
   <h3 id="gpTitle" style="margin:0 0 6px">Create an account</h3>
@@ -600,6 +643,7 @@ main>.sess,main>.topbar,main>.hint,main>.live,main>.searchbar,main>.cchips,main>
       </div>
     </div>
     <div id="pmOrders" hidden>
+      <div class="cchips" id="soTabs"></div>
       <div class="cchips" id="soChips"></div>
       <div id="soList"></div>
     </div>
@@ -921,7 +965,7 @@ function pubCard(p){
   var img=p.photo?'<button class="pimgbtn" data-a="zoom" data-id="'+id+'" aria-label="View picture of '+esc(p.name)+'"><img src="'+esc(p.photo)+'" alt="'+esc(p.name)+'"></button>':'<div class="pimgph">'+pubIcon()+'</div>';
   return '<div class="pc2'+(out?' out':'')+'"><div class="pimg">'+img+(badges?'<div class="bdgs">'+badges+'</div>':'')+'</div>'
     +'<div class="pinfo"><div class="pname">'+esc(p.name)+'</div><div class="pprice">'+priceHtml(p)+'</div>'
-    +(p.note?'<span class="chip" style="margin-top:0">'+esc(p.note)+'</span>':'')+askLink(p,out)+'</div></div>';
+    +(p.note?'<span class="chip" style="margin-top:0">'+esc(p.note)+'</span>':'')+'<div class="prow">'+askLink(p,out)+orderBtn(p)+'</div></div></div>';
 }
 function rowHtml(p,isSim,parentName){
   if(!canSeeCost())return pubCard(p);
@@ -1628,7 +1672,7 @@ function priceHtml(p){
   return (typeof p.offer==='number'&&p.offer>=0)?'<s style="opacity:.6;font-size:.8em;font-weight:500">'+money(p.retail)+'</s> '+money(p.offer):money(p.retail);
 }
 function giftPrice(p){return (typeof p.offer==='number'&&p.offer>=0)?p.offer:(Number(p.retail)||0)}
-function syncOverflow(){document.body.style.overflow=['gift','mygift','acct','pm','notes','order','myorders'].some(function(id){return !$(id).hidden})?'hidden':''}
+function syncOverflow(){document.body.style.overflow=['gift','mygift','acct','pm','notes','order','myorders','porder'].some(function(id){return !$(id).hidden})?'hidden':''}
 function gToast(t){const e=$('gToast');e.textContent=t;e.hidden=false;clearTimeout(toastT);toastT=setTimeout(function(){e.hidden=true},2600)}
 function draftCount(){return draft.reduce(function(n,i){return n+(Number(i.qty)||0)},0)}
 
@@ -1680,7 +1724,10 @@ function acctAfterLoad(){
 }
 function afterLoginGo(){
   if(!isCustomer||!cust)return;
-  if(ls('oparanno_after')==='gift'){ls('oparanno_after','');openGift()}
+  const af=ls('oparanno_after');
+  if(af==='gift'){ls('oparanno_after','');openGift()}
+  else if(af&&af.indexOf('porder:')===0){ls('oparanno_after','');pendingPO=af.slice(7)}
+  if(pendingPO){const pid=pendingPO;pendingPO=null;openProductOrder(pid,0)}
   if(pendingAdd){const a=pendingAdd;pendingAdd=null;addToDraft(a.it,a.qty,a.text,a.pic)}
 }
 
@@ -1726,11 +1773,11 @@ function startCraftPub(){
     if(!$('gift').hidden)renderGift();if(!$('mygift').hidden)renderMyGift();
   },function(){craftAll=[]});
 }
-function openGift(){
+function openGift(quiet){
   $('gift').hidden=false;syncOverflow();
   $('gChips').innerHTML=GFILTERS.map(function(f){return '<button type="button" data-c="'+f[0]+'"'+(f[0]===gFilter?' class="on"':'')+'>'+f[1]+'</button>'}).join('');
   startCraftPub();renderGift();menuSync();
-  if(!user&&!giftSkipped)showGPop('first');
+  if(!user&&!giftSkipped&&!quiet)showGPop('first');
 }
 function closeGift(){$('gift').hidden=true;hideGSheet();hideGPop();syncOverflow()}
 function giftItems(){
@@ -1782,7 +1829,7 @@ $('gGrid').addEventListener('click',function(e){
 });
 $('gBack').addEventListener('click',closeGift);
 $('gMy').addEventListener('click',openMyGift);
-$('bgift').addEventListener('click',openGift);
+$('bgift').addEventListener('click',function(){openGift()});
 
 /* ----- item sheet (details, customisation, quantity) ----- */
 function hideGSheet(){$('gsheet').hidden=true;gsItem=null}
@@ -1819,13 +1866,14 @@ $('gsheet').addEventListener('click',function(e){
 /* ----- login prompt ----- */
 function showGPop(mode){
   $('gpTitle').textContent=mode==='first'?'Create an account':'Login needed';
-  $('gpText').textContent=mode==='first'?'Create an account to save your gift draft and place orders. You can also skip and just look around.':'Please login or create an account to add items to your gift draft.';
+  $('gpText').textContent=mode==='first'?'Create an account to save your gift draft and place orders. You can also skip and just look around.':(mode==='plogin'?'Please login or create an account to place your order.':'Please login or create an account to add items to your gift draft.');
   $('gpSkip').textContent=mode==='first'?'Skip':'Cancel';
+  popAfter=(mode==='plogin'&&pendingPO)?('porder:'+pendingPO):'gift';
   $('gpop').hidden=false;
 }
 function hideGPop(){$('gpop').hidden=true}
-$('gpLogin').addEventListener('click',function(){ls('oparanno_after','gift');hideGPop();startLogin()});
-$('gpSkip').addEventListener('click',function(){giftSkipped=true;pendingAdd=null;hideGPop()});
+$('gpLogin').addEventListener('click',function(){ls('oparanno_after',popAfter);hideGPop();startLogin()});
+$('gpSkip').addEventListener('click',function(){giftSkipped=true;pendingAdd=null;pendingPO=null;hideGPop()});
 
 /* ----- draft ----- */
 function addToDraft(it,qty,text,pic){
@@ -1925,7 +1973,15 @@ const ORDER_RULES=[
   'গিফ্টে ক্যাশ অন ডেলিভারি থাকবে না। গিফ্টের সম্পূর্ণ পেমেন্ট অনলাইনে করতে হবে।',
   'অর্ডার করার সময় থেকে আর্জেন্ট ডেলিভারিতে ১-২ দিন, রেগুলার ডেলিভারিতে ৩ দিন এবং চিপেস্ট ডেলিভারিতে ৩-৪ দিন লাগতে পারে।'
 ];
-const STAT={placed:'Waiting for payment check',processing:'Processing',delivered:'Delivered',cancelled:'Cancelled'};
+const GIFT_STAGES=['placed','collection','crafting','ready','ondelivery','delivered','receive','archived'];
+const PROD_STAGES=['placed','ondelivery','delivered','archived'];
+const STAFF_LABEL={placed:'Confirm',collection:'Collection',crafting:'Crafting',ready:'Ready to dispatch',ondelivery:'On delivery',delivered:'Delivered',receive:'Receive',issues:'Issues',archived:'Archive',cancelled:'Cancelled'};
+const STAT={placed:'Waiting for confirmation',collection:'Collecting items',crafting:'Crafting your gift',ready:'Ready to dispatch',ondelivery:'On delivery',delivered:'Delivered',receive:'Received',issues:'There is an issue, we will contact you',archived:'Completed',cancelled:'Cancelled',processing:'Collecting items'};
+function normStatus(o){return o.status==='processing'?'collection':o.status}
+function oType(o){return o.orderType==='product'?'product':'gift'}
+function stagesOf(o){return oType(o)==='product'?PROD_STAGES:GIFT_STAGES}
+function stageLabel(k){return STAFF_LABEL[k]||k}
+function soStatuses(t){return t==='product'?['placed','ondelivery','delivered','issues','archived']:['placed','collection','crafting','ready','ondelivery','delivered','issues','receive','archived']}
 function fmtDate(ts){return new Date(ts||0).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'})}
 function fmtDay(d){return d?new Date(d+'T12:00:00').toLocaleDateString(undefined,{day:'numeric',month:'short'}):''}
 function grand(o){return (Number(o.total)||0)+(Number(o.extraCharge)||0)}
@@ -2043,7 +2099,7 @@ $('oPlace').addEventListener('click',async function(){
   if(!draft.length){oMsg('oMsg2','Your gift draft is empty.');return}
   const f=ordState.form,t=orderTotals(),now=Date.now(),id=newId();
   const order={
-    uid:user.uid,customerName:cust.name||'',customerPhone:cust.phone||'',customerEmail:user.email||'',
+    orderType:'gift',uid:user.uid,customerName:cust.name||'',customerPhone:cust.phone||'',customerEmail:user.email||'',
     sendTo:ordState.to,receiverName:f.name,receiverPhone:f.phone,occasion:f.occasion,dateFrom:f.from,dateTo:f.to,address:f.address,
     deliveryType:f.delivery,deliveryZone:f.delivery==='cheapest'?f.zone:'',deliveryCharge:t.delivery,
     items:draft.map(function(i){return {type:i.type,id:i.id,name:i.name,price:draftLookup(i).price,qty:Number(i.qty)||1,text:i.text||'',pic:i.pic||''}}),
@@ -2069,16 +2125,24 @@ $('moBack').addEventListener('click',closeMyOrders);
 function renderMyOrders(){
   if(!myOrders.length){$('moList').innerHTML='<p class="hint">No orders yet.</p>';return}
   $('moList').innerHTML=myOrders.map(function(o){
-    const paid=Number(o.paidAmount)||0;
-    return '<div class="ocard"><div class="oh"><b>'+esc(fmtDate(o.createdAt))+'</b><span class="ostat s-'+esc(o.status)+'">'+esc(STAT[o.status]||o.status)+'</span></div>'
-      +orderItemsHtml(o)+'<hr>'
-      +'<div class="ol">Delivery: '+esc(delivLabel(o))+' · '+esc(money(Number(o.deliveryCharge)||0))+'</div>'
-      +'<div class="ol">Needed: '+esc(fmtDay(o.dateFrom))+' to '+esc(fmtDay(o.dateTo))+' · For '+esc(o.receiverName)+'</div>'
-      +((Number(o.extraCharge)||0)>0?'<div class="ol">Extra charge: <b>'+esc(money(o.extraCharge))+'</b>'+(o.extraNote?' <small>('+esc(o.extraNote)+')</small>':'')+'</div>':'')
-      +'<div class="ol" style="font-size:1.02rem">Total: <b>'+esc(money(grand(o)))+'</b></div>'
-      +(o.status==='placed'?'<div class="ol"><small>We are checking your payment ('+esc(money(Number(o.payAmount)||0))+' sent by bKash).</small></div>'
-        :(o.status==='cancelled'?'':'<div class="ol">Paid: <b>'+esc(money(paid))+'</b>'+(dueOf(o)>0?' · Due: <b>'+esc(money(dueOf(o)))+'</b>':' · Fully paid')+'</div>'))
-      +'</div>';
+    const st=normStatus(o),gift=oType(o)==='gift',paid=Number(o.paidAmount)||0;
+    let h='<div class="ocard"><div class="oh"><span><b>'+esc(fmtDate(o.createdAt))+'</b><span class="otype">'+(gift?'Gift order':'Product order')+'</span></span><span class="ostat s-'+esc(st)+'">'+esc(STAT[st]||st)+'</span></div>'+orderItemsHtml(o)+'<hr>';
+    if(gift){
+      h+='<div class="ol">Delivery: '+esc(delivLabel(o))+' · '+esc(money(Number(o.deliveryCharge)||0))+'</div>'
+        +'<div class="ol">Needed: '+esc(fmtDay(o.dateFrom))+' to '+esc(fmtDay(o.dateTo))+' · For '+esc(o.receiverName)+'</div>';
+    }else{
+      h+='<div class="ol">Deliver to: '+esc(o.receiverName)+' · '+esc(o.receiverPhone)+'<br><small>'+esc(o.address)+'</small></div>';
+    }
+    if((Number(o.extraCharge)||0)>0)h+='<div class="ol">Extra charge: <b>'+esc(money(o.extraCharge))+'</b>'+(o.extraNote?' <small>('+esc(o.extraNote)+')</small>':'')+'</div>';
+    h+='<div class="ol" style="font-size:1.02rem">Total: <b>'+esc(money(grand(o)))+'</b></div>';
+    if(st==='cancelled'){}
+    else if(gift){
+      h+=(st==='placed')?'<div class="ol"><small>We are checking your payment ('+esc(money(Number(o.payAmount)||0))+' sent by bKash).</small></div>'
+        :'<div class="ol">Paid: <b>'+esc(money(paid))+'</b>'+(dueOf(o)>0?' · Due: <b>'+esc(money(dueOf(o)))+'</b>':' · Fully paid')+'</div>';
+    }else{
+      h+=dueOf(o)>0?'<div class="ol">Cash on delivery: pay <b>'+esc(money(dueOf(o)))+'</b> when you receive it.</div>':'<div class="ol">Fully paid</div>';
+    }
+    return h+'</div>';
   }).join('');
 }
 
@@ -2097,36 +2161,56 @@ function stopOrders(){
   if(unsubOrders){try{unsubOrders()}catch(e){}unsubOrders=null}
   ordersAll=[];newOrderCount=0;
 }
-const SO_FILTERS=[['placed','New'],['processing','Processing'],['delivered','Delivered'],['cancelled','Cancelled'],['all','All']];
-function renderStaffOrders(){
-  $('soChips').innerHTML=SO_FILTERS.map(function(f){
-    const n=f[0]==='all'?ordersAll.length:ordersAll.filter(function(o){return o.status===f[0]}).length;
-    return '<button type="button" data-so="'+f[0]+'"'+(f[0]===soFilter?' class="on"':'')+'>'+f[1]+' ('+n+')</button>';
-  }).join('');
-  const list=ordersAll.filter(function(o){return soFilter==='all'||o.status===soFilter});
-  if(!list.length){$('soList').innerHTML='<p class="hint">No orders here.</p>';return}
-  $('soList').innerHTML=list.map(function(o){
-    const open=o.status==='placed'||o.status==='processing';
-    return '<div class="ocard" data-id="'+esc(o.id)+'"><div class="oh"><b>#'+esc(o.id.slice(-5).toUpperCase())+' · '+esc(fmtDate(o.createdAt))+'</b><span class="ostat s-'+esc(o.status)+'">'+esc(STAT[o.status]||o.status)+'</span></div>'
-      +'<div class="ol"><b>Customer:</b> '+esc(o.customerName)+' · '+esc(o.customerPhone)+'<br><small>'+esc(o.customerEmail)+'</small></div>'
-      +'<div class="ol"><b>Receiver:</b> '+esc(o.receiverName)+' · '+esc(o.receiverPhone)+' ('+(o.sendTo==='me'?'send to customer':'send to relative')+')<br><small>'+esc(o.address)+'</small></div>'
+let soType='gift';
+function soCard(o){
+  const st=normStatus(o),gift=oType(o)==='gift',stages=stagesOf(o),idx=stages.indexOf(st);
+  const final=(st==='archived'||st==='cancelled');
+  const nextKey=(idx>=0&&idx<stages.length-1)?stages[idx+1]:'';
+  const opts=soStatuses(oType(o)).concat(['cancelled']).map(function(k){return '<option value="'+k+'"'+(k===st?' selected':'')+'>'+esc(stageLabel(k))+'</option>'}).join('');
+  let h='<div class="ocard" data-id="'+esc(o.id)+'"><div class="oh"><b>#'+esc(o.id.slice(-5).toUpperCase())+' · '+esc(fmtDate(o.createdAt))+'</b><span class="ostat s-'+esc(st)+'">'+esc(stageLabel(st))+'</span></div>'
+    +'<div class="ol"><b>Customer:</b> '+esc(o.customerName)+' · '+esc(o.customerPhone)+'<br><small>'+esc(o.customerEmail)+'</small></div>';
+  if(gift){
+    h+='<div class="ol"><b>Receiver:</b> '+esc(o.receiverName)+' · '+esc(o.receiverPhone)+' ('+(o.sendTo==='me'?'send to customer':'send to relative')+')<br><small>'+esc(o.address)+'</small></div>'
       +'<div class="ol"><b>Occasion:</b> '+esc(o.occasion)+' · needed '+esc(fmtDay(o.dateFrom))+' to '+esc(fmtDay(o.dateTo))+'</div>'
-      +'<div class="ol"><b>Delivery:</b> '+esc(delivLabel(o))+' · '+esc(money(Number(o.deliveryCharge)||0))+'</div><hr>'
-      +orderItemsHtml(o)+'<hr>'
-      +'<div class="ol">Items: '+esc(money(Number(o.itemsTotal)||0))+' · Delivery: '+esc(money(Number(o.deliveryCharge)||0))+((Number(o.extraCharge)||0)>0?' · Extra: '+esc(money(o.extraCharge))+(o.extraNote?' <small>('+esc(o.extraNote)+')</small>':''):'')+'</div>'
-      +'<div class="ol" style="font-size:1.02rem">Total: <b>'+esc(money(grand(o)))+'</b> · Paid: <b>'+esc(money(Number(o.paidAmount)||0))+'</b> · Due: <b>'+esc(money(dueOf(o)))+'</b></div>'
-      +'<div class="ol">Payment chosen: '+(o.payType==='half'?'Half':'Full')+' · '+esc(money(Number(o.payAmount)||0))+' by bKash · Transaction ID: <b>'+esc(o.txnId)+'</b></div>'
-      +(open?'<div class="oex"><input class="oxa" type="number" min="0" step="any" inputmode="decimal" placeholder="Extra charge"><input class="oxn" placeholder="Note (optional)"><button type="button" data-oa="extra">Add extra charge</button></div>':'')
-      +'<textarea class="osn" placeholder="Staff note (only you can see)">'+esc(o.staffNote||'')+'</textarea>'
-      +'<div class="oact">'
-        +(o.status==='placed'?'<button type="button" data-oa="confirm">Confirm payment</button>':'')
-        +(o.status==='processing'&&dueOf(o)>0?'<button type="button" data-oa="paid">Mark fully paid</button>':'')
-        +(o.status==='processing'?'<button type="button" data-oa="delivered">Delivered</button>':'')
-        +(open?'<button type="button" class="ghost" data-oa="cancel">Cancel order</button>':'')
-        +'<button type="button" class="ghost" data-oa="note">Save note</button>'
-      +'</div></div>';
-  }).join('');
+      +'<div class="ol"><b>Delivery:</b> '+esc(delivLabel(o))+' · '+esc(money(Number(o.deliveryCharge)||0))+'</div>';
+  }else{
+    h+='<div class="ol"><b>Deliver to:</b> '+esc(o.receiverName)+' · '+esc(o.receiverPhone)+'<br><small>'+esc(o.address)+'</small></div>';
+  }
+  h+='<hr>'+orderItemsHtml(o)+'<hr>'
+    +'<div class="ol">Items: '+esc(money(Number(o.itemsTotal)||0))+(gift?' · Delivery: '+esc(money(Number(o.deliveryCharge)||0)):'')+((Number(o.extraCharge)||0)>0?' · Extra: '+esc(money(o.extraCharge))+(o.extraNote?' <small>('+esc(o.extraNote)+')</small>':''):'')+'</div>'
+    +'<div class="ol" style="font-size:1.02rem">Total: <b>'+esc(money(grand(o)))+'</b> · '+(gift?'Paid':'Collected')+': <b>'+esc(money(Number(o.paidAmount)||0))+'</b> · Due: <b>'+esc(money(dueOf(o)))+'</b></div>'
+    +(gift?'<div class="ol">Payment chosen: '+(o.payType==='half'?'Half':'Full')+' · '+esc(money(Number(o.payAmount)||0))+' by bKash · Transaction ID: <b>'+esc(o.txnId)+'</b></div>':'<div class="ol">Payment: <b>Cash on delivery</b></div>');
+  if(!final)h+='<div class="oex"><input class="oxa" type="number" min="0" step="any" inputmode="decimal" placeholder="Extra charge"><input class="oxn" placeholder="Note (optional)"><button type="button" data-oa="extra">Add extra charge</button></div>';
+  h+='<textarea class="osn" placeholder="Staff note (only you can see)">'+esc(o.staffNote||'')+'</textarea>'
+    +'<select class="ost" aria-label="Status">'+opts+'</select>'
+    +'<div class="oact">'
+      +(nextKey?'<button type="button" data-oa="next">'+(st==='placed'?'Confirm':'Next: '+esc(stageLabel(nextKey)))+'</button>':'')
+      +'<button type="button" class="ghost" data-oa="set">Update status</button>'
+      +((st!=='placed'&&st!=='cancelled'&&dueOf(o)>0)?'<button type="button" class="ghost" data-oa="paid">'+(gift?'Mark fully paid':'Cash received')+'</button>':'')
+      +((!final&&st!=='delivered'&&st!=='receive')?'<button type="button" class="ghost" data-oa="cancel">Cancel order</button>':'')
+      +'<button type="button" class="ghost" data-oa="note">Save note</button>'
+    +'</div></div>';
+  return h;
 }
+function renderStaffOrders(){
+  const cnt=function(t){return ordersAll.filter(function(o){return oType(o)===t&&normStatus(o)==='placed'}).length};
+  $('soTabs').innerHTML=[['gift','Gift order'],['product','Product order']].map(function(f){
+    return '<button type="button" data-st="'+f[0]+'"'+(f[0]===soType?' class="on"':'')+'>'+f[1]+(cnt(f[0])?' ('+cnt(f[0])+' new)':'')+'</button>';
+  }).join('');
+  const mine=ordersAll.filter(function(o){return oType(o)===soType});
+  const keys=soStatuses(soType).concat(['cancelled']);
+  if(soFilter!=='all'&&keys.indexOf(soFilter)<0)soFilter='placed';
+  $('soChips').innerHTML=keys.map(function(k){
+    const n=mine.filter(function(o){return normStatus(o)===k}).length;
+    return '<button type="button" data-so="'+k+'"'+(k===soFilter?' class="on"':'')+'>'+esc(stageLabel(k))+' ('+n+')</button>';
+  }).join('')+'<button type="button" data-so="all"'+(soFilter==='all'?' class="on"':'')+'>All ('+mine.length+')</button>';
+  const list=mine.filter(function(o){return soFilter==='all'||normStatus(o)===soFilter});
+  $('soList').innerHTML=list.map(soCard).join('')||'<p class="hint">No orders here.</p>';
+}
+$('soTabs').addEventListener('click',function(e){
+  const b=e.target.closest('button[data-st]');if(!b)return;
+  soType=b.getAttribute('data-st');soFilter='placed';renderStaffOrders();
+});
 $('soChips').addEventListener('click',function(e){
   const b=e.target.closest('button[data-so]');if(!b)return;
   soFilter=b.getAttribute('data-so');renderStaffOrders();
@@ -2135,13 +2219,20 @@ async function ordUpdate(id,patch){
   try{await updateDoc(doc(db,'orders',id),Object.assign({updatedAt:Date.now()},patch));pmMsg('Updated.',true)}
   catch(err){pmMsg('Could not update: '+((err&&err.code==='permission-denied')?'not allowed (Firebase rules).':niceErr(err)))}
 }
+async function setOrderStatus(o,ns){
+  const cur=normStatus(o);if(ns===cur)return;
+  const patch={status:ns};
+  if(ns==='issues')patch.issueFrom=cur;
+  if(oType(o)==='gift'&&cur==='placed'&&GIFT_STAGES.indexOf(ns)>0&&!(Number(o.paidAmount)>0))patch.paidAmount=Number(o.payAmount)||0;
+  await ordUpdate(o.id,patch);
+}
 $('soList').addEventListener('click',async function(e){
   const b=e.target.closest('[data-oa]');if(!b||!canAdd())return;
   const card=b.closest('.ocard'),id=card.getAttribute('data-id'),o=ordersAll.find(function(x){return x.id===id});if(!o)return;
   const a=b.getAttribute('data-oa');
-  if(a==='confirm')await ordUpdate(id,{status:'processing',paidAmount:Number(o.payAmount)||0});
+  if(a==='next'){const stg=stagesOf(o),i=stg.indexOf(normStatus(o));if(i>=0&&i<stg.length-1)await setOrderStatus(o,stg[i+1])}
+  else if(a==='set'){const sel=card.querySelector('.ost');if(sel)await setOrderStatus(o,sel.value)}
   else if(a==='paid')await ordUpdate(id,{paidAmount:grand(o)});
-  else if(a==='delivered')await ordUpdate(id,{status:'delivered'});
   else if(a==='cancel'){if(window.confirm('Cancel this order?'))await ordUpdate(id,{status:'cancelled'})}
   else if(a==='extra'){
     const amt=parseFloat(card.querySelector('.oxa').value),note=card.querySelector('.oxn').value.trim();
@@ -2150,6 +2241,82 @@ $('soList').addEventListener('click',async function(e){
     await ordUpdate(id,{extraCharge:(Number(o.extraCharge)||0)+amt,extraNote:(o.extraNote?o.extraNote+'; ':'')+line});
   }
   else if(a==='note')await ordUpdate(id,{staffNote:card.querySelector('.osn').value.trim()});
+});
+
+
+/* ---------- Product orders (cash on delivery) ---------- */
+let poItem=null,poQty=1,pendingPO=null,popAfter='gift';
+function orderBtn(p){return p.stock==='out'?'':'<button type="button" class="obtn" data-po="'+esc(p.id)+'">Order</button>'}
+$('rows').addEventListener('click',function(e){
+  const b=e.target.closest('button[data-po]');if(!b)return;
+  openPChoice(b.getAttribute('data-po'));
+});
+function openPChoice(id){
+  const p=prods.find(function(x){return x.id===id});if(!p)return;
+  if(canAdd()){gToast('Staff accounts cannot place orders. Use a customer account.');return}
+  poItem=p;$('pcTitle').textContent=p.name;$('pcGift').hidden=!!p.hideGift;$('pchoice').hidden=false;
+}
+$('pchoice').addEventListener('click',function(e){if(e.target===this)this.hidden=true});
+$('pcCancel').addEventListener('click',function(){$('pchoice').hidden=true});
+$('pcGift').addEventListener('click',function(){
+  $('pchoice').hidden=true;if(!poItem)return;
+  const it=findGiftItem('product',poItem.id);if(!it)return;
+  gFilter='all';openGift(true);openGSheet(it);
+});
+$('pcThis').addEventListener('click',function(){
+  $('pchoice').hidden=true;if(!poItem)return;
+  const id=poItem.id;
+  if(!user){pendingPO=id;showGPop('plogin');return}
+  if(!cust){pendingPO=id;openAcct('new');return}
+  openProductOrder(id,0);
+});
+function poMsg(t,ok){const m=$('poMsg');m.textContent=t||'';m.className='msg'+(ok?' ok':'')}
+function poUpdate(){
+  if(!poItem)return;
+  const price=giftPrice(poItem);
+  $('poQ').textContent=poQty;
+  $('poTotal').textContent=money(Math.round(price*poQty*100)/100);
+}
+function openProductOrder(id,tries){
+  const p=prods.find(function(x){return x.id===id});
+  if(!p){if((tries||0)<6)setTimeout(function(){openProductOrder(id,(tries||0)+1)},600);return}
+  if(!user||!cust||canAdd())return;
+  poItem=p;poQty=1;
+  const img=p.photo?'<img src="'+esc(p.photo)+'" alt="">':'<div class="nico">🛍</div>';
+  $('poSum').innerHTML='<div class="mgrow">'+img+'<div class="nmeta"><b>'+esc(p.name)+'</b><small>'+priceHtml(p)+'</small></div></div>';
+  $('poN').value=cust.name||'';$('poP').value=cust.phone||'';$('poA').value=cust.address||'';
+  poMsg('');$('poForm').hidden=false;$('poDone').hidden=true;
+  poUpdate();$('porder').hidden=false;syncOverflow();
+}
+function closePO(){$('porder').hidden=true;syncOverflow()}
+$('poBack').addEventListener('click',closePO);
+$('poClose').addEventListener('click',closePO);
+$('poToOrders').addEventListener('click',function(){closePO();openMyOrders()});
+$('porder').addEventListener('click',function(e){
+  const b=e.target.closest('[data-poq]');if(!b)return;
+  poQty=b.getAttribute('data-poq')==='plus'?Math.min(99,poQty+1):Math.max(1,poQty-1);poUpdate();
+});
+$('poPlace').addEventListener('click',async function(){
+  if(!user||!cust||!poItem)return;
+  const name=$('poN').value.trim(),phone=$('poP').value.trim(),address=$('poA').value.trim();
+  if(!name){poMsg('Enter your name.');return}
+  if(phone.replace(/\D/g,'').length<7||!/^[0-9+\-\s()]+$/.test(phone)){poMsg('Enter a valid phone number.');return}
+  if(!address){poMsg('Enter your address.');return}
+  const price=giftPrice(poItem),total=Math.round(price*poQty*100)/100,now=Date.now();
+  const order={
+    orderType:'product',uid:user.uid,customerName:cust.name||'',customerPhone:cust.phone||'',customerEmail:user.email||'',
+    receiverName:name,receiverPhone:phone,address:address,
+    items:[{type:'product',id:poItem.id,name:poItem.name,price:price,qty:poQty,text:'',pic:''}],
+    itemsTotal:total,deliveryCharge:0,total:total,extraCharge:0,extraNote:'',
+    payType:'cod',payMethod:'cod',payAmount:0,txnId:'',paidAmount:0,
+    status:'placed',staffNote:'',createdAt:now,updatedAt:now
+  };
+  $('poPlace').disabled=true;poMsg('Placing your order…',true);
+  try{
+    await setDoc(doc(db,'orders',newId()),order);
+    poMsg('');$('poForm').hidden=true;$('poDone').hidden=false;
+  }catch(err){poMsg('Could not place the order: '+((err&&err.code==='permission-denied')?'orders are not allowed yet (Firebase rules).':niceErr(err)))}
+  finally{$('poPlace').disabled=false}
 });
 
 // Show the public price list straight away; sign-in state is applied as soon as Firebase answers.
