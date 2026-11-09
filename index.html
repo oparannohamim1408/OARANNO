@@ -244,6 +244,25 @@ main>.sess,main>.topbar,main>.hint,main>.live,main>.searchbar,main>.cchips,main>
 .mgq{display:flex;align-items:center;gap:6px;margin-top:6px}
 .mgq button{width:32px;height:32px;border-radius:50%;padding:0}
 
+
+/* Orders */
+.pmb.sel{border-color:#C20019;box-shadow:inset 0 0 0 2px #C20019}
+.ocard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:12px;font-size:.92rem}
+.ocard .oh{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.ocard .ol{margin:3px 0;overflow-wrap:anywhere}
+.ocard .ol small{color:var(--muted)}
+.ocard hr{border:0;border-top:1px solid var(--line);margin:8px 0}
+.ostat{font-size:.78rem;font-weight:700;border-radius:999px;padding:3px 10px;background:var(--soft);color:var(--text);border:1px solid var(--line)}
+.ostat.s-placed{background:#FFF3CD;color:#7A5A00;border-color:#F0D98A}
+.ostat.s-processing{background:#DCEBFF;color:#0B4A8F;border-color:#AFCBF2}
+.ostat.s-delivered{background:#DDF3E1;color:#1E6B2F;border-color:#A9D8B3}
+.ostat.s-cancelled{background:#F3DDDD;color:#8F1D1D;border-color:#E0AAAA}
+.ocard .oact{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.ocard .oact button{padding:8px 12px;font-size:.85rem}
+.ocard .oex{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.ocard .oex input{margin:0;flex:1;min-width:90px}
+.ocard textarea{min-height:50px;margin:8px 0 0}
+
 /* Product Management */
 .pmb{display:flex;align-items:center;justify-content:space-between;width:100%;text-align:left;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:10px;font-size:1rem;font-weight:600;box-shadow:none}
 .pmb small{display:block;color:var(--muted);font-weight:400;font-size:.8rem;margin-top:2px}
@@ -325,8 +344,9 @@ main>.sess,main>.topbar,main>.hint,main>.live,main>.searchbar,main>.cchips,main>
           <button type="button" class="bic staff-menu-trigger" id="menuBtn" aria-label="Menu" aria-expanded="false"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg></button>
           <div class="staff-menu" id="staffMenu" hidden>
             <button type="button" data-menu="mygift"><span>🎁</span> <em id="mgLabel" style="font-style:normal">My Gift</em></button>
+            <button type="button" data-menu="myorders"><span>📦</span> My Orders</button>
             <button type="button" data-menu="account"><span>☺</span> My account</button>
-            <button type="button" data-menu="pm"><span>▦</span> Product Management</button>
+            <button type="button" data-menu="pm"><span>▦</span> <em id="pmLabel" style="font-style:normal">Product Management</em></button>
             <button type="button" data-menu="notes"><span>✎</span> Note</button>
             <button type="button" data-menu="wa"><span>✆</span> WhatsApp</button>
             <button type="button" data-menu="login"><span>→</span> Login / Create account</button>
@@ -449,6 +469,74 @@ main>.sess,main>.topbar,main>.hint,main>.live,main>.searchbar,main>.cchips,main>
     <div class="nact"><button type="button" id="acSave">Confirm</button><button type="button" class="ghost" id="acSkip">Skip for now</button></div>
   </div>
 </div>
+<div class="npanel" id="order" hidden role="dialog" aria-label="Order">
+  <div class="nhead">
+    <button type="button" class="bic" id="oBack" aria-label="Back">&larr;</button>
+    <span class="ntitle" id="oTitle">Order</span>
+  </div>
+  <div class="nbody">
+    <div id="oSend">
+      <p class="hint">Who is this gift for?</p>
+      <button type="button" class="pmb" data-os="me"><span>Send to me<small>Use my name, number and address</small></span><i>›</i></button>
+      <button type="button" class="pmb" data-os="rel"><span>Send to relative<small>Enter the receiver’s details</small></span><i>›</i></button>
+    </div>
+    <div id="oForm" hidden>
+      <label for="oN">Receiver name</label>
+      <input id="oN" autocomplete="off">
+      <label for="oP">Receiver number</label>
+      <input id="oP" inputmode="tel" autocomplete="off">
+      <label for="oOc">Occasion</label>
+      <input id="oOc" list="oOcList" placeholder="Birthday, Anniversary…" autocomplete="off">
+      <datalist id="oOcList"><option value="Birthday"><option value="Anniversary"><option value="Eid"><option value="Wedding"><option value="Other"></datalist>
+      <label for="oF">Needed from (date)</label>
+      <input id="oF" type="date">
+      <label for="oT">Needed by (last date)</label>
+      <input id="oT" type="date">
+      <label for="oA">Receiver address</label>
+      <textarea id="oA" style="min-height:90px"></textarea>
+      <label for="oDel">Delivery type</label>
+      <select id="oDel" style="width:100%"></select>
+      <div id="oZoneW" hidden>
+        <label for="oZone">Delivery area</label>
+        <select id="oZone" style="width:100%"><option value="inside">Inside Dhaka</option><option value="outside">Outside Dhaka</option></select>
+      </div>
+      <div class="msg" id="oMsg1" role="status"></div>
+      <div class="nact"><button type="button" id="oNext">Continue</button></div>
+    </div>
+    <div id="oPay" hidden>
+      <div id="oSum"></div>
+      <h4 style="margin:16px 0 6px">Gift curation rules</h4>
+      <ol id="oRules" style="padding-left:20px;margin:0 0 10px;line-height:1.6"></ol>
+      <label class="pmtog"><input type="checkbox" id="oAgree"> আমি রুলসগুলো পড়েছি এবং সম্মত</label>
+      <div id="oPayW" hidden>
+        <h4 style="margin:16px 0 6px">Payment</h4>
+        <div id="oTypes"></div>
+        <div id="oMeth" style="margin-top:6px"></div>
+        <div id="oBk" hidden style="background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0">
+          <p style="margin:0 0 6px">Send Money on bKash to <b id="oBkNum"></b> <button type="button" class="ghost" id="oCopy" style="padding:4px 10px">Copy</button></p>
+          <p style="margin:0 0 8px">Amount to send: <b id="oBkAmt"></b></p>
+          <label for="oTx">bKash Transaction ID</label>
+          <input id="oTx" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Example: 8N7A6D5EE7">
+        </div>
+        <p class="hint" id="oCardHint" hidden>Card payment is coming soon. Please use bKash for now.</p>
+        <div class="msg" id="oMsg2" role="status"></div>
+        <div class="nact"><button type="button" id="oPlace">Place order</button></div>
+      </div>
+    </div>
+    <div id="oDone" hidden>
+      <h3 style="margin:0 0 6px">Order received</h3>
+      <p class="hint">Thank you! We will check your payment and start processing your gift. You can follow it in My Orders.</p>
+      <div class="nact"><button type="button" id="oToOrders">My Orders</button><button type="button" class="ghost" id="oClose">Close</button></div>
+    </div>
+  </div>
+</div>
+<div class="npanel" id="myorders" hidden role="dialog" aria-label="My Orders">
+  <div class="nhead">
+    <button type="button" class="bic" id="moBack" aria-label="Back">&larr;</button>
+    <span class="ntitle">My Orders</span>
+  </div>
+  <div class="nbody"><div id="moList"></div></div>
+</div>
 <div class="gmodal" id="gsheet" hidden><div id="gsBody"></div></div>
 <div class="gmodal" id="gpop" hidden><div>
   <h3 id="gpTitle" style="margin:0 0 6px">Create an account</h3>
@@ -463,6 +551,7 @@ main>.sess,main>.topbar,main>.hint,main>.live,main>.searchbar,main>.cchips,main>
   </div>
   <div class="nbody" id="pmBody">
     <div id="pmHome">
+      <button type="button" class="pmb" data-pm="orders"><span>Orders<small id="pmOrdSub">Customer gift orders</small></span><i>›</i></button>
       <button type="button" class="pmb" data-pm="mat"><span>Material<small>Product, Card, Inner craft, Outer craft</small></span><i>›</i></button>
       <button type="button" class="pmb" data-pm="arrange"><span>Product Arrange<small>Move products up or down</small></span><i>›</i></button>
       <button type="button" class="pmb" data-pm="buy"><span>Buy Entry<small>Record a purchase</small></span><i>›</i></button>
@@ -509,6 +598,10 @@ main>.sess,main>.topbar,main>.hint,main>.live,main>.searchbar,main>.cchips,main>
         <label class="pmtog"><input type="checkbox" id="cH"> Hide from Gift page</label>
         <div class="nact"><button type="button" id="cSave">Save</button><button type="button" class="ghost" id="cCancel">Cancel</button><button type="button" class="ghost" id="cDel" hidden>Delete</button></div>
       </div>
+    </div>
+    <div id="pmOrders" hidden>
+      <div class="cchips" id="soChips"></div>
+      <div id="soList"></div>
     </div>
     <div class="msg" id="pmMsg" role="status"></div>
   </div>
@@ -656,7 +749,7 @@ $('out2').addEventListener('click',()=>signOut(auth));
 
 onAuthStateChanged(auth,async(u)=>{
   if(unsubUser){try{unsubUser()}catch(e){}unsubUser=null}
-  stopCust();
+  stopCust();stopOrders();
   user=u;listedStaff=false;
   if(!u){role='public';isCustomer=false;route();menuSync();return}
   wantLogin=false;
@@ -665,7 +758,7 @@ onAuthStateChanged(auth,async(u)=>{
     role=(r==='owner'||r==='staff')?r:(listedStaff?'staff':'public');
     isCustomer=(role==='public');
     route();
-    if(isCustomer)startCust();else stopCust();
+    if(isCustomer){stopOrders();startCust()}else{stopCust();startOrdersStaff()}
     menuSync();
   };
   unsubUser=onSnapshot(doc(db,'users',u.uid),function(snap){apply(snap.exists()?snap.data().role:'')},function(){apply('')});
@@ -1163,6 +1256,7 @@ $('staffMenu').addEventListener('click',function(e){
   if(action==='signout'){signOut(auth);return;}
   if(action==='mygift'){openMyGift()
   }else if(action==='account'){openAcct('edit')
+  }else if(action==='myorders'){openMyOrders()
   }else if(action==='wa'){window.open($('waHeader').href,'_blank','noopener')
   }else if(action==='login'){startLogin()
   }else if(action==='new'){
@@ -1396,9 +1490,9 @@ function craftErr(e){
 }
 function pmShow(v){
   pmView=v;
-  const map={home:'pmHome',mat:'pmMat',prod:'pmProd',craft:'pmCraft'};
+  const map={home:'pmHome',mat:'pmMat',prod:'pmProd',craft:'pmCraft',orders:'pmOrders'};
   Object.keys(map).forEach(function(k){$(map[k]).hidden=(k!==v)});
-  $('pmTitle').textContent=v==='home'?'Product Management':v==='mat'?'Material':v==='prod'?'New product':CRAFT_LABEL[craftKind];
+  $('pmTitle').textContent=v==='home'?'Product Management':v==='orders'?'Orders':v==='mat'?'Material':v==='prod'?'New product':CRAFT_LABEL[craftKind];
   pmMsg('');$('pmBody').scrollTop=0;
 }
 function openPM(){
@@ -1444,6 +1538,7 @@ function showPnPic(){$('pnPw').hidden=!pnPhoto;if(pnPhoto)$('pnImg').src=pnPhoto
 
 $('pmBack').addEventListener('click',function(){
   if(pmView==='craft'&&craftEdit){closeCraftForm();return}
+  if(pmView==='orders'){pmShow('home');return}
   if(pmView==='prod'||pmView==='craft'){pmShow('mat');return}
   if(pmView==='mat'){pmShow('home');return}
   closePM();
@@ -1453,6 +1548,7 @@ $('pm').addEventListener('click',function(e){
   const a=b.getAttribute('data-pm');
   if(a==='mat'){pmShow('mat')}
   else if(a==='prod'){pmShow('prod')}
+  else if(a==='orders'){pmShow('orders');renderStaffOrders()}
   else if(a==='card'||a==='inner'||a==='outer'){craftKind=a;craftEdit=null;$('cForm').hidden=true;$('cList').hidden=false;$('cTop').hidden=false;pmShow('craft');renderCraftList();startCraft()}
   else if(a==='buy'){
     closePM();setAdd(true);setTimeout(function(){$('pdate').scrollIntoView({block:'center',behavior:'smooth'});$('pdate').focus()},50);
@@ -1532,19 +1628,20 @@ function priceHtml(p){
   return (typeof p.offer==='number'&&p.offer>=0)?'<s style="opacity:.6;font-size:.8em;font-weight:500">'+money(p.retail)+'</s> '+money(p.offer):money(p.retail);
 }
 function giftPrice(p){return (typeof p.offer==='number'&&p.offer>=0)?p.offer:(Number(p.retail)||0)}
-function syncOverflow(){document.body.style.overflow=['gift','mygift','acct','pm','notes'].some(function(id){return !$(id).hidden})?'hidden':''}
+function syncOverflow(){document.body.style.overflow=['gift','mygift','acct','pm','notes','order','myorders'].some(function(id){return !$(id).hidden})?'hidden':''}
 function gToast(t){const e=$('gToast');e.textContent=t;e.hidden=false;clearTimeout(toastT);toastT=setTimeout(function(){e.hidden=true},2600)}
 function draftCount(){return draft.reduce(function(n,i){return n+(Number(i.qty)||0)},0)}
 
 function menuSync(){
   const staffish=role==='owner'||role==='staff';
   const cu=!!user&&!staffish;
-  const vis={mygift:cu,account:cu,pm:staffish,notes:staffish,wa:!staffish,login:!user,signout:!!user};
+  const vis={mygift:cu,myorders:cu,account:cu,pm:staffish,notes:staffish,wa:!staffish,login:!user,signout:!!user};
   $('staffMenu').querySelectorAll('button[data-menu]').forEach(function(b){b.hidden=!vis[b.getAttribute('data-menu')]});
   $('menuSep').hidden=!user;
   const n=draftCount();
   $('mgLabel').textContent=n?('My Gift ('+n+')'):'My Gift';
-  $('menuBtn').classList.toggle('hasdot',cu&&n>0);
+  $('pmLabel').textContent=(staffish&&newOrderCount)?('Product Management ('+newOrderCount+' new)'):'Product Management';
+  $('menuBtn').classList.toggle('hasdot',(cu&&n>0)||(staffish&&newOrderCount>0));
   $('gMy').hidden=!cu;$('gMy').textContent=n?('My Gift ('+n+')'):'My Gift';
 }
 
@@ -1566,10 +1663,14 @@ function startCust(){
     draft=snap.exists()?(snap.data().items||[]):[];
     menuSync();if(!$('mygift').hidden)renderMyGift();
   },function(){draft=[]});
+  unsubMyOrders=onSnapshot(query(collection(db,'orders'),where('uid','==',user.uid)),function(snap){
+    myOrders=snap.docs.map(function(d){return Object.assign({id:d.id},d.data())}).sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0)});
+    if(!$('myorders').hidden)renderMyOrders();
+  },function(){myOrders=[]});
 }
 function stopCust(){
-  [unsubCust,unsubDraft].forEach(function(u){if(u)try{u()}catch(e){}});
-  unsubCust=unsubDraft=null;cust=null;custLoaded=false;draft=[];
+  [unsubCust,unsubDraft,unsubMyOrders].forEach(function(u){if(u)try{u()}catch(e){}});
+  unsubCust=unsubDraft=unsubMyOrders=null;cust=null;custLoaded=false;draft=[];myOrders=[];
 }
 function acctAfterLoad(){
   if(!isCustomer)return;
@@ -1781,7 +1882,7 @@ $('mgList').addEventListener('click',function(e){
   saveDraft(list);
 });
 $('mgBack').addEventListener('click',closeMyGift);
-$('mgOrder').addEventListener('click',function(){$('mgMsg').textContent='Ordering is coming soon. Your gift draft is saved.';$('mgMsg').className='msg ok'});
+$('mgOrder').addEventListener('click',openOrder);
 
 /* ----- owner: staff emails ----- */
 function startStaffEmails(){
@@ -1805,6 +1906,250 @@ $('seList').addEventListener('click',async function(e){
   const b=e.target.closest('[data-se]');if(!b||role!=='owner')return;
   if(!window.confirm('Remove '+b.getAttribute('data-se')+' from staff?'))return;
   try{await deleteDoc(doc(db,'staffEmails',b.getAttribute('data-se')));seMsg('Removed.',true)}catch(err){seMsg('Could not remove: '+niceErr(err))}
+});
+
+
+/* ---------- Orders ---------- */
+let ordersAll=[],myOrders=[],unsubOrders=null,unsubMyOrders=null,newOrderCount=0,ordState={view:'send',to:'me',payType:'full',method:'bkash',busy:false},soFilter='placed';
+const BKASH_NUMBER='01342054583';
+const DELIVERY={
+  urgent:{label:'Urgent',days:'1-2 days',charge:600},
+  regular:{label:'Regular',days:'3 days',charge:300},
+  cheapest:{label:'Cheapest',days:'3-4 days',inside:90,outside:150}
+};
+const ORDER_RULES=[
+  'আমরা আপনার গিফ্টটি নিজেদের মতো করে কিউরেট করব। গিফ্টের সৌন্দর্যের জন্য আপনার ইনার র‍্যাপ পরিবর্তন হতে পারে। (পরিবর্তন না চাইলে আমাদের সাথে কথা বলুন।)',
+  'আপনার কোনো কিছু পরিবর্তন করার থাকলে গিফ্ট ডিসপ্যাচ করার আগে আমাদের জানান।',
+  'প্রোডাক্টের কোয়ালিটি নিশ্চিত করার জন্য আমরা আপনার কাছে দায়বদ্ধ থাকব।',
+  'গিফ্ট কিউরেশনের পর যদি গিফ্টটি আপনার পছন্দ না হয় এবং ইনার র‍্যাপ পরিবর্তন করতে চান, তাহলে তৃতীয়বার পরিবর্তনের জন্য অতিরিক্ত কিউরেশন ও ইনার র‍্যাপের চার্জ প্রযোজ্য হবে।',
+  'গিফ্টে ক্যাশ অন ডেলিভারি থাকবে না। গিফ্টের সম্পূর্ণ পেমেন্ট অনলাইনে করতে হবে।',
+  'অর্ডার করার সময় থেকে আর্জেন্ট ডেলিভারিতে ১-২ দিন, রেগুলার ডেলিভারিতে ৩ দিন এবং চিপেস্ট ডেলিভারিতে ৩-৪ দিন লাগতে পারে।'
+];
+const STAT={placed:'Waiting for payment check',processing:'Processing',delivered:'Delivered',cancelled:'Cancelled'};
+function fmtDate(ts){return new Date(ts||0).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'})}
+function fmtDay(d){return d?new Date(d+'T12:00:00').toLocaleDateString(undefined,{day:'numeric',month:'short'}):''}
+function grand(o){return (Number(o.total)||0)+(Number(o.extraCharge)||0)}
+function dueOf(o){return Math.max(0,grand(o)-(Number(o.paidAmount)||0))}
+function delivCharge(key,zone){
+  const d=DELIVERY[key];if(!d)return 0;
+  if(key==='cheapest')return zone==='outside'?d.outside:d.inside;
+  return d.charge;
+}
+function delivLabel(o){
+  const d=DELIVERY[o.deliveryType]||{};
+  return (d.label||o.deliveryType||'')+(d.days?' ('+d.days+')':'')+(o.deliveryZone?' · '+(o.deliveryZone==='outside'?'Outside Dhaka':'Inside Dhaka'):'');
+}
+function orderItemsHtml(o){
+  return (o.items||[]).map(function(i){
+    return '<div class="ol">'+esc(i.name)+' × '+esc(i.qty)+' <small>('+esc(money((Number(i.price)||0)*(Number(i.qty)||0)))+')</small>'
+      +(i.text?'<br><small>Text: '+esc(i.text)+'</small>':'')+(i.pic?'<br><small>Picture: '+esc(i.pic)+'</small>':'')+'</div>';
+  }).join('');
+}
+
+/* ----- customer: place an order ----- */
+function oMsg(n,t,ok){const m=$(n);m.textContent=t||'';m.className='msg'+(ok?' ok':'')}
+function oShow(v){
+  ordState.view=v;
+  ['oSend','oForm','oPay','oDone'].forEach(function(id){$(id).hidden=(id!=='o'+v.charAt(0).toUpperCase()+v.slice(1))});
+  $('oTitle').textContent=v==='send'?'Order':v==='form'?'Receiver details':v==='pay'?'Review and pay':'Order received';
+  $('order').querySelector('.nbody').scrollTop=0;
+}
+function openOrder(){
+  if(!user||canAdd())return;
+  if(!draft.length){$('mgMsg').textContent='Your gift draft is empty.';return}
+  if(!cust){closeMyGift();openAcct('new');return}
+  ordState={view:'send',to:'me',payType:'full',method:'bkash',busy:false};
+  $('oAgree').checked=false;$('oPayW').hidden=true;$('oTx').value='';
+  $('oDel').innerHTML='<option value="">Choose delivery type</option>'+Object.keys(DELIVERY).map(function(k){
+    const d=DELIVERY[k];
+    return '<option value="'+k+'">'+d.label+' ('+d.days+') – '+(k==='cheapest'?money(d.inside)+' Dhaka / '+money(d.outside)+' outside':money(d.charge))+'</option>';
+  }).join('');
+  $('oF').min=dateToday();$('oT').min=dateToday();
+  oMsg('oMsg1','');oMsg('oMsg2','');
+  oShow('send');$('order').hidden=false;syncOverflow();
+}
+function closeOrder(){$('order').hidden=true;syncOverflow()}
+function orderTotals(){
+  let items=0;
+  draft.forEach(function(it){items+=draftLookup(it).price*(Number(it.qty)||0)});
+  const f=ordState.form||{};
+  const del=delivCharge(f.delivery,f.zone);
+  return {items:Math.round(items*100)/100,delivery:del,total:Math.round((items+del)*100)/100};
+}
+function payAmount(){const t=orderTotals().total;return ordState.payType==='half'?Math.ceil(t/2):t}
+function renderPay(){
+  const t=orderTotals(),f=ordState.form;
+  $('oSum').innerHTML='<div class="ocard">'
+    +draft.map(function(i){const lk=draftLookup(i);return '<div class="ol">'+esc(i.name)+' × '+esc(i.qty)+' <small>('+esc(money(lk.price*(Number(i.qty)||0)))+')</small>'+(i.text?'<br><small>Text: '+esc(i.text)+'</small>':'')+(i.pic?'<br><small>Picture: '+esc(i.pic)+'</small>':'')+'</div>'}).join('')
+    +'<hr><div class="ol">Items total: <b>'+esc(money(t.items))+'</b></div>'
+    +'<div class="ol">Delivery ('+esc(delivLabel({deliveryType:f.delivery,deliveryZone:f.delivery==='cheapest'?f.zone:''}))+'): <b>'+esc(money(t.delivery))+'</b></div>'
+    +'<div class="ol" style="font-size:1.05rem">Total: <b>'+esc(money(t.total))+'</b></div>'
+    +'<hr><div class="ol"><small>To: '+esc(f.name)+', '+esc(f.phone)+'<br>'+esc(f.address)+'<br>'+esc(f.occasion)+' · needed '+esc(fmtDay(f.from))+' to '+esc(fmtDay(f.to))+'</small></div></div>';
+  $('oRules').innerHTML=ORDER_RULES.map(function(r){return '<li>'+esc(r)+'</li>'}).join('');
+  renderPayChoices();
+}
+function renderPayChoices(){
+  const t=orderTotals().total,half=Math.ceil(t/2);
+  $('oTypes').innerHTML=
+    '<button type="button" class="pmb'+(ordState.payType==='full'?' sel':'')+'" data-ot="full"><span>Full payment<small>'+esc(money(t))+'</small></span></button>'
+   +'<button type="button" class="pmb'+(ordState.payType==='half'?' sel':'')+'" data-ot="half"><span>Half payment<small>'+esc(money(half))+' now, the rest ('+esc(money(t-half))+') before dispatch</small></span></button>';
+  $('oMeth').innerHTML=
+    '<button type="button" class="pmb'+(ordState.method==='bkash'?' sel':'')+'" data-om="bkash"><span>bKash<small>Send Money</small></span></button>'
+   +'<button type="button" class="pmb'+(ordState.method==='card'?' sel':'')+'" data-om="card"><span>Card<small>Coming soon</small></span></button>';
+  $('oBk').hidden=ordState.method!=='bkash';
+  $('oCardHint').hidden=ordState.method!=='card';
+  $('oBkNum').textContent=BKASH_NUMBER;$('oBkAmt').textContent=money(payAmount());
+}
+$('oBack').addEventListener('click',function(){
+  if(ordState.busy)return;
+  const v=ordState.view;
+  if(v==='form')oShow('send');else if(v==='pay')oShow('form');else closeOrder();
+});
+$('order').addEventListener('click',function(e){
+  const os=e.target.closest('[data-os]');
+  if(os){
+    ordState.to=os.getAttribute('data-os');
+    const me=ordState.to==='me';
+    $('oN').value=me?(cust.name||''):'';$('oP').value=me?(cust.phone||''):'';$('oA').value=me?(cust.address||''):'';
+    $('oOc').value='';$('oF').value='';$('oT').value='';$('oDel').value='';$('oZoneW').hidden=true;
+    oMsg('oMsg1','');oShow('form');return;
+  }
+  const ot=e.target.closest('[data-ot]');if(ot){ordState.payType=ot.getAttribute('data-ot');renderPayChoices();return}
+  const om=e.target.closest('[data-om]');if(om){ordState.method=om.getAttribute('data-om');renderPayChoices();return}
+});
+$('oDel').addEventListener('change',function(){$('oZoneW').hidden=this.value!=='cheapest'});
+$('oNext').addEventListener('click',function(){
+  const f={name:$('oN').value.trim(),phone:$('oP').value.trim(),occasion:$('oOc').value.trim(),from:$('oF').value,to:$('oT').value,address:$('oA').value.trim(),delivery:$('oDel').value,zone:$('oZone').value};
+  if(!f.name){oMsg('oMsg1','Enter the receiver name.');return}
+  if(f.phone.replace(/\D/g,'').length<7||!/^[0-9+\-\s()]+$/.test(f.phone)){oMsg('oMsg1','Enter a valid receiver number.');return}
+  if(!f.occasion){oMsg('oMsg1','Enter the occasion.');return}
+  if(!f.from||!f.to){oMsg('oMsg1','Choose both dates.');return}
+  if(f.from<dateToday()){oMsg('oMsg1','The first date cannot be in the past.');return}
+  if(f.to<f.from){oMsg('oMsg1','The last date cannot be before the first date.');return}
+  if(!f.address){oMsg('oMsg1','Enter the receiver address.');return}
+  if(!f.delivery){oMsg('oMsg1','Choose a delivery type.');return}
+  ordState.form=f;oMsg('oMsg1','');renderPay();$('oAgree').checked=false;$('oPayW').hidden=true;oShow('pay');
+});
+$('oAgree').addEventListener('change',function(){$('oPayW').hidden=!this.checked;if(this.checked)renderPayChoices()});
+$('oCopy').addEventListener('click',function(){
+  try{navigator.clipboard.writeText(BKASH_NUMBER);gToast('bKash number copied.')}catch(e){gToast(BKASH_NUMBER)}
+});
+$('oPlace').addEventListener('click',async function(){
+  if(ordState.busy||!user||!cust)return;
+  if(!$('oAgree').checked){oMsg('oMsg2','Please agree to the rules first.');return}
+  if(ordState.method!=='bkash'){oMsg('oMsg2','Card payment is coming soon. Please choose bKash.');return}
+  const tx=$('oTx').value.trim().toUpperCase().replace(/\s+/g,'');
+  if(!/^[A-Z0-9]{6,20}$/.test(tx)){oMsg('oMsg2','Enter the bKash Transaction ID (letters and numbers).');return}
+  if(!draft.length){oMsg('oMsg2','Your gift draft is empty.');return}
+  const f=ordState.form,t=orderTotals(),now=Date.now(),id=newId();
+  const order={
+    uid:user.uid,customerName:cust.name||'',customerPhone:cust.phone||'',customerEmail:user.email||'',
+    sendTo:ordState.to,receiverName:f.name,receiverPhone:f.phone,occasion:f.occasion,dateFrom:f.from,dateTo:f.to,address:f.address,
+    deliveryType:f.delivery,deliveryZone:f.delivery==='cheapest'?f.zone:'',deliveryCharge:t.delivery,
+    items:draft.map(function(i){return {type:i.type,id:i.id,name:i.name,price:draftLookup(i).price,qty:Number(i.qty)||1,text:i.text||'',pic:i.pic||''}}),
+    itemsTotal:t.items,total:t.total,extraCharge:0,extraNote:'',
+    payType:ordState.payType,payMethod:'bkash',payAmount:payAmount(),txnId:tx,paidAmount:0,
+    status:'placed',staffNote:'',createdAt:now,updatedAt:now
+  };
+  ordState.busy=true;$('oPlace').disabled=true;oMsg('oMsg2','Placing your order…',true);
+  try{
+    await setDoc(doc(db,'orders',id),order);
+    try{await setDoc(doc(db,'drafts',user.uid),{uid:user.uid,items:[],updatedAt:Date.now()});draft=[];menuSync();renderMyGift()}catch(e){}
+    oMsg('oMsg2','');oShow('done');
+  }catch(err){oMsg('oMsg2','Could not place the order: '+((err&&err.code==='permission-denied')?'orders are not allowed yet (Firebase rules).':niceErr(err)))}
+  finally{ordState.busy=false;$('oPlace').disabled=false}
+});
+$('oClose').addEventListener('click',function(){closeOrder();closeMyGift()});
+$('oToOrders').addEventListener('click',function(){closeOrder();closeMyGift();openMyOrders()});
+
+/* ----- customer: My Orders ----- */
+function openMyOrders(){if(!user||canAdd())return;$('myorders').hidden=false;syncOverflow();renderMyOrders()}
+function closeMyOrders(){$('myorders').hidden=true;syncOverflow()}
+$('moBack').addEventListener('click',closeMyOrders);
+function renderMyOrders(){
+  if(!myOrders.length){$('moList').innerHTML='<p class="hint">No orders yet.</p>';return}
+  $('moList').innerHTML=myOrders.map(function(o){
+    const paid=Number(o.paidAmount)||0;
+    return '<div class="ocard"><div class="oh"><b>'+esc(fmtDate(o.createdAt))+'</b><span class="ostat s-'+esc(o.status)+'">'+esc(STAT[o.status]||o.status)+'</span></div>'
+      +orderItemsHtml(o)+'<hr>'
+      +'<div class="ol">Delivery: '+esc(delivLabel(o))+' · '+esc(money(Number(o.deliveryCharge)||0))+'</div>'
+      +'<div class="ol">Needed: '+esc(fmtDay(o.dateFrom))+' to '+esc(fmtDay(o.dateTo))+' · For '+esc(o.receiverName)+'</div>'
+      +((Number(o.extraCharge)||0)>0?'<div class="ol">Extra charge: <b>'+esc(money(o.extraCharge))+'</b>'+(o.extraNote?' <small>('+esc(o.extraNote)+')</small>':'')+'</div>':'')
+      +'<div class="ol" style="font-size:1.02rem">Total: <b>'+esc(money(grand(o)))+'</b></div>'
+      +(o.status==='placed'?'<div class="ol"><small>We are checking your payment ('+esc(money(Number(o.payAmount)||0))+' sent by bKash).</small></div>'
+        :(o.status==='cancelled'?'':'<div class="ol">Paid: <b>'+esc(money(paid))+'</b>'+(dueOf(o)>0?' · Due: <b>'+esc(money(dueOf(o)))+'</b>':' · Fully paid')+'</div>'))
+      +'</div>';
+  }).join('');
+}
+
+/* ----- staff / owner: Orders ----- */
+function startOrdersStaff(){
+  if(unsubOrders)return;
+  unsubOrders=onSnapshot(collection(db,'orders'),function(snap){
+    ordersAll=snap.docs.map(function(d){return Object.assign({id:d.id},d.data())}).sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0)});
+    newOrderCount=ordersAll.filter(function(o){return o.status==='placed'}).length;
+    $('pmOrdSub').textContent=newOrderCount?(newOrderCount+' new'):'Customer gift orders';
+    menuSync();
+    if(!$('pm').hidden&&pmView==='orders')renderStaffOrders();
+  },function(){ordersAll=[];newOrderCount=0});
+}
+function stopOrders(){
+  if(unsubOrders){try{unsubOrders()}catch(e){}unsubOrders=null}
+  ordersAll=[];newOrderCount=0;
+}
+const SO_FILTERS=[['placed','New'],['processing','Processing'],['delivered','Delivered'],['cancelled','Cancelled'],['all','All']];
+function renderStaffOrders(){
+  $('soChips').innerHTML=SO_FILTERS.map(function(f){
+    const n=f[0]==='all'?ordersAll.length:ordersAll.filter(function(o){return o.status===f[0]}).length;
+    return '<button type="button" data-so="'+f[0]+'"'+(f[0]===soFilter?' class="on"':'')+'>'+f[1]+' ('+n+')</button>';
+  }).join('');
+  const list=ordersAll.filter(function(o){return soFilter==='all'||o.status===soFilter});
+  if(!list.length){$('soList').innerHTML='<p class="hint">No orders here.</p>';return}
+  $('soList').innerHTML=list.map(function(o){
+    const open=o.status==='placed'||o.status==='processing';
+    return '<div class="ocard" data-id="'+esc(o.id)+'"><div class="oh"><b>#'+esc(o.id.slice(-5).toUpperCase())+' · '+esc(fmtDate(o.createdAt))+'</b><span class="ostat s-'+esc(o.status)+'">'+esc(STAT[o.status]||o.status)+'</span></div>'
+      +'<div class="ol"><b>Customer:</b> '+esc(o.customerName)+' · '+esc(o.customerPhone)+'<br><small>'+esc(o.customerEmail)+'</small></div>'
+      +'<div class="ol"><b>Receiver:</b> '+esc(o.receiverName)+' · '+esc(o.receiverPhone)+' ('+(o.sendTo==='me'?'send to customer':'send to relative')+')<br><small>'+esc(o.address)+'</small></div>'
+      +'<div class="ol"><b>Occasion:</b> '+esc(o.occasion)+' · needed '+esc(fmtDay(o.dateFrom))+' to '+esc(fmtDay(o.dateTo))+'</div>'
+      +'<div class="ol"><b>Delivery:</b> '+esc(delivLabel(o))+' · '+esc(money(Number(o.deliveryCharge)||0))+'</div><hr>'
+      +orderItemsHtml(o)+'<hr>'
+      +'<div class="ol">Items: '+esc(money(Number(o.itemsTotal)||0))+' · Delivery: '+esc(money(Number(o.deliveryCharge)||0))+((Number(o.extraCharge)||0)>0?' · Extra: '+esc(money(o.extraCharge))+(o.extraNote?' <small>('+esc(o.extraNote)+')</small>':''):'')+'</div>'
+      +'<div class="ol" style="font-size:1.02rem">Total: <b>'+esc(money(grand(o)))+'</b> · Paid: <b>'+esc(money(Number(o.paidAmount)||0))+'</b> · Due: <b>'+esc(money(dueOf(o)))+'</b></div>'
+      +'<div class="ol">Payment chosen: '+(o.payType==='half'?'Half':'Full')+' · '+esc(money(Number(o.payAmount)||0))+' by bKash · Transaction ID: <b>'+esc(o.txnId)+'</b></div>'
+      +(open?'<div class="oex"><input class="oxa" type="number" min="0" step="any" inputmode="decimal" placeholder="Extra charge"><input class="oxn" placeholder="Note (optional)"><button type="button" data-oa="extra">Add extra charge</button></div>':'')
+      +'<textarea class="osn" placeholder="Staff note (only you can see)">'+esc(o.staffNote||'')+'</textarea>'
+      +'<div class="oact">'
+        +(o.status==='placed'?'<button type="button" data-oa="confirm">Confirm payment</button>':'')
+        +(o.status==='processing'&&dueOf(o)>0?'<button type="button" data-oa="paid">Mark fully paid</button>':'')
+        +(o.status==='processing'?'<button type="button" data-oa="delivered">Delivered</button>':'')
+        +(open?'<button type="button" class="ghost" data-oa="cancel">Cancel order</button>':'')
+        +'<button type="button" class="ghost" data-oa="note">Save note</button>'
+      +'</div></div>';
+  }).join('');
+}
+$('soChips').addEventListener('click',function(e){
+  const b=e.target.closest('button[data-so]');if(!b)return;
+  soFilter=b.getAttribute('data-so');renderStaffOrders();
+});
+async function ordUpdate(id,patch){
+  try{await updateDoc(doc(db,'orders',id),Object.assign({updatedAt:Date.now()},patch));pmMsg('Updated.',true)}
+  catch(err){pmMsg('Could not update: '+((err&&err.code==='permission-denied')?'not allowed (Firebase rules).':niceErr(err)))}
+}
+$('soList').addEventListener('click',async function(e){
+  const b=e.target.closest('[data-oa]');if(!b||!canAdd())return;
+  const card=b.closest('.ocard'),id=card.getAttribute('data-id'),o=ordersAll.find(function(x){return x.id===id});if(!o)return;
+  const a=b.getAttribute('data-oa');
+  if(a==='confirm')await ordUpdate(id,{status:'processing',paidAmount:Number(o.payAmount)||0});
+  else if(a==='paid')await ordUpdate(id,{paidAmount:grand(o)});
+  else if(a==='delivered')await ordUpdate(id,{status:'delivered'});
+  else if(a==='cancel'){if(window.confirm('Cancel this order?'))await ordUpdate(id,{status:'cancelled'})}
+  else if(a==='extra'){
+    const amt=parseFloat(card.querySelector('.oxa').value),note=card.querySelector('.oxn').value.trim();
+    if(!(amt>0)){pmMsg('Enter the extra charge amount.');return}
+    const line=(note||'Extra charge')+' '+money(amt);
+    await ordUpdate(id,{extraCharge:(Number(o.extraCharge)||0)+amt,extraNote:(o.extraNote?o.extraNote+'; ':'')+line});
+  }
+  else if(a==='note')await ordUpdate(id,{staffNote:card.querySelector('.osn').value.trim()});
 });
 
 // Show the public price list straight away; sign-in state is applied as soon as Firebase answers.
