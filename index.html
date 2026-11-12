@@ -287,6 +287,21 @@ main>.sess,main>.topbar,main>.hint,main>.live,main>.searchbar,main>.cchips,main>
 .pc2 .gadd{padding:7px 6px;font-size:.82rem}
 .prow .askbtn,.obtn{padding:7px 6px;font-size:.85rem}
 
+
+/* Uniform, smaller product cards */
+.pc2{border-radius:14px}
+.pc2 .pimg{aspect-ratio:4/3;height:auto;min-height:0;overflow:hidden}
+.pc2 .pimgbtn{position:absolute;inset:0;width:100%;height:100%}
+.pc2 .pimgbtn img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block}
+.pc2 .pimgph{position:absolute;inset:0}
+.pc2 .pname{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.5em}
+.staff-product-extra{padding:6px 10px 8px;gap:4px 6px}
+.staff-product-extra .staff-wholesale{flex:1 1 100%;margin-right:0;font-size:.88rem}
+.staff-product-extra .hbtn{padding:4px 10px;font-size:.78rem}
+.staff-product-extra .ico{margin-left:auto;min-width:0}
+.staff-product-extra .ib{padding:5px}
+.staff-product-extra .ib svg{width:18px;height:18px}
+
 /* Product Management */
 .pmb{display:flex;align-items:center;justify-content:space-between;width:100%;text-align:left;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:10px;font-size:1rem;font-weight:600;box-shadow:none}
 .pmb small{display:block;color:var(--muted);font-weight:400;font-size:.8rem;margin-top:2px}
@@ -364,7 +379,7 @@ main>.sess,main>.topbar,main>.hint,main>.live,main>.searchbar,main>.cchips,main>
         <span class="bname">Oparanno</span>
         <div class="bicons">
           <button type="button" class="bic" id="bbell" aria-label="Notifications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="bn" id="bellN" hidden></span></button>
-          <button type="button" class="bic" id="bgift" aria-label="Gift"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M5 12v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8"/><path d="M7.5 8a2.5 2.5 0 1 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 1 1 0 5"/></svg></button>
+          <button type="button" class="bic" id="bgift" aria-label="Gift"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="9" width="18" height="4" rx="1"/><path d="M5 13v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/><path d="M12 9v12"/><path d="M12 9c-2.6 0-4.6-1-4.6-3S9 3.4 10.6 4.2C11.8 4.8 12 7 12 9z"/><path d="M12 9c2.6 0 4.6-1 4.6-3S15 3.4 13.4 4.2C12.2 4.8 12 7 12 9z"/></svg></button>
           <button type="button" class="bic staff-menu-trigger" id="menuBtn" aria-label="Menu" aria-expanded="false"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg></button>
           <div class="staff-menu" id="staffMenu" hidden>
             <button type="button" data-menu="search"><span>🔍</span> Search</button>
@@ -373,6 +388,7 @@ main>.sess,main>.topbar,main>.hint,main>.live,main>.searchbar,main>.cchips,main>
             <button type="button" data-menu="account"><span>☺</span> My account</button>
             <button type="button" data-menu="orders"><span>📋</span> <em id="omLabel" style="font-style:normal">Order Management</em></button>
             <button type="button" data-menu="pm"><span>▦</span> Product Management</button>
+            <button type="button" data-menu="team"><span>👥</span> Team</button>
             <button type="button" data-menu="notes"><span>✎</span> Note</button>
             <button type="button" data-menu="wa"><span>✆</span> WhatsApp</button>
             <button type="button" data-menu="login"><span>→</span> Login / Create account</button>
@@ -434,8 +450,9 @@ main>.sess,main>.topbar,main>.hint,main>.live,main>.searchbar,main>.cchips,main>
     <div id="rows" class="list"></div>
   </div>
 
-  <div class="card" id="team" hidden>
-    <div class="fh">Team</div>
+  <div class="npanel" id="team" hidden role="dialog" aria-label="Team">
+    <div class="nhead"><button type="button" class="bic" id="tmBack" aria-label="Back">&larr;</button><span class="ntitle">Team</span></div>
+    <div class="nbody">
     <p class="hint">Anyone can look at the price list without signing in (retail prices only). Add the email a staff member signs in with below. Anyone who signs in with a listed email gets the staff page. Everyone else who signs in is a customer.</p>
     <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:4px"><input id="seIn" type="email" inputmode="email" placeholder="staff@email.com" autocomplete="off" style="flex:1;margin-bottom:0"><button type="button" id="seAdd">Add staff</button></div>
     <div class="msg" id="seMsg" role="status"></div>
@@ -448,6 +465,7 @@ main>.sess,main>.topbar,main>.hint,main>.live,main>.searchbar,main>.cchips,main>
       <div style="margin-top:8px"><button type="button" id="impgo">Import</button></div>
       <div class="msg" id="impmsg"></div>
     </details>
+    </div>
   </div>
   <footer class="foot" id="foot">
     <a class="igl" href="https://www.instagram.com/oparanno" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="12" cy="12" r="3"/><line x1="16.5" y1="7.5" x2="16.5" y2="7.501"/></svg><span>Instagram · oparanno</span></a>
@@ -861,7 +879,6 @@ function route(){
   $('rows').classList.add('pubgrid');
   $('listcard').classList.add('pub');
   $('signin2').hidden=!!user;$('tg').textContent=$('addcard').hidden?'+ Add': '– Close';
-  $('team').hidden=role!=='owner';
   $('sMargin').parentNode.hidden=!sees;$('sBest').parentNode.hidden=!sees;
   const key=staffish?role:'public';
   if(startedFor!==key){
@@ -1321,6 +1338,7 @@ $('staffMenu').addEventListener('click',function(e){
   if(action==='signout'){signOut(auth);return;}
   if(action==='search'){openSearch()
   }else if(action==='orders'){openOrders()
+  }else if(action==='team'){openTeam()
   }else if(action==='mygift'){openMyGift()
   }else if(action==='account'){openAcct('edit')
   }else if(action==='myorders'){openMyOrders()
@@ -1694,16 +1712,17 @@ function priceHtml(p){
   return (typeof p.offer==='number'&&p.offer>=0)?'<s style="opacity:.6;font-size:.8em;font-weight:500">'+money(p.retail)+'</s> '+money(p.offer):money(p.retail);
 }
 function giftPrice(p){return (typeof p.offer==='number'&&p.offer>=0)?p.offer:(Number(p.retail)||0)}
-function syncOverflow(){document.body.style.overflow=['gift','mygift','acct','pm','notes','order','myorders','porder','notif'].some(function(id){return !$(id).hidden})?'hidden':''}
+function syncOverflow(){document.body.style.overflow=['gift','mygift','acct','pm','notes','order','myorders','porder','notif','team'].some(function(id){return !$(id).hidden})?'hidden':''}
 function gToast(t){const e=$('gToast');e.textContent=t;e.hidden=false;clearTimeout(toastT);toastT=setTimeout(function(){e.hidden=true},2600)}
 function draftCount(){return draft.reduce(function(n,i){return n+(Number(i.qty)||0)},0)}
 
 function menuSync(){
   const staffish=role==='owner'||role==='staff';
   const cu=!!user&&!staffish;
-  const vis={search:true,orders:staffish,mygift:cu,myorders:cu,account:cu,pm:staffish,notes:staffish,wa:!staffish,login:!user,signout:!!user};
+  const vis={search:true,team:role==='owner',orders:staffish,mygift:cu,myorders:cu,account:cu,pm:staffish,notes:staffish,wa:!staffish,login:!user,signout:!!user};
   $('staffMenu').querySelectorAll('button[data-menu]').forEach(function(b){b.hidden=!vis[b.getAttribute('data-menu')]});
   $('menuSep').hidden=!user;
+  if(role!=='owner'&&!$('team').hidden)closeTeam();
   const n=draftCount();
   $('mgLabel').textContent=n?('My Gift ('+n+')'):'My Gift';
   $('omLabel').textContent=(staffish&&newOrderCount)?('Order Management ('+newOrderCount+' new)'):'Order Management';
@@ -2390,6 +2409,9 @@ $('nfAll').addEventListener('click',async function(){
   const list=notifs.filter(function(n){return (n.readBy||[]).indexOf(user.uid)<0}).slice(0,50);
   for(const n of list){try{await updateDoc(doc(db,'notifications',n.id),{readBy:arrayUnion(user.uid)})}catch(err){}}
 });
+function openTeam(){if(role!=='owner')return;$('team').hidden=false;syncOverflow()}
+function closeTeam(){$('team').hidden=true;syncOverflow()}
+$('tmBack').addEventListener('click',closeTeam);
 function openOrders(){if(!canAdd())return;openPM();pmShow('orders');renderStaffOrders()}
 
 // Show the public price list straight away; sign-in state is applied as soon as Firebase answers.
