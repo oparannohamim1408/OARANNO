@@ -378,6 +378,31 @@ main>.sess,main>.topbar,main>.hint,main>.live,main>.searchbar,main>.cchips,main>
   @page{margin:14mm}
 }
 
+
+/* Red and white theme */
+body,body.pubmode{--bg:#FFFFFF;--card:#FFFFFF;--text:#1A1A1A;--muted:#6B6B6B;--line:#F0D4D8;--soft:#FFF4F5;--accent:#C20019;--accent-t:#FFFFFF;--bad:#C20019}
+.pc2{background:#FFFFFF;border:1.5px solid #C20019}
+.pc2 .pname{color:#1A1A1A}
+.pc2 .pprice{color:#C20019}
+.pc2 .chip{border-color:#C20019;color:#C20019}
+.pc2 .pimgph{color:#C20019}
+.askbtn{border-color:#C20019}
+.obtn{background:#C20019;color:#FFFFFF;border:2px solid #C20019}
+.staff-product-extra{background:#FFFFFF;color:#1A1A1A;border-top:1px solid #F0D4D8}
+.staff-product-extra .staff-wholesale small{color:#C20019}
+.staff-product-extra .ghost{color:#C20019;border-color:#C20019}
+.staff-product-extra .ib{color:#C20019}
+.staff-product-extra .arrange-arrows button{color:#C20019;border-color:#C20019}
+.clabel{background:#FFFFFF;color:#C20019}
+.bdg-new{background:#C20019;color:#FFFFFF}
+.bdg-offer{background:#7A0010;color:#FFFFFF}
+.bdg-in{background:#FFFFFF;color:#C20019;border:1px solid #C20019}
+#gToast{background:#C20019}
+.staff-menu .mi svg{width:20px;height:20px;display:block}
+.tagpick{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.tagbtn{background:#FFFFFF;color:#C20019;border:1px solid #C20019;border-radius:999px;padding:5px 12px;font-size:.82rem;font-weight:600}
+.tagbtn.on{background:#C20019;color:#FFFFFF}
+
 /* Product Management */
 .pmb{display:flex;align-items:center;justify-content:space-between;width:100%;text-align:left;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:10px;font-size:1rem;font-weight:600;box-shadow:none}
 .pmb small{display:block;color:var(--muted);font-weight:400;font-size:.8rem;margin-top:2px}
@@ -458,18 +483,18 @@ main>.sess,main>.topbar,main>.hint,main>.live,main>.searchbar,main>.cchips,main>
           <button type="button" class="bic" id="bbell" aria-label="Notifications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="bn" id="bellN" hidden></span></button>
           <button type="button" class="bic staff-menu-trigger" id="menuBtn" aria-label="Menu" aria-expanded="false"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg></button>
           <div class="staff-menu" id="staffMenu" hidden>
-            <button type="button" data-menu="search"><span>🔍</span> Search</button>
-            <button type="button" data-menu="mygift"><span>🎁</span> <em id="mgLabel" style="font-style:normal">My Gift</em></button>
+            <button type="button" data-menu="search"><span class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="#C20019" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></span> Search</button>
+            <button type="button" data-menu="mygift"><span class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="#C20019" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M5 12v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8"/><path d="M7.5 8a2.5 2.5 0 1 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 1 1 0 5"/></svg></span> <em id="mgLabel" style="font-style:normal">My Gift</em></button>
             <button type="button" data-menu="myorders"><span class="mi"><img src="data:image/webp;base64,UklGRlYFAABXRUJQVlA4WAoAAAAQAAAAXwAAXwAAQUxQSN0EAAABCUaRJCmKhn11+ze8dGAgov8TgLXmqYU3aRGS3AUimVU4Y/mTnhjbDoaQIMH/380RkdAKQBD+0xVETEB6wrbtjLRt/7bjVKov+7Zt27bve/TYNka2MbI1s23btp/b7apKcp7HIOnUWZ1anukTERMg1ahYjcpsNhataXrQNIPaZVM9ZBY7l0pgz+oBD/jPe5YbRWFnhxgiHHSJ9YeM9r7m7k/+Q1n44ThiZVYANmx+xMvo+t83bhgEZUaGEm5+gt//sJZoG/zzE2+9DTbKDDCJ4qSjHnAVrKrxDqhLxYcHfvCTF5SKnQnnXb9TgQ2srYjCeM5VuL6JSYMbDqihrAsr3PelH3HaZTuAchjRweUQpGduvP1GGLPZ8cv7xv8cl5xz7clejtg7bKjT4IQvb3Fi+mSSlZMqUpHgd+/8dZhzYMOg9s9+BFSFiT8Ior5PoeSic4alr4v/fuDOQNcjT3/fPH5F05e1sr1Kuy6D1cItfvRfsCFqTBiL0TFf3jxOq3N88UqD6Y2YtOup/wIDP/gcokOhXRQI/9yoLpXfP0yd6Ysx9WEfZGw2DD+wiAxGiY7Owokv2FQm98tza0R6AoRdKtWgfDM+LdHdGrnrT/sZm+ZP3p60P9YJKMaV0TChSfz8GU+/ANlxy7lgehPvHA3EcdcBqZRJwI0+8QehDGecCrY34YACcff95DByOtEKxmzZBdIPV8erHrFLHT//VQE6mSgWFAx9NejB5wxUuGeerAm5c35rQKveKCzfnQwUxWIWRf/0j+MCYnrTVABDygIkpe9iGkr24NGetatmixFZdyLWSJuvCK4hzmYJJV4A7IBi0JbATsmo0nmxboyXAJ0MWKgbqyO6G5mGWI3dSA1jajIbaQjdkzVT8BXsPvvE3SQDmMTR+wtw8q1bspjEsfsJcMUbsBFIhr/dHw5MFJJLlMN2n3bTxZ5JDzlvZ5aOJz+Fte+907/gcJTMRuI+H9nf7Cjoc0w//M6VgMnhlGtfcNZ+UI91Le8NEMuYy3sDVOMOc1a3nvK0B+0jikzmNd7x6LgyELeRSW2wudr9pg4ow/rqh+xQJW+NdYZ+C9YxHpK1YqctFeFvP7hbRRQbOekUr8Li73+3iuhEJnHKyS5afv/tShSwkfNOBK12nL8tg1BzwJ4gEb777L+z5hNfuEPgr5/5ESg5n/a8bdHyzcew9qufSRJ/4k37gEzSVEDhzr+z9moCWPkLuVcVC4mOkaZYIW8daSYT5oaAjfz53acEldG+3mkGV/OHd50UVH4TTCiBwYiNLeVyncmaFkmj4YimfPW5R4ZoD4KUA+HLzzlyY+3+WWISMBoRW4yTTKotCJ1tMhEkS6tNJrJulXbtYE2tICiZramV/3WloVOQhvbq/2sVmXnM+qQtArJuVCcQmZLQqhDXDU66BF+laUkLYNK66b4SkSnFqI3CyEZdD0ZTWFzpFBlsbomVZvKFqIGTL9LKrQchhaW/V6JtoioHnwSWOLfLZaorxMHZN4FfD9kttpyPGVQ9Wx5wBeNoBvS51LpwP//CplBOBL7m1H1H9D/ww19CoRmI2H+4Yq533Pc8JzIkp6Bx26cHbNuX2kwtYbKoX/lbCuAieVUsPwL2o+pNWJoHY0Zkj5FZmBL5xXqIqVdONOoU0AgifVJVJgUAVlA4IFIAAAAQBQCdASpgAGAAPikUiUOhoSEQdAAYAoS0gDsAfgAAB43P06dOnTp06dOnTp06dN8AAP778G///kFywuuRr//90CfugT90Cf+6yOdkVMAAAAAA" alt="" width="20" height="20"></span> My Orders</button>
-            <button type="button" data-menu="account"><span>☺</span> My account</button>
+            <button type="button" data-menu="account"><span class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="#C20019" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg></span> My account</button>
             <button type="button" data-menu="orders"><span class="mi"><img src="data:image/webp;base64,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" alt="" width="20" height="20"></span> <em id="omLabel" style="font-style:normal">Process</em></button>
-            <button type="button" data-menu="pm"><span>▦</span> Product Management</button>
-            <button type="button" data-menu="team"><span>👥</span> Team</button>
-            <button type="button" data-menu="notes"><span>✎</span> Note</button>
+            <button type="button" data-menu="pm"><span class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="#C20019" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span> Materials</button>
+            <button type="button" data-menu="team"><span class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="#C20019" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17" cy="9" r="2.5"/><path d="M16.5 14.2c3 0 5 2 5 4.8"/></svg></span> Team</button>
+            <button type="button" data-menu="notes"><span class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="#C20019" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg></span> Note</button>
             <button type="button" data-menu="wa"><span class="mi"><img src="data:image/webp;base64,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" alt="" width="20" height="20"></span> WhatsApp</button>
             <button type="button" data-menu="login"><span>→</span> Login / Create account</button>
             <div class="menu-sep" id="menuSep"></div>
-            <button type="button" data-menu="signout"><span>↪</span> Sign out</button>
+            <button type="button" data-menu="signout"><span class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="#C20019" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4"/><path d="M16 8l4 4-4 4M20 12H9"/></svg></span> Sign out</button>
             <a id="waHeader" hidden href="https://wa.me/8801342054583?text=Hello!%20I%20would%20like%20to%20know%20more%20about%20your%20products." target="_blank" rel="noopener noreferrer">WhatsApp</a>
           </div>
         </div>
@@ -509,7 +534,7 @@ main>.sess,main>.topbar,main>.hint,main>.live,main>.searchbar,main>.cchips,main>
   <div class="card" id="addcard" hidden>
     <div class="fh">Buy Entry</div>
     <form class="top" id="f" autocomplete="off">
-      <div style="grid-column:1/-1;position:relative"><label for="name">Product</label><input id="name" required placeholder="Type to search a product" autocomplete="off"><div id="suggestions" class="list" style="display:none;position:absolute;z-index:8;left:0;right:0;top:100%;max-height:240px;overflow:auto"></div><p class="hint" id="pickhint">Choose a product that is already added. New products are added in Product Management, Material, Product.</p></div>
+      <div style="grid-column:1/-1;position:relative"><label for="name">Product</label><input id="name" required placeholder="Type to search a product" autocomplete="off"><div id="suggestions" class="list" style="display:none;position:absolute;z-index:8;left:0;right:0;top:100%;max-height:240px;overflow:auto"></div><p class="hint" id="pickhint">Choose a product that is already added. New products are added in Materials, Product.</p></div>
       <div><label for="pqty">Quantity</label><input id="pqty" type="number" min="0.001" step="any" value="1" required inputmode="decimal"></div>
       <div><label for="punit">Unit</label><select id="punit" style="width:100%"><option value="pcs">pcs</option><option value="box">box</option></select></div>
       <div><label for="pprice">Price per pcs / box</label><input id="pprice" type="number" min="0" step="any" required inputmode="decimal"></div>
@@ -558,6 +583,7 @@ main>.sess,main>.topbar,main>.hint,main>.live,main>.searchbar,main>.cchips,main>
     <div class="pdots" id="pdDots"></div>
     <h2 id="pdName" style="margin:10px 0 4px;font-size:1.2rem;overflow-wrap:anywhere"></h2>
     <div id="pdPrice" style="font-weight:700;font-size:1.1rem;margin-bottom:8px"></div>
+    <div id="pdTags" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px"></div>
     <p id="pdDesc" style="white-space:pre-wrap;margin:0 0 12px;overflow-wrap:anywhere"></p>
     <p class="hint" id="pdOut" hidden>This product is out of stock right now.</p>
     <div class="pdbtns">
@@ -741,14 +767,17 @@ main>.sess,main>.topbar,main>.hint,main>.live,main>.searchbar,main>.cchips,main>
   <div class="nact"><button type="button" id="gpLogin">Login / Create account</button><button type="button" class="ghost" id="gpSkip">Skip</button></div>
 </div></div>
 <div id="gToast" hidden></div>
-<div class="npanel" id="pm" hidden role="dialog" aria-label="Product Management">
+<div class="npanel" id="pm" hidden role="dialog" aria-label="Materials">
   <div class="nhead">
     <button type="button" class="bic" id="pmBack" aria-label="Back">&larr;</button>
-    <span class="ntitle" id="pmTitle">Product Management</span>
+    <span class="ntitle" id="pmTitle">Materials</span>
   </div>
   <div class="nbody" id="pmBody">
     <div id="pmHome">
-      <button type="button" class="pmb" data-pm="mat"><span>Material<small>Product, Card, Inner craft, Outer craft</small></span><i>›</i></button>
+      <button type="button" class="pmb" data-pm="prod"><span>Product<small>Add a new product</small></span><i>›</i></button>
+      <button type="button" class="pmb" data-pm="card"><span>Card<small>Name, picture, price</small></span><i>›</i></button>
+      <button type="button" class="pmb" data-pm="inner"><span>Inner craft<small>Name, picture, price</small></span><i>›</i></button>
+      <button type="button" class="pmb" data-pm="outer"><span>Outer craft<small>Name, picture, price</small></span><i>›</i></button>
       <button type="button" class="pmb" data-pm="arrange"><span>Product Arrange<small>Move products up or down</small></span><i>›</i></button>
       <button type="button" class="pmb" data-pm="buy"><span>Buy Entry<small>Record a purchase</small></span><i>›</i></button>
     </div>
@@ -772,6 +801,10 @@ main>.sess,main>.topbar,main>.hint,main>.live,main>.searchbar,main>.cchips,main>
         <input id="pnO" type="number" step="any" min="0" inputmode="decimal">
         <label for="pnC">Category</label>
         <select id="pnC"></select>
+        <label for="pnS">Size (optional, e.g. 80ml, 1pc)</label>
+        <input id="pnS" autocomplete="off" placeholder="80ml">
+        <label>Tags (tap to choose)</label>
+        <div class="tagpick" id="pnTags"></div>
         <label for="pnU">Customisation</label>
         <select id="pnU"></select>
         <label>Picture (optional)</label>
@@ -1102,6 +1135,7 @@ var expanded = {};
 var curCat = '';
 var CATS = {perfume:'Perfume',edibles:'Edibles',cosmetics:'Cosmetics',gadgets:'Gadgets'};
 var CUSTOM = {text:'Text',textpic:'Text and Picture',pic:'Picture'};
+var TAGS = ['Man','Women','Couple','Kids','Jewellery','Hand made','Customized'];
 function catOk(p){return !curCat||(curCat==='none'?!p.category:p.category===curCat)}
 // WhatsApp Business number for the public "Ask" button (country code first, no + or spaces).
 var WA_NUMBER = '8801342054583';
@@ -1149,10 +1183,11 @@ function editorHtml(){
     +'<div class="full"><label>Product name</label><input name="name" required value="'+esc(d.name)+'"></div>'
     +'<div><label>Wholesale price (W)</label><input name="ws" type="number" step="any" min="0" required inputmode="decimal" value="'+esc(d.ws)+'"></div>'
     +'<div><label>Retail price (R)</label><input name="rt" type="number" step="any" min="0" required inputmode="decimal" value="'+esc(d.rt)+'"></div>'
-    +'<div><label>Tag (optional)</label><input name="nt" value="'+esc(d.nt)+'"></div>'
+    +'<div><label>Size (e.g. 80ml)</label><input name="nt" value="'+esc(d.nt)+'"></div>'
     +'<div><label>Availability</label><select name="stock"><option value="">Not set</option><option value="in"'+(d.stock==='in'?' selected':'')+'>In stock</option><option value="out"'+(d.stock==='out'?' selected':'')+'>Out of stock</option></select></div>'
     +'<div><label>Label</label><select name="label"><option value="">None</option><option value="new"'+(d.label==='new'?' selected':'')+'>New</option><option value="offer"'+(d.label==='offer'?' selected':'')+'>Offer</option></select></div>'
     +'<div><label>Category</label><select name="cat"><option value="">Not set</option>'+Object.keys(CATS).map(function(k){return '<option value="'+k+'"'+(d.cat===k?' selected':'')+'>'+CATS[k]+'</option>'}).join('')+'</select></div>'
+    +'<div class="full"><label>Tags (tap to choose)</label><div class="tagpick">'+TAGS.map(function(t){return '<button type="button" class="tagbtn'+((d.tags||[]).indexOf(t)>=0?' on':'')+'" data-a="tagt" data-tag="'+t+'">'+t+'</button>'}).join('')+'</div></div>'
     +'<div class="full"><label>Description (optional)</label><textarea name="desc" style="min-height:70px">'+esc(d.desc)+'</textarea></div>'
     +'<div><label>Offer price (optional)</label><input name="offer" type="number" step="any" min="0" inputmode="decimal" value="'+esc(d.offer)+'"></div>'
     +'<div><label>Customisation</label><select name="custom" style="width:100%"><option value="">None</option>'+Object.keys(CUSTOM).map(function(k){return '<option value="'+k+'"'+(d.custom===k?' selected':'')+'>'+CUSTOM[k]+'</option>'}).join('')+'</select></div>'
@@ -1171,7 +1206,7 @@ function editorHtml(){
 function grab(){
   var ed=$('ed');if(!ed||!inline)return;
   function v(n){return ed.querySelector('[name='+n+']').value}
-  inline.draft={name:v('name'),ws:v('ws'),rt:v('rt'),nt:v('nt'),stock:v('stock'),label:v('label'),cat:v('cat'),desc:v('desc'),offer:v('offer'),custom:v('custom'),hn:ed.querySelector('[name=hn]').checked,hg:ed.querySelector('[name=hg]').checked,photo:(inline.draft&&inline.draft.photo)||'',photos:(inline.draft&&inline.draft.photos)||[]};
+  inline.draft={name:v('name'),ws:v('ws'),rt:v('rt'),nt:v('nt'),stock:v('stock'),label:v('label'),cat:v('cat'),desc:v('desc'),offer:v('offer'),custom:v('custom'),hn:ed.querySelector('[name=hn]').checked,hg:ed.querySelector('[name=hg]').checked,photo:(inline.draft&&inline.draft.photo)||'',photos:(inline.draft&&inline.draft.photos)||[],tags:(inline.draft&&inline.draft.tags)||[]};
 }
 
 /* ---------- Search ---------- */
@@ -1249,7 +1284,7 @@ function showNew(){}
 function dateToday(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 $('pdate').value=dateToday();
 function matchingProducts(q){var nq=norm(q);if(!nq)return [];return items.map(function(p){return {p:p,r:rank(p,nq)}}).filter(function(x){return x.r>=0}).sort(function(a,b){return a.r-b.r||String(a.p.name).localeCompare(String(b.p.name))}).slice(0,8).map(function(x){return x.p})}
-function showSuggestions(){var box=$('suggestions'),q=$('name').value.trim();if(selectedExisting&&norm(selectedExisting.name)!==norm(q))selectedExisting=null;var found=matchingProducts(q);if(!q||!found.length){box.style.display='none';box.innerHTML='';$('pickhint').textContent=selectedExisting?'Purchase will be added to '+selectedExisting.name+' history.':'Select a product from the list. New products are added in Product Management, Material, Product.';toggleNewFields(!selectedExisting);return}box.innerHTML=found.map(function(p){return '<div class="row" data-pick="'+esc(p.id)+'"><div class="main"><div class="nm">'+esc(p.name)+'</div><span class="simlbl">Tap to select</span></div></div>'}).join('');box.style.display='block';$('pickhint').textContent='Select a product from the list below.';toggleNewFields(!selectedExisting)}
+function showSuggestions(){var box=$('suggestions'),q=$('name').value.trim();if(selectedExisting&&norm(selectedExisting.name)!==norm(q))selectedExisting=null;var found=matchingProducts(q);if(!q||!found.length){box.style.display='none';box.innerHTML='';$('pickhint').textContent=selectedExisting?'Purchase will be added to '+selectedExisting.name+' history.':'Select a product from the list. New products are added in Materials, Product.';toggleNewFields(!selectedExisting);return}box.innerHTML=found.map(function(p){return '<div class="row" data-pick="'+esc(p.id)+'"><div class="main"><div class="nm">'+esc(p.name)+'</div><span class="simlbl">Tap to select</span></div></div>'}).join('');box.style.display='block';$('pickhint').textContent='Select a product from the list below.';toggleNewFields(!selectedExisting)}
 function toggleNewFields(show){}
 $('name').addEventListener('input',function(){selectedExisting=null;showSuggestions()});
 $('suggestions').addEventListener('click',function(e){var r=e.target.closest('[data-pick]');if(!r)return;selectedExisting=items.find(function(p){return p.id===r.getAttribute('data-pick')})||null;if(!selectedExisting)return;$('name').value=selectedExisting.name;$('suggestions').style.display='none';$('pickhint').textContent='Selected '+selectedExisting.name+'. Saving will add a purchase to its history; wholesale price will not change.';toggleNewFields(false);$('pprice').focus()});
@@ -1257,7 +1292,7 @@ $('f').addEventListener('submit',async function(e){
   e.preventDefault();if(!canAdd()){setStatus('Only the owner or staff can record purchases.');return}
   var qty=parseFloat($('pqty').value),price=parseFloat($('pprice').value),unit=$('punit').value,date=$('pdate').value,shop=$('pmarket').value.trim();
   var product=selectedExisting;
-  if(!product){setStatus('Select a product from the list first. New products are added in Product Management, Material, Product.');return}
+  if(!product){setStatus('Select a product from the list first. New products are added in Materials, Product.');return}
   if(!date||!unit||!shop||!(qty>0)||!(price>=0))return;
   try{
     var purchase={productId:product.id,productName:product.name,purchaseDate:new Date(date+'T12:00:00').getTime(),quantity:qty,unit:unit,unitPrice:price,totalCost:Math.round(qty*price*100)/100,marketName:shop,notes:$('pnotes').value.trim(),createdAt:Date.now(),createdBy:user?user.uid:''};
@@ -1341,6 +1376,7 @@ $('rows').addEventListener('submit',function(e){
   if(d.custom)p.custom=d.custom;
   if(d.hn)p.hideNormal=true;if(d.hg)p.hideGift=true;
   if(d.photos&&d.photos.length)p.photos=d.photos.slice(0,3);
+  if(d.tags&&d.tags.length)p.tags=d.tags.slice();
   if(inline.mode==='sim'){if(!canAdd())return;p.parent=inline.id;saveProduct(newId(),p,w)}
   else{if(!canEdit())return;var old=items.find(function(x){return x.id===inline.id});if(old&&old.parent)p.parent=old.parent;saveProduct(inline.id,p,w)}
   inline=null;render();
@@ -1354,8 +1390,8 @@ $('rows').addEventListener('change',function(e){
 });
 function openEditor(mode,p){
   inline={mode:mode,id:p.id,draft:mode==='edit'
-    ?{name:p.name,ws:p.wholesale,rt:p.retail,nt:p.note||'',stock:p.stock||'',label:p.label||'',cat:p.category||'',desc:p.description||'',offer:(typeof p.offer==='number'?p.offer:''),custom:p.custom||'',hn:!!p.hideNormal,hg:!!p.hideGift,photo:p.photo||'',photos:(p.photos||[]).slice()}
-    :{name:p.name+' – ',ws:'',rt:'',nt:'',stock:'',label:'',cat:p.category||'',desc:'',offer:'',custom:p.custom||'',hn:false,hg:false,photo:'',photos:[]}};
+    ?{name:p.name,ws:p.wholesale,rt:p.retail,nt:p.note||'',stock:p.stock||'',label:p.label||'',cat:p.category||'',desc:p.description||'',offer:(typeof p.offer==='number'?p.offer:''),custom:p.custom||'',hn:!!p.hideNormal,hg:!!p.hideGift,photo:p.photo||'',photos:(p.photos||[]).slice(),tags:(p.tags||[]).slice()}
+    :{name:p.name+' – ',ws:'',rt:'',nt:'',stock:'',label:'',cat:p.category||'',desc:'',offer:'',custom:p.custom||'',hn:false,hg:false,photo:'',photos:[],tags:(p.tags||[]).slice()}};
   render();
   var ed=$('ed');if(!ed)return;
   var first=ed.querySelector('[name=name]');
@@ -1387,6 +1423,7 @@ $('rows').addEventListener('click',function(e){
   var a=b.getAttribute('data-a');
   if(a==='cancel'){inline=null;render();return}
   if(a==='rmphoto'){grab();inline.draft.photo='';render();return}
+  if(a==='tagt'){grab();var tg=b.getAttribute('data-tag'),ts=inline.draft.tags||(inline.draft.tags=[]),ix=ts.indexOf(tg);if(ix>=0)ts.splice(ix,1);else ts.push(tg);render();return}
   if(a==='rmxp'){grab();(inline.draft.photos||[]).splice(Number(b.getAttribute('data-i')),1);render();return}
   var id=b.getAttribute('data-id');
   var p=items.find(function(x){return x.id===id});
@@ -1698,7 +1735,7 @@ function pmShow(v){
   pmView=v;
   const map={home:'pmHome',mat:'pmMat',prod:'pmProd',craft:'pmCraft',orders:'pmOrders'};
   Object.keys(map).forEach(function(k){$(map[k]).hidden=(k!==v)});
-  $('pmTitle').textContent=v==='home'?'Product Management':v==='orders'?'Process':v==='mat'?'Material':v==='prod'?'New product':CRAFT_LABEL[craftKind];
+  $('pmTitle').textContent=v==='home'?'Materials':v==='orders'?'Process':v==='mat'?'Material':v==='prod'?'New product':CRAFT_LABEL[craftKind];
   pmMsg('');$('pmBody').scrollTop=0;
 }
 function openPM(){
@@ -1706,6 +1743,7 @@ function openPM(){
   const c=$('pnC');
   if(!c.options.length){
     c.innerHTML='<option value="">Not set</option>'+Object.keys(CATS).map(function(k){return '<option value="'+k+'">'+CATS[k]+'</option>'}).join('');
+    $('pnTags').innerHTML=TAGS.map(function(t){return '<button type="button" class="tagbtn" data-tag="'+t+'">'+t+'</button>'}).join('');
     $('pnU').innerHTML='<option value="">None</option>'+Object.keys(CUSTOM).map(function(k){return '<option value="'+k+'">'+CUSTOM[k]+'</option>'}).join('');
   }
   $('pm').hidden=false;document.body.style.overflow='hidden';pmShow('home');
@@ -1749,7 +1787,7 @@ function showPnPic(){
 $('pmBack').addEventListener('click',function(){
   if(pmView==='craft'&&craftEdit){closeCraftForm();return}
   if(pmView==='orders'){closePM();return}
-  if(pmView==='prod'||pmView==='craft'){pmShow('mat');return}
+  if(pmView==='prod'||pmView==='craft'){pmShow('home');return}
   if(pmView==='mat'){pmShow('home');return}
   closePM();
 });
@@ -1808,6 +1846,7 @@ $('pnF').addEventListener('change',function(){
     });
   });
 });
+$('pnTags').addEventListener('click',function(e){const b=e.target.closest('.tagbtn');if(b)b.classList.toggle('on')});
 $('pnThumbs').addEventListener('click',function(e){if(e.target.id==='pnRm'){pnPhoto='';pnExtra=[];showPnPic()}});
 $('pnForm').addEventListener('submit',async function(e){
   e.preventDefault();
@@ -1823,12 +1862,14 @@ $('pnForm').addEventListener('submit',async function(e){
   if($('pnHG').checked)p.hideGift=true;
   if(pnPhoto)p.photo=pnPhoto;
   if(pnExtra.length)p.photos=pnExtra.slice();
+  const sz=$('pnS').value.trim();if(sz)p.note=sz;
+  const tg=Array.prototype.map.call($('pnTags').querySelectorAll('.tagbtn.on'),function(b){return b.getAttribute('data-tag')});if(tg.length)p.tags=tg;
   $('pnSave').disabled=true;
   try{
     const id=newId(),b=writeBatch(db);
     b.set(doc(db,'products',id),p);b.set(doc(db,'costs',id),{wholesale:w});
     await b.commit();
-    $('pnForm').reset();pnPhoto='';pnExtra=[];showPnPic();pmMsg('Product saved.',true);
+    $('pnForm').reset();pnPhoto='';pnExtra=[];showPnPic();Array.prototype.forEach.call($('pnTags').querySelectorAll('.tagbtn.on'),function(b){b.classList.remove('on')});pmMsg('Product saved.',true);
   }catch(err){pmMsg('Could not save: '+niceErr(err))}
   finally{$('pnSave').disabled=false}
 });
@@ -2569,6 +2610,7 @@ function openPDetail(id,tries){
   $('pdGal').scrollLeft=0;
   $('pdName').textContent=p.name;
   $('pdPrice').innerHTML=priceHtml(p)+(p.note?' <span class="chip" style="margin-top:0">'+esc(p.note)+'</span>':'');
+  $('pdTags').innerHTML=(p.tags||[]).map(function(t){return '<span class="chip" style="margin-top:0">'+esc(t)+'</span>'}).join('');
   $('pdDesc').textContent=p.description||'';$('pdDesc').hidden=!p.description;
   const out=p.stock==='out';
   $('pdOut').hidden=!out;$('pdOrder').hidden=out;$('pdGift').hidden=out||!!p.hideGift;
