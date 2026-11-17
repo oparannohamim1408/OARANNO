@@ -455,6 +455,16 @@ body.matadd .camb{width:100%;border-radius:999px}
 .rgq{width:64px!important;margin:0!important;padding:6px 8px!important}
 .rggrp{font-weight:800;color:#C20019;margin:10px 0 2px;font-size:.85rem;text-transform:uppercase}
 
+
+/* Order card buttons, customer page */
+.oh{flex-wrap:wrap}
+.ohl{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}
+.oiconb{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:1.5px solid #C20019;border-radius:50%;background:#FFFFFF;text-decoration:none}
+.custbar{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:#FFFFFF;color:#1A1A1A;border:1.5px solid #C20019;border-radius:999px;padding:9px 14px;margin:6px 0;font-weight:600;box-shadow:none}
+.custbar span{color:#6B6B6B;font-weight:500;font-size:.8rem}
+.custbar i{margin-left:auto;color:#C20019;font-style:normal;font-size:1.2rem}
+a.pmb{text-decoration:none}
+
 /* Product Management */
 .pmb{display:flex;align-items:center;justify-content:space-between;width:100%;text-align:left;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:10px;font-size:1rem;font-weight:600;box-shadow:none}
 .pmb small{display:block;color:var(--muted);font-weight:400;font-size:.8rem;margin-top:2px}
@@ -532,7 +542,7 @@ body.matadd .camb{width:100%;border-radius:999px}
         <span class="bname" aria-label="Oparanno" title="Oparanno">Paranno</span>
         <div class="bicons">
           <button type="button" class="bic" id="bbell" aria-label="Notifications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="bn" id="bellN" hidden></span></button>
-          <button type="button" class="bic staff-menu-trigger" id="menuBtn" aria-label="Menu" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M7 12h10M11 18h2"/></svg></button>
+          <button type="button" class="bic staff-menu-trigger" id="menuBtn" aria-label="Menu" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
           <div class="staff-menu" id="staffMenu" hidden>
             <div class="fsec">Category</div>
             <button type="button" data-fcat="perfume">Perfume</button>
@@ -671,10 +681,11 @@ body.matadd .camb{width:100%;border-radius:999px}
     <button type="button" class="bic" id="gBack" aria-label="Back">&larr;</button>
     <span class="ntitle">Gift</span>
     <button type="button" class="gmy" id="gMy" hidden>My Gift</button>
-    <button type="button" class="bic" id="gMenuBtn" aria-label="Filter"><svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26" aria-hidden="true"><circle cx="12" cy="5" r="2.2"/><circle cx="12" cy="12" r="2.2"/><circle cx="12" cy="19" r="2.2"/></svg></button>
+    <button type="button" class="bic" id="gMenuBtn" aria-label="Filter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" width="26" height="26" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
     <div class="gmenu" id="gMenu" hidden></div>
   </div>
   <div class="nbody">
+    <div class="msg ok" id="gForBar" hidden></div>
     <div class="list pubgrid" id="gGrid"></div>
   </div>
 </div>
@@ -700,8 +711,8 @@ body.matadd .camb{width:100%;border-radius:999px}
     <p class="hint">Signed in as <b id="acEmail"></b></p>
     <label for="acN">Name</label>
     <input id="acN" autocomplete="name">
-    <label for="acP">Phone number</label>
-    <input id="acP" inputmode="tel" autocomplete="tel">
+    <label for="acP">WhatsApp number</label>
+    <input id="acP" inputmode="tel" autocomplete="tel" placeholder="01XXXXXXXXX">
     <label for="acA">Address</label>
     <textarea id="acA" style="min-height:90px" autocomplete="street-address"></textarea>
     <div class="msg" id="acMsg" role="status"></div>
@@ -826,6 +837,13 @@ body.matadd .camb{width:100%;border-radius:999px}
     <p class="hint noprint">Tap Print / Save as PDF. In the print window choose “Save as PDF” to download it.</p>
     <div id="invDoc"></div>
   </div>
+</div>
+<div class="npanel" id="custview" hidden role="dialog" aria-label="Customer">
+  <div class="nhead">
+    <button type="button" class="bic" id="cvBack" aria-label="Back">&larr;</button>
+    <span class="ntitle">Customer</span>
+  </div>
+  <div class="nbody"><div id="cvBody"></div></div>
 </div>
 <div class="gmodal" id="gsheet" hidden><div id="gsBody"></div></div>
 <div class="gmodal" id="gpop" hidden><div>
@@ -1958,7 +1976,7 @@ function priceHtml(p){
   return (typeof p.offer==='number'&&p.offer>=0)?'<s style="opacity:.6;font-size:.8em;font-weight:500">'+money(p.retail)+'</s> '+money(p.offer):money(p.retail);
 }
 function giftPrice(p){return (typeof p.offer==='number'&&p.offer>=0)?p.offer:(Number(p.retail)||0)}
-function syncOverflow(){document.body.style.overflow=['gift','mygift','acct','pm','notes','order','myorders','porder','notif','team','pdetail','invoice','mepanel'].some(function(id){return !$(id).hidden})?'hidden':''}
+function syncOverflow(){document.body.style.overflow=['gift','mygift','acct','pm','notes','order','myorders','porder','notif','team','pdetail','invoice','mepanel','custview'].some(function(id){return !$(id).hidden})?'hidden':''}
 function gToast(t){const e=$('gToast');e.textContent=t;e.hidden=false;clearTimeout(toastT);toastT=setTimeout(function(){e.hidden=true},2600)}
 function draftCount(){return draft.reduce(function(n,i){return n+(Number(i.qty)||0)},0)}
 
@@ -1968,7 +1986,7 @@ function menuSync(){
   const cu=!!user&&!staffish;
   if(role!=='owner'&&!$('team').hidden)closeTeam();
   const n=draftCount();
-  $('gMy').hidden=!cu;$('gMy').textContent=n?('My Gift ('+n+')'):'My Gift';
+  $('gMy').hidden=!(cu||draftFor);$('gMy').textContent=n?('My Gift ('+n+')'):'My Gift';
   ['bnGift','bnDraft','bnOrder'].forEach(function(id){$(id).hidden=staffish});
   ['bnMat','bnProc','bnEntry'].forEach(function(id){$(id).hidden=!staffish});
   setBadge('bnDraftN',cu?n:0);
@@ -2046,7 +2064,7 @@ $('acSave').addEventListener('click',async function(){
   if(!user)return;
   const name=$('acN').value.trim(),phone=$('acP').value.trim(),address=$('acA').value.trim();
   if(!name){acMsg('Enter your name.');return}
-  if(phone.replace(/\D/g,'').length<7||!/^[0-9+\-\s()]+$/.test(phone)){acMsg('Enter a valid phone number.');return}
+  if(phone.replace(/\D/g,'').length<7||!/^[0-9+\-\s()]+$/.test(phone)){acMsg('Enter a valid WhatsApp number.');return}
   if(!address){acMsg('Enter your address.');return}
   const now=Date.now();
   $('acSave').disabled=true;
@@ -2078,7 +2096,7 @@ function openGift(quiet){
   startCraftPub();renderGift();menuSync();
   if(!user&&!giftSkipped&&!quiet)showGPop('first');
 }
-function closeGift(){$('gift').hidden=true;hideGSheet();hideGPop();syncOverflow()}
+function closeGift(){if(draftFor)endDraftFor();$('gift').hidden=true;hideGSheet();hideGPop();syncOverflow()}
 function giftItems(){
   const out=[];
   if(!gSel.length&&!gTags.length)return out;
@@ -2198,20 +2216,21 @@ $('gpSkip').addEventListener('click',function(){giftSkipped=true;pendingAdd=null
 
 /* ----- draft ----- */
 function addToDraft(it,qty,text,pic){
-  if(canAdd()){gToast('Staff accounts cannot make a gift draft. Use a customer account.');hideGSheet();return}
+  if(canAdd()&&!draftFor){gToast('Staff accounts cannot make a gift draft. Use a customer account.');hideGSheet();return}
   if(!user){hideGSheet();pendingAdd={it:it,qty:qty,text:text,pic:pic};showGPop('login');return}
-  if(!cust){hideGSheet();pendingAdd={it:it,qty:qty,text:text,pic:pic};openAcct('new');return}
+  if(!cust&&!draftFor){hideGSheet();pendingAdd={it:it,qty:qty,text:text,pic:pic};openAcct('new');return}
   const key=it.type+':'+it.id+'|'+(text||'')+'|'+(pic||'');
   const list=draft.map(function(x){return Object.assign({},x)});
   const ex=list.find(function(x){return x.k===key});
   if(ex)ex.qty=(Number(ex.qty)||0)+qty;
   else list.push({k:key,type:it.type,id:it.id,name:it.name,price:Number(it.price)||0,qty:qty,text:text||'',pic:pic||'',parts:it.parts||[]});
-  saveDraft(list);hideGSheet();gToast('Added to your gift draft.');
+  saveDraft(list);hideGSheet();gToast(draftFor?('Added to '+draftFor.name+'’s draft.'):'Added to your gift draft.');
 }
 async function saveDraft(list){
   draft=list;menuSync();if(!$('mygift').hidden)renderMyGift();
-  try{await setDoc(doc(db,'drafts',user.uid),{uid:user.uid,items:list,updatedAt:Date.now()})}
-  catch(err){gToast('Could not save: '+niceErr(err))}
+  const tu=draftFor?draftFor.uid:user.uid;
+  try{await setDoc(doc(db,'drafts',tu),{uid:tu,items:list,updatedAt:Date.now()})}
+  catch(err){gToast('Could not save: '+((err&&err.code==='permission-denied')?'not allowed (Firebase rules).':niceErr(err)))}
 }
 
 /* ----- My Gift ----- */
@@ -2221,8 +2240,8 @@ function draftLookup(it){
   const x=craftAll.find(function(c){return c.id===it.id});return x?{photo:x.photo,price:Number(x.price)||0}:{photo:'',price:Number(it.price)||0};
 }
 function openMyGift(){
-  if(!user||canAdd())return;
-  startCraftPub();$('mygift').hidden=false;syncOverflow();$('mgMsg').textContent='';renderMyGift();
+  if(!user||(canAdd()&&!draftFor))return;
+  startCraftPub();$('mygift').hidden=false;syncOverflow();$('mgMsg').textContent='';renderMyGift();$('mgOrder').hidden=canAdd();
 }
 function closeMyGift(){$('mygift').hidden=true;syncOverflow()}
 function renderMyGift(){
@@ -2494,8 +2513,12 @@ function soCard(o){
   const final=(st==='archived'||st==='cancelled');
   const nextKey=(idx>=0&&idx<stages.length-1)?stages[idx+1]:'';
   const opts=soStatuses(oType(o)).concat(['cancelled']).map(function(k){return '<option value="'+k+'"'+(k===st?' selected':'')+'>'+esc(stageLabel(k))+'</option>'}).join('');
-  let h='<div class="ocard" data-id="'+esc(o.id)+'"><div class="oh"><b>#'+esc(o.id.slice(-5).toUpperCase())+' · '+esc(fmtDate(o.createdAt))+'</b><span class="ostat s-'+esc(st)+'">'+esc(stageLabel(st))+'</span></div>'
-    +'<div class="ol"><b>Customer:</b> '+esc(o.customerName)+' · '+esc(o.customerPhone)+'<br><small>'+esc(o.customerEmail)+'</small></div>';
+  const code5=o.id.slice(-5).toUpperCase();
+  let h='<div class="ocard" data-id="'+esc(o.id)+'"><div class="oh"><span class="ohl"><b>#'+esc(code5)+' · '+esc(fmtDate(o.createdAt))+'</b>'
+    +(o.customerPhone?'<a class="oiconb" href="'+esc(waHref(o.customerPhone,'Hello, this is OPARANNO about your order #'+code5))+'" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp the customer"><img src="data:image/webp;base64,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" alt="" width="18" height="18"></a>':'')
+    +(o.customerEmail?'<a class="oiconb" href="'+esc(mailHref(o.customerEmail,'OPARANNO order #'+code5))+'" aria-label="Email the customer"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#C20019" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></a>':'')
+    +'</span><span class="ostat s-'+esc(st)+'">'+esc(stageLabel(st))+'</span></div>'
+    +'<button type="button" class="custbar" data-oa="cust"><span>Customer</span><b>'+esc(o.customerName||'Customer')+'</b><i>›</i></button>';
   if(gift){
     h+='<div class="ol"><b>Receiver:</b> '+esc(o.receiverName)+' · '+esc(o.receiverPhone)+' ('+(o.sendTo==='me'?'send to customer':'send to relative')+')<br><small>'+esc(o.address)+'</small></div>'
       +'<div class="ol"><b>Occasion:</b> '+esc(o.occasion)+' · needed '+esc(fmtDay(o.dateFrom))+' to '+esc(fmtDay(o.dateTo))+'</div>'
@@ -2558,7 +2581,8 @@ $('soList').addEventListener('click',async function(e){
   const b=e.target.closest('[data-oa]');if(!b||!canAdd())return;
   const card=b.closest('.ocard'),id=card.getAttribute('data-id'),o=ordersAll.find(function(x){return x.id===id});if(!o)return;
   const a=b.getAttribute('data-oa');
-  if(a==='print'){openInvoice(o,'invoice')}
+  if(a==='cust'){openCustView(o)}
+  else if(a==='print'){openInvoice(o,'invoice')}
   else if(a==='slip'){openInvoice(o,'slip')}
   else if(a==='next'){const stg=stagesOf(o),i=stg.indexOf(normStatus(o));if(i>=0&&i<stg.length-1)await setOrderStatus(o,stg[i+1])}
   else if(a==='set'){const sel=card.querySelector('.ost');if(sel)await setOrderStatus(o,sel.value)}
@@ -2689,7 +2713,8 @@ $('nfList').addEventListener('click',async function(e){
   const c=e.target.closest('.ncard');if(!c||!user)return;
   const n=notifs.find(function(x){return x.id===c.getAttribute('data-id')});if(!n)return;
   if((n.readBy||[]).indexOf(user.uid)<0){try{await updateDoc(doc(db,'notifications',n.id),{readBy:arrayUnion(user.uid)})}catch(err){}}
-  if(n.orderId){closeNotif();if(notifMode==='staff')openOrders();else openMyOrders()}
+  if(n.kind==='draft'){closeNotif();openMyGift()}
+  else if(n.orderId){closeNotif();if(notifMode==='staff')openOrders();else openMyOrders()}
 });
 $('nfAll').addEventListener('click',async function(){
   if(!user)return;
@@ -3074,6 +3099,60 @@ $('rgDel').addEventListener('click',async function(){
   if(!window.confirm('Delete this ready-made gift?'))return;
   try{await deleteDoc(doc(db,'readyGifts',rgEdit.id));closePM()}catch(err){rgMsg('Could not delete: '+niceErr(err))}
 });
+
+
+/* ---------- Customer page for staff, WhatsApp / email links, gift draft for a customer ---------- */
+let draftFor=null,unsubDraftFor=null,draftReturn=false,cvName='',cvUid='';
+function waHref(num,text){
+  let d=String(num||'').replace(/\D/g,'');
+  if(d.indexOf('880')!==0&&d.charAt(0)==='0')d='880'+d.slice(1);
+  return 'https://wa.me/'+d+(text?'?text='+encodeURIComponent(text):'');
+}
+function mailHref(em,subject){return 'mailto:'+String(em||'')+(subject?'?subject='+encodeURIComponent(subject):'')}
+async function notifyUid(uid,title,text,kind){
+  try{await setDoc(doc(db,'notifications',newId()),{forStaff:false,toUid:uid,title:title,text:text,orderId:'',kind:kind||'',createdAt:Date.now(),readBy:[]})}catch(e){}
+}
+async function openCustView(o){
+  if(!canAdd())return;
+  cvUid=o.uid;
+  let c=null;try{const sn=await getDoc(doc(db,'customers',o.uid));if(sn.exists())c=sn.data()}catch(e){}
+  const name=(c&&c.name)||o.customerName||'Customer',phone=(c&&c.phone)||o.customerPhone||'',email=(c&&c.email)||o.customerEmail||'',addr=(c&&c.address)||'';
+  cvName=name;
+  const mine=ordersAll.filter(function(x){return x.uid===o.uid}).sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0)});
+  $('cvBody').innerHTML='<div class="ocard"><div class="ol" style="font-size:1.1rem"><b>'+esc(name)+'</b></div>'
+    +'<div class="ol">WhatsApp: '+esc(phone||'-')+'</div><div class="ol">Email: '+esc(email||'-')+'</div>'
+    +'<div class="ol"><small>'+esc(addr||'No address saved')+'</small></div></div>'
+    +(phone?'<a class="pmb" href="'+esc(waHref(phone,'Hello, this is OPARANNO.'))+'" target="_blank" rel="noopener noreferrer"><span>WhatsApp<small>'+esc(phone)+'</small></span><i>›</i></a>':'')
+    +(email?'<a class="pmb" href="'+esc(mailHref(email,'OPARANNO'))+'"><span>Email<small>'+esc(email)+'</small></span><i>›</i></a>':'')
+    +'<button type="button" class="pmb" id="cvDraft"><span>Create gift draft<small>Add gifts to '+esc(name)+'’s Draft</small></span><i>›</i></button>'
+    +'<h3 style="margin:16px 0 6px;font-size:1.05rem">Orders ('+mine.length+')</h3>'
+    +(mine.length?mine.map(function(x){return '<div class="ocard"><div class="oh"><b>#'+esc(x.id.slice(-5).toUpperCase())+' · '+esc(fmtDate(x.createdAt))+'</b><span class="ostat s-'+esc(normStatus(x))+'">'+esc(stageLabel(normStatus(x)))+'</span></div><div class="ol">'+(oType(x)==='gift'?'Gift order':'Product order')+' · Total <b>'+esc(money(grand(x)))+'</b></div></div>'}).join(''):'<p class="hint">No orders yet.</p>');
+  $('custview').hidden=false;syncOverflow();$('custview').querySelector('.nbody').scrollTop=0;
+}
+function closeCustView(){$('custview').hidden=true;syncOverflow()}
+$('cvBack').addEventListener('click',closeCustView);
+$('cvBody').addEventListener('click',function(e){if(e.target.closest('#cvDraft'))startDraftFor({uid:cvUid,name:cvName})});
+function stopDraftForSub(){if(unsubDraftFor){try{unsubDraftFor()}catch(e){}unsubDraftFor=null}}
+function startDraftFor(c){
+  if(!canAdd()||!c.uid)return;
+  stopDraftForSub();draftFor={uid:c.uid,name:c.name||'Customer'};draft=[];
+  unsubDraftFor=onSnapshot(doc(db,'drafts',c.uid),function(snap){
+    draft=snap.exists()?(snap.data().items||[]):[];
+    menuSync();if(!$('mygift').hidden)renderMyGift();
+  },function(){draft=[]});
+  closeCustView();draftReturn=!$('pm').hidden;closePM();
+  openGift();
+  $('gForBar').textContent='Drafting for '+draftFor.name+'. Everything you add goes to their Draft.';$('gForBar').hidden=false;
+  menuSync();
+}
+function endDraftFor(){
+  if(!draftFor)return;
+  const f=draftFor,had=draft.length;
+  stopDraftForSub();draftFor=null;draft=[];$('gForBar').hidden=true;menuSync();
+  closeMyGift();
+  if(had)notifyUid(f.uid,'Gift draft','We made a gift draft for you. Open Draft to see it.','draft');
+  if(draftReturn){draftReturn=false;setTimeout(function(){openOrders()},60)}
+}
 
 // Show the public price list straight away; sign-in state is applied as soon as Firebase answers.
 route();
