@@ -465,6 +465,12 @@ body.matadd .camb{width:100%;border-radius:999px}
 .custbar i{margin-left:auto;color:#C20019;font-style:normal;font-size:1.2rem}
 a.pmb{text-decoration:none}
 
+
+/* Surprise slip, saved addresses */
+.slipsur{background:#C20019;color:#FFFFFF;font-weight:800;padding:10px;border-radius:6px;margin-bottom:12px;font-size:16px;line-height:1.35}
+@media print{.slipsur{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+#acAddrs .nfile{padding:6px 0}
+
 /* Product Management */
 .pmb{display:flex;align-items:center;justify-content:space-between;width:100%;text-align:left;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:10px;font-size:1rem;font-weight:600;box-shadow:none}
 .pmb small{display:block;color:var(--muted);font-weight:400;font-size:.8rem;margin-top:2px}
@@ -715,6 +721,11 @@ a.pmb{text-decoration:none}
     <input id="acP" inputmode="tel" autocomplete="tel" placeholder="01XXXXXXXXX">
     <label for="acA">Address</label>
     <textarea id="acA" style="min-height:90px" autocomplete="street-address"></textarea>
+    <label>More addresses (optional)</label>
+    <div id="acAddrs"></div>
+    <input id="acAL" placeholder="Label (Home, Office…)" autocomplete="off">
+    <textarea id="acAT" style="min-height:60px" placeholder="Address"></textarea>
+    <div class="nact" style="margin-top:0"><button type="button" class="ghost" id="acAAdd">+ Add this address</button></div>
     <div class="msg" id="acMsg" role="status"></div>
     <div class="nact"><button type="button" id="acSave">Confirm</button><button type="button" class="ghost" id="acSkip">Skip for now</button></div>
   </div>
@@ -742,8 +753,11 @@ a.pmb{text-decoration:none}
       <input id="oF" type="date">
       <label for="oT">Needed by (last date)</label>
       <input id="oT" type="date">
+      <div id="oAddrW" hidden><label for="oAddrSel">Saved address</label><select id="oAddrSel" style="width:100%"></select></div>
       <label for="oA">Receiver address</label>
       <textarea id="oA" style="min-height:90px"></textarea>
+      <label for="oStyle">Gift style</label>
+      <select id="oStyle" style="width:100%"><option value="regular">Regular</option><option value="surprise">Surprise (the receiver should not know before delivery)</option></select>
       <label for="oDel">Delivery type</label>
       <select id="oDel" style="width:100%"></select>
       <div id="oZoneW" hidden>
@@ -776,7 +790,7 @@ a.pmb{text-decoration:none}
     <div id="oDone" hidden>
       <h3 style="margin:0 0 6px">Order received</h3>
       <p class="hint">Thank you! We will check your payment and start processing your gift. You can follow it in My Orders.</p>
-      <div class="nact"><button type="button" id="oToOrders">My Orders</button><button type="button" class="ghost" id="oClose">Close</button></div>
+      <div class="nact"><button type="button" id="oWa">Send order details on WhatsApp</button><button type="button" id="oToOrders">My Orders</button><button type="button" class="ghost" id="oClose">Close</button></div>
     </div>
   </div>
 </div>
@@ -800,6 +814,7 @@ a.pmb{text-decoration:none}
       <input id="poN" autocomplete="name">
       <label for="poP">Phone</label>
       <input id="poP" inputmode="tel" autocomplete="tel">
+      <div id="poAddrW" hidden><label for="poAddrSel">Saved address</label><select id="poAddrSel" style="width:100%"></select></div>
       <label for="poA">Address</label>
       <textarea id="poA" style="min-height:90px" autocomplete="street-address"></textarea>
       <div class="ocard" style="margin-top:12px"><div class="ol">Payment: <b>Cash on delivery</b></div><div class="ol" style="font-size:1.05rem">Total to pay on delivery: <b id="poTotal"></b></div></div>
@@ -809,7 +824,7 @@ a.pmb{text-decoration:none}
     <div id="poDone" hidden>
       <h3 style="margin:0 0 6px">Order received</h3>
       <p class="hint">Thank you! We will call you to confirm your order. You pay cash on delivery. You can follow it in My Orders.</p>
-      <div class="nact"><button type="button" id="poToOrders">My Orders</button><button type="button" class="ghost" id="poClose">Close</button></div>
+      <div class="nact"><button type="button" id="poWa">Send order details on WhatsApp</button><button type="button" id="poToOrders">My Orders</button><button type="button" class="ghost" id="poClose">Close</button></div>
     </div>
   </div>
 </div>
@@ -908,6 +923,7 @@ a.pmb{text-decoration:none}
         <input id="cN" placeholder="Name" autocomplete="off">
         <label for="cP">Price</label>
         <input id="cP" type="number" step="any" min="0" inputmode="decimal">
+        <div id="cUW" hidden><label for="cU">Customisation</label><select id="cU" style="width:100%"></select></div>
         <label>Picture</label>
         <div class="ppic"><label class="pick">+ Add picture<input type="file" accept="image/*" id="cF"></label><span id="cPw" hidden><img id="cImg" alt=""> <button type="button" class="ghost" id="cRm">Remove</button></span></div>
         <label class="pmtog"><input type="checkbox" id="cH"> Hide from Gift page</label>
@@ -1865,6 +1881,8 @@ function openCraftForm(x){
   craftEdit=x?x:{id:newId(),isNew:true};craftPhoto=x&&x.photo?x.photo:'';
   $('cN').value=x?(x.name||''):'';$('cP').value=x&&x.price!=null?x.price:'';$('cH').checked=!!(x&&x.hidden);
   $('cDel').hidden=!x;showCraftPic();pmMsg('');
+  const cw=(craftKind==='card'||craftKind==='outer');$('cUW').hidden=!cw;
+  if(cw){$('cU').innerHTML='<option value="">None</option>'+Object.keys(CUSTOM).map(function(k){return '<option value="'+k+'">'+CUSTOM[k]+'</option>'}).join('');$('cU').value=(x&&x.custom)||''}
   $('cForm').hidden=false;$('cList').hidden=true;$('cTop').hidden=true;$('cN').focus();
 }
 function closeCraftForm(){if(pmFromMat){craftEdit=null;closePM();return}craftEdit=null;$('cForm').hidden=true;$('cList').hidden=false;$('cTop').hidden=false;renderCraftList()}
@@ -1916,6 +1934,7 @@ $('cSave').addEventListener('click',async function(){
   const now=Date.now();
   const d={kind:craftKind,name:name,price:price,hidden:$('cH').checked,createdAt:craftEdit.createdAt||now,updatedAt:now};
   if(craftPhoto)d.photo=craftPhoto;
+  if((craftKind==='card'||craftKind==='outer')&&$('cU').value)d.custom=$('cU').value;
   $('cSave').disabled=true;
   try{await setDoc(doc(db,'craftItems',craftEdit.id),d);closeCraftForm();pmMsg('Saved.',true)}
   catch(err){pmMsg('Could not save: '+craftErr(err))}
@@ -2053,6 +2072,7 @@ function openAcct(mode){
   $('acN').value=(cust&&cust.name)||user.displayName||'';
   $('acP').value=(cust&&cust.phone)||'';
   $('acA').value=(cust&&cust.address)||'';
+  acAddrs=((cust&&cust.addresses)||[]).slice();acAddrDraw();$('acAL').value='';$('acAT').value='';
   $('acSave').textContent=mode==='new'?'Confirm':'Save';
   $('acSkip').hidden=mode!=='new';
   acMsg('');$('acct').hidden=false;syncOverflow();
@@ -2069,8 +2089,8 @@ $('acSave').addEventListener('click',async function(){
   const now=Date.now();
   $('acSave').disabled=true;
   try{
-    await setDoc(doc(db,'customers',user.uid),{uid:user.uid,email:user.email||'',name:name,phone:phone,address:address,createdAt:(cust&&cust.createdAt)||now,updatedAt:now});
-    cust={uid:user.uid,email:user.email||'',name:name,phone:phone,address:address,createdAt:(cust&&cust.createdAt)||now,updatedAt:now};
+    await setDoc(doc(db,'customers',user.uid),{uid:user.uid,email:user.email||'',name:name,phone:phone,address:address,addresses:acAddrs.slice(0,8),createdAt:(cust&&cust.createdAt)||now,updatedAt:now});
+    cust={uid:user.uid,email:user.email||'',name:name,phone:phone,address:address,addresses:acAddrs.slice(0,8),createdAt:(cust&&cust.createdAt)||now,updatedAt:now};
     closeAcct();gToast(acctMode==='new'?'Your account is ready.':'Saved.');afterLoginGo();
   }catch(err){acMsg('Could not save: '+niceErr(err))}
   finally{$('acSave').disabled=false}
@@ -2120,7 +2140,7 @@ function giftItems(){
     craftAll.slice().sort(function(a,b){return (a.createdAt||0)-(b.createdAt||0)}).forEach(function(x){
       if(x.hidden)return;
       if(gSel.indexOf(x.kind)<0)return;
-      out.push({type:x.kind,id:x.id,name:x.name,price:Number(x.price)||0,photo:x.photo});
+      out.push({type:x.kind,id:x.id,name:x.name,price:Number(x.price)||0,photo:x.photo,custom:x.custom});
     });
   }
   return out;
@@ -2128,7 +2148,7 @@ function giftItems(){
 function findGiftItem(type,id){
   if(type==='product'){const p=prods.find(function(x){return x.id===id});return p?{type:'product',id:p.id,name:p.name,price:giftPrice(p),retail:p.retail,offer:p.offer,photo:p.photo,desc:p.description,custom:p.custom,out:p.stock==='out'}:null}
   if(type==='ready'){const r=readyAll.find(function(x){return x.id===id});return r?{type:'ready',id:r.id,name:r.name,price:readyPrice(r),photo:r.photo,desc:r.desc,parts:readyPartsText(r),out:readyOut(r)}:null}
-  const x=craftAll.find(function(c){return c.id===id});return x?{type:x.kind,id:x.id,name:x.name,price:Number(x.price)||0,photo:x.photo}:null;
+  const x=craftAll.find(function(c){return c.id===id});return x?{type:x.kind,id:x.id,name:x.name,price:Number(x.price)||0,photo:x.photo,custom:x.custom}:null;
 }
 function gImg(it){return it.photo?'<img src="'+esc(it.photo)+'" alt="'+esc(it.name)+'" style="width:100%;height:100%;object-fit:contain;display:block">':'<div class="pimgph">'+pubIcon()+'</div>'}
 function gPrice(it){return (it.type==='product'&&typeof it.offer==='number'&&it.offer>=0)?'<s style="opacity:.6;font-size:.8em;font-weight:500">'+money(it.retail)+'</s> '+money(it.offer):money(it.price)}
@@ -2386,7 +2406,7 @@ function renderPay(){
     +(t.curation>0?'<div class="ol">Curation charge (2%): <b>'+esc(money(t.curation))+'</b></div>':'')
     +'<div class="ol">Delivery ('+esc(delivLabel({deliveryType:f.delivery,deliveryZone:f.delivery==='cheapest'?f.zone:''}))+'): <b>'+esc(money(t.delivery))+'</b></div>'
     +'<div class="ol" style="font-size:1.05rem">Total: <b>'+esc(money(t.total))+'</b></div>'
-    +'<hr><div class="ol"><small>To: '+esc(f.name)+', '+esc(f.phone)+'<br>'+esc(f.address)+'<br>'+esc(f.occasion)+' · needed '+esc(fmtDay(f.from))+' to '+esc(fmtDay(f.to))+'</small></div></div>';
+    +'<hr><div class="ol"><small>To: '+esc(f.name)+', '+esc(f.phone)+'<br>'+esc(f.address)+'<br>'+esc(f.occasion)+' · needed '+esc(fmtDay(f.from))+' to '+esc(fmtDay(f.to))+'</small>'+(f.style==='surprise'?'<br><b>Surprise gift</b>':'')+'</div></div>';
   $('oRules').innerHTML=ORDER_RULES.map(function(r){return '<li>'+esc(r)+'</li>'}).join('');
   renderPayChoices();
 }
@@ -2413,7 +2433,8 @@ $('order').addEventListener('click',function(e){
     ordState.to=os.getAttribute('data-os');
     const me=ordState.to==='me';
     $('oN').value=me?(cust.name||''):'';$('oP').value=me?(cust.phone||''):'';$('oA').value=me?(cust.address||''):'';
-    $('oOc').value='';$('oF').value='';$('oT').value='';$('oDel').value='';$('oZoneW').hidden=true;
+    fillAddrSel('oAddrSel','oA',me,'oAddrW');
+    $('oOc').value='';$('oF').value='';$('oT').value='';$('oDel').value='';$('oZoneW').hidden=true;$('oStyle').value='regular';
     oMsg('oMsg1','');oShow('form');return;
   }
   const ot=e.target.closest('[data-ot]');if(ot){ordState.payType=ot.getAttribute('data-ot');renderPayChoices();return}
@@ -2421,7 +2442,7 @@ $('order').addEventListener('click',function(e){
 });
 $('oDel').addEventListener('change',function(){$('oZoneW').hidden=this.value!=='cheapest'});
 $('oNext').addEventListener('click',function(){
-  const f={name:$('oN').value.trim(),phone:$('oP').value.trim(),occasion:$('oOc').value.trim(),from:$('oF').value,to:$('oT').value,address:$('oA').value.trim(),delivery:$('oDel').value,zone:$('oZone').value};
+  const f={name:$('oN').value.trim(),phone:$('oP').value.trim(),occasion:$('oOc').value.trim(),from:$('oF').value,to:$('oT').value,address:$('oA').value.trim(),delivery:$('oDel').value,zone:$('oZone').value,style:$('oStyle').value};
   if(!f.name){oMsg('oMsg1','Enter the receiver name.');return}
   if(f.phone.replace(/\D/g,'').length<7||!/^[0-9+\-\s()]+$/.test(f.phone)){oMsg('oMsg1','Enter a valid receiver number.');return}
   if(!f.occasion){oMsg('oMsg1','Enter the occasion.');return}
@@ -2446,7 +2467,7 @@ $('oPlace').addEventListener('click',async function(){
   const f=ordState.form,t=orderTotals(),now=Date.now(),id=newId();
   const order={
     orderType:'gift',uid:user.uid,customerName:cust.name||'',customerPhone:cust.phone||'',customerEmail:user.email||'',
-    sendTo:ordState.to,receiverName:f.name,receiverPhone:f.phone,occasion:f.occasion,dateFrom:f.from,dateTo:f.to,address:f.address,
+    sendTo:ordState.to,giftStyle:(f.style==='surprise'?'surprise':'regular'),receiverName:f.name,receiverPhone:f.phone,occasion:f.occasion,dateFrom:f.from,dateTo:f.to,address:f.address,
     deliveryType:f.delivery,deliveryZone:f.delivery==='cheapest'?f.zone:'',deliveryCharge:t.delivery,
     items:ordList().map(function(i){return {type:i.type,id:i.id,name:i.name,price:draftLookup(i).price,qty:Number(i.qty)||1,text:i.text||'',pic:i.pic||'',parts:i.parts||[]}}),
     itemsTotal:t.items,curationCharge:t.curation,giftMode:ordState.items?'single':'full',total:t.total,extraCharge:0,extraNote:'',
@@ -2457,6 +2478,7 @@ $('oPlace').addEventListener('click',async function(){
   try{
     await setDoc(doc(db,'orders',id),order);
     notifyStaff('New gift order',(cust.name||'Customer')+' · '+money(t.total),id);
+    lastOrderMsg=orderMsg(order,id);
     if(!ordState.items){try{await setDoc(doc(db,'drafts',user.uid),{uid:user.uid,items:[],updatedAt:Date.now()});draft=[];menuSync();renderMyGift()}catch(e){}}
     oMsg('oMsg2','');oShow('done');
   }catch(err){oMsg('oMsg2','Could not place the order: '+((err&&err.code==='permission-denied')?'orders are not allowed yet (Firebase rules).':niceErr(err)))}
@@ -2476,7 +2498,7 @@ function renderMyOrders(){
     let h='<div class="ocard"><div class="oh"><span><b>'+esc(fmtDate(o.createdAt))+'</b><span class="otype">'+(gift?'Gift order':'Product order')+'</span></span><span class="ostat s-'+esc(st)+'">'+esc(statText(o,st))+'</span></div>'+orderItemsHtml(o)+'<hr>';
     if(gift){
       h+=((Number(o.curationCharge)||0)>0?'<div class="ol">Curation charge (2%): '+esc(money(o.curationCharge))+'</div>':'')+'<div class="ol">Delivery: '+esc(delivLabel(o))+' · '+esc(money(Number(o.deliveryCharge)||0))+'</div>'
-        +'<div class="ol">Needed: '+esc(fmtDay(o.dateFrom))+' to '+esc(fmtDay(o.dateTo))+' · For '+esc(o.receiverName)+'</div>';
+        +'<div class="ol">Needed: '+esc(fmtDay(o.dateFrom))+' to '+esc(fmtDay(o.dateTo))+' · For '+esc(o.receiverName)+(o.giftStyle==='surprise'?' · <b>Surprise</b>':'')+'</div>';
     }else{
       h+='<div class="ol">Deliver to: '+esc(o.receiverName)+' · '+esc(o.receiverPhone)+'<br><small>'+esc(o.address)+'</small></div>';
     }
@@ -2515,13 +2537,14 @@ function soCard(o){
   const opts=soStatuses(oType(o)).concat(['cancelled']).map(function(k){return '<option value="'+k+'"'+(k===st?' selected':'')+'>'+esc(stageLabel(k))+'</option>'}).join('');
   const code5=o.id.slice(-5).toUpperCase();
   let h='<div class="ocard" data-id="'+esc(o.id)+'"><div class="oh"><span class="ohl"><b>#'+esc(code5)+' · '+esc(fmtDate(o.createdAt))+'</b>'
-    +(o.customerPhone?'<a class="oiconb" href="'+esc(waHref(o.customerPhone,'Hello, this is OPARANNO about your order #'+code5))+'" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp the customer"><img src="data:image/webp;base64,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" alt="" width="18" height="18"></a>':'')
+    +(o.customerPhone?'<a class="oiconb" href="'+esc(waHref(o.customerPhone,orderWaText(o,code5)))+'" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp the customer"><img src="data:image/webp;base64,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" alt="" width="18" height="18"></a>':'')
     +(o.customerEmail?'<a class="oiconb" href="'+esc(mailHref(o.customerEmail,'OPARANNO order #'+code5))+'" aria-label="Email the customer"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#C20019" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></a>':'')
     +'</span><span class="ostat s-'+esc(st)+'">'+esc(stageLabel(st))+'</span></div>'
     +'<button type="button" class="custbar" data-oa="cust"><span>Customer</span><b>'+esc(o.customerName||'Customer')+'</b><i>›</i></button>';
   if(gift){
     h+='<div class="ol"><b>Receiver:</b> '+esc(o.receiverName)+' · '+esc(o.receiverPhone)+' ('+(o.sendTo==='me'?'send to customer':'send to relative')+')<br><small>'+esc(o.address)+'</small></div>'
       +'<div class="ol"><b>Occasion:</b> '+esc(o.occasion)+' · needed '+esc(fmtDay(o.dateFrom))+' to '+esc(fmtDay(o.dateTo))+'</div>'
+      +(o.giftStyle==='surprise'?'<div class="ol"><b style="color:#C20019">SURPRISE GIFT</b> · do not call the receiver before delivery</div>':'')
       +'<div class="ol"><b>Delivery:</b> '+esc(delivLabel(o))+' · '+esc(money(Number(o.deliveryCharge)||0))+'</div>';
   }else{
     h+='<div class="ol"><b>Deliver to:</b> '+esc(o.receiverName)+' · '+esc(o.receiverPhone)+'<br><small>'+esc(o.address)+'</small></div>';
@@ -2638,6 +2661,7 @@ function openProductOrder(id,tries){
   const img=p.photo?'<img src="'+esc(p.photo)+'" alt="">':'<div class="nico">🛍</div>';
   $('poSum').innerHTML='<div class="mgrow">'+img+'<div class="nmeta"><b>'+esc(p.name)+'</b><small>'+priceHtml(p)+'</small></div></div>';
   $('poN').value=cust.name||'';$('poP').value=cust.phone||'';$('poA').value=cust.address||'';
+  fillAddrSel('poAddrSel','poA',true,'poAddrW');
   poMsg('');$('poForm').hidden=false;$('poDone').hidden=true;
   poUpdate();$('porder').hidden=false;syncOverflow();
 }
@@ -2668,6 +2692,7 @@ $('poPlace').addEventListener('click',async function(){
   try{
     const oid=newId();await setDoc(doc(db,'orders',oid),order);
     notifyStaff('New product order',(cust.name||'Customer')+' · '+money(total),oid);
+    lastOrderMsg=orderMsg(order,oid);
     poMsg('');$('poForm').hidden=true;$('poDone').hidden=false;
   }catch(err){poMsg('Could not place the order: '+((err&&err.code==='permission-denied')?'orders are not allowed yet (Firebase rules).':niceErr(err)))}
   finally{$('poPlace').disabled=false}
@@ -2805,7 +2830,7 @@ function invHtml(o){
   const gift=oType(o)==='gift',code=String(o.id).slice(-5).toUpperCase();
   const rows=(o.items||[]).map(function(i){
     const pr=Number(i.price)||0,q=Number(i.qty)||0;
-    return '<tr><td>'+esc(i.name)+(i.text?'<br><small>Text: '+esc(i.text)+'</small>':'')+((i.parts&&i.parts.length)?'<br><small>'+esc(i.parts.join(', '))+'</small>':'')+'</td><td class="r">'+esc(q)+'</td><td class="r">'+esc(money(pr))+'</td><td class="r">'+esc(money(pr*q))+'</td></tr>';
+    return '<tr><td>'+esc(i.name)+(i.text?'<br><small>Text: '+esc(i.text)+'</small>':'')+(i.pic?'<br><small>Picture: '+esc(i.pic)+'</small>':'')+((i.parts&&i.parts.length)?'<br><small>'+esc(i.parts.join(', '))+'</small>':'')+'</td><td class="r">'+esc(q)+'</td><td class="r">'+esc(money(pr))+'</td><td class="r">'+esc(money(pr*q))+'</td></tr>';
   }).join('');
   const del=Number(o.deliveryCharge)||0,ext=Number(o.extraCharge)||0;
   const sums=[['Items total',Number(o.itemsTotal)||0]];
@@ -2828,7 +2853,7 @@ function invHtml(o){
     +'<div class="invfoot">Thank you for shopping with OPARANNO</div></div>';
 }
 function slipHtml(o){
-  return '<div class="slip"><div class="slipl">Deliver to</div><div class="slipn">'+esc(o.receiverName)+'</div><div class="slipp">'+esc(o.receiverPhone)+'</div><div class="slipa">'+esc(o.address)+'</div></div>';
+  return '<div class="slip">'+(o.giftStyle==='surprise'?'<div class="slipsur">SURPRISE GIFT: do not call or tell the receiver before delivery. Do not show any price.</div>':'')+'<div class="slipl">Deliver to</div><div class="slipn">'+esc(o.receiverName)+'</div><div class="slipp">'+esc(o.receiverPhone)+'</div><div class="slipa">'+esc(o.address)+'</div></div>';
 }
 function openInvoice(o,kind){
   $('invDoc').innerHTML=kind==='slip'?slipHtml(o):invHtml(o);
@@ -3001,7 +3026,7 @@ function openMatKind(k){
 }
 function matItems(){
   if(matKind==='ready')return readyAll.slice().sort(function(a,b){return (a.createdAt||0)-(b.createdAt||0)}).map(function(r){return {id:r.id,name:r.name,photo:r.photo,price:readyPrice(r),hidden:r.hidden,sub:(r.items||[]).length+' item(s)',raw:r}});
-  return craftAll.filter(function(x){return x.kind===matKind}).sort(function(a,b){return (a.createdAt||0)-(b.createdAt||0)}).map(function(x){return {id:x.id,name:x.name,photo:x.photo,price:Number(x.price)||0,hidden:x.hidden,sub:'',raw:x}});
+  return craftAll.filter(function(x){return x.kind===matKind}).sort(function(a,b){return (a.createdAt||0)-(b.createdAt||0)}).map(function(x){return {id:x.id,name:x.name,photo:x.photo,price:Number(x.price)||0,hidden:x.hidden,sub:(x.custom&&CUSTOM[x.custom]?'Customisation: '+CUSTOM[x.custom]:''),raw:x}});
 }
 function matPool(){return matItems().filter(function(i){return i.photo})}
 function matRender(){
@@ -3152,6 +3177,54 @@ function endDraftFor(){
   closeMyGift();
   if(had)notifyUid(f.uid,'Gift draft','We made a gift draft for you. Open Draft to see it.','draft');
   if(draftReturn){draftReturn=false;setTimeout(function(){openOrders()},60)}
+}
+
+
+/* ---------- Order WhatsApp messages and saved addresses ---------- */
+let lastOrderMsg='',acAddrs=[];
+function orderMsg(o,id){
+  const code=String(id).slice(-5).toUpperCase(),gift=oType(o)==='gift';
+  const L=['New order #'+code+' (OPARANNO)','Name: '+(o.customerName||''),'WhatsApp: '+(o.customerPhone||'')];
+  (o.items||[]).forEach(function(i){L.push('- '+i.name+' x'+i.qty+(i.text?' ('+i.text+')':'')+' = '+money((Number(i.price)||0)*(Number(i.qty)||0)))});
+  if((Number(o.curationCharge)||0)>0)L.push('Curation charge: '+money(o.curationCharge));
+  if((Number(o.deliveryCharge)||0)>0)L.push('Delivery: '+money(o.deliveryCharge));
+  L.push('Total: '+money(grand(o)));
+  if(gift){
+    L.push('Receiver: '+o.receiverName+' '+o.receiverPhone,'Address: '+o.address,'Needed: '+fmtDay(o.dateFrom)+' to '+fmtDay(o.dateTo),'Occasion: '+o.occasion);
+    if(o.giftStyle==='surprise')L.push('SURPRISE gift');
+    L.push('Payment: bKash '+money(Number(o.payAmount)||0)+' ('+(o.payType==='half'?'half':'full')+'), Transaction ID '+o.txnId);
+  }else{
+    L.push('Deliver to: '+o.receiverName+' '+o.receiverPhone,'Address: '+o.address,'Payment: Cash on delivery');
+  }
+  return L.join('\n');
+}
+function orderWaText(o,code){
+  const its=(o.items||[]).map(function(i){return i.name+' x'+i.qty}).join(', ');
+  return 'Hello '+(o.customerName||'')+', this is OPARANNO. We received your order #'+code+' ('+its+'). Total '+money(grand(o))+((Number(o.paidAmount)||0)>0?', paid '+money(o.paidAmount)+', due '+money(dueOf(o)):'')+'. Thank you!';
+}
+function sendOrderWa(){window.open(waHref(WA_NUMBER,lastOrderMsg),'_blank','noopener')}
+$('oWa').addEventListener('click',sendOrderWa);
+$('poWa').addEventListener('click',sendOrderWa);
+
+function acAddrDraw(){
+  $('acAddrs').innerHTML=acAddrs.map(function(a,i){return '<div class="nfile"><div class="nmeta"><span><b>'+esc(a.label)+'</b></span><small>'+esc(a.text)+'</small></div><button type="button" class="nx" data-ai="'+i+'" aria-label="Remove address">✕</button></div>'}).join('');
+}
+$('acAddrs').addEventListener('click',function(e){const b=e.target.closest('[data-ai]');if(!b)return;acAddrs.splice(Number(b.getAttribute('data-ai')),1);acAddrDraw()});
+$('acAAdd').addEventListener('click',function(){
+  const label=$('acAL').value.trim(),text=$('acAT').value.trim();
+  if(!label||!text){acMsg('Write a label and the address.');return}
+  if(acAddrs.length>=8){acMsg('You can save up to 8 addresses.');return}
+  acAddrs.push({label:label,text:text});$('acAL').value='';$('acAT').value='';acMsg('');acAddrDraw();
+});
+function addrList(){
+  const l=[];if(cust&&cust.address)l.push({label:'Default',text:cust.address});
+  ((cust&&cust.addresses)||[]).forEach(function(a){l.push(a)});return l;
+}
+function fillAddrSel(selId,areaId,show,wrapId){
+  const l=addrList(),sel=$(selId);
+  sel.innerHTML=l.map(function(a,i){return '<option value="'+i+'">'+esc(a.label+': '+String(a.text).slice(0,40))+'</option>'}).join('');
+  $(wrapId).hidden=!(show&&l.length>1);
+  sel.onchange=function(){const a=l[Number(sel.value)];if(a)$(areaId).value=a.text};
 }
 
 // Show the public price list straight away; sign-in state is applied as soon as Firebase answers.
