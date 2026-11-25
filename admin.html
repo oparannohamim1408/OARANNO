@@ -547,17 +547,33 @@ a.pmb{text-decoration:none}
 
 <div class="screen" id="login" hidden>
   <h1>Oparanno Staff</h1>
-  <p class="sub">Staff sign in</p>
-  <button type="button" id="gsi" style="width:100%;margin-bottom:12px">Continue with Google</button>
-  <p class="hint">Or use your email. We’ll send you a secure sign-in link. No password needed.</p>
+  <p class="sub">Sign in with your email and password</p>
   <form id="ef" autocomplete="on">
-    <input type="email" id="em" placeholder="Your email" required autocomplete="email">
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button type="submit" id="si">Send sign-in link</button>
+    <input type="email" id="em" placeholder="Email" required autocomplete="email">
+    <input type="password" id="pw" placeholder="Password" required minlength="6" autocomplete="current-password">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+      <button type="submit" id="si">Sign in</button>
     </div>
   </form>
   <div class="msg" id="amsg" role="status"></div>
-  <button type="button" class="ghost" id="backlist">← Back to the price list</button>
+  <p class="hint"><button type="button" class="linkbtn" id="lgForgot">Forgot password?</button></p>
+  <p class="hint">Access is by invitation. The owner adds your email and you get a welcome email.</p>
+</div>
+
+<div class="screen" id="join" hidden>
+  <h1>Welcome to Oparanno</h1>
+  <p class="sub">Finish your account to join the team.</p>
+  <form id="jf" autocomplete="on">
+    <label for="jEm">Email</label>
+    <input type="email" id="jEm" readonly autocomplete="email">
+    <label for="jName">Your name</label>
+    <input type="text" id="jName" placeholder="Your name" required autocomplete="name">
+    <label for="jPw">Create password</label>
+    <input type="password" id="jPw" placeholder="At least 6 characters" required minlength="6" autocomplete="new-password">
+    <button type="submit" id="jGo" style="width:100%">Join</button>
+  </form>
+  <div class="msg" id="jMsg" role="status"></div>
+  <p class="hint"><button type="button" class="linkbtn" id="jToLogin" hidden>Go to sign in</button></p>
 </div>
 
 <div class="screen" id="pending" hidden>
@@ -658,7 +674,7 @@ a.pmb{text-decoration:none}
   <div class="npanel" id="team" hidden role="dialog" aria-label="Team">
     <div class="nhead"><button type="button" class="bic" id="tmBack" aria-label="Back">&larr;</button><span class="ntitle">Team</span></div>
     <div class="nbody">
-    <p class="hint">Anyone can look at the price list without signing in (retail prices only). Add the email a staff member signs in with below. Anyone who signs in with a listed email gets the staff page. Everyone else who signs in is a customer.</p>
+    <p class="hint">Type the email of a new staff member and press Add staff. They get a welcome email with a join link. They write their name, create a password, and then use that email and password every time.</p>
     <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:4px"><input id="seIn" type="email" inputmode="email" placeholder="staff@email.com" autocomplete="off" style="flex:1;margin-bottom:0"><button type="button" id="seAdd">Add staff</button></div>
     <div class="msg" id="seMsg" role="status"></div>
     <div id="seList"></div>
@@ -1051,7 +1067,7 @@ a.pmb{text-decoration:none}
 <script type="module">
 
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {getAuth,onAuthStateChanged,sendSignInLinkToEmail,isSignInWithEmailLink,signInWithEmailLink,signOut,GoogleAuthProvider,signInWithPopup} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,sendPasswordResetEmail,sendSignInLinkToEmail,isSignInWithEmailLink,signInWithEmailLink,updatePassword,updateProfile,signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {getFirestore,collection,doc,getDoc,setDoc,updateDoc,writeBatch,onSnapshot,query,where,orderBy,deleteDoc,arrayUnion,runTransaction} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import {getStorage,ref as sref,uploadBytesResumable,getDownloadURL,deleteObject} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
@@ -1068,7 +1084,7 @@ const firebaseConfig = {
 
 const $ = (id) => document.getElementById(id);
 const show = (name) => {
-  ['setup','loading','login','pending','app'].forEach((n) => { $(n).hidden = (n !== name); });
+  ['setup','loading','login','join','pending','app'].forEach((n) => { $(n).hidden = (n !== name); });
 };
 
 if (String(firebaseConfig.apiKey).indexOf('PASTE') === 0) { show('setup'); throw new Error('Firebase settings are not filled in yet.'); }
@@ -1099,7 +1115,7 @@ function niceErr(e){
   const c=(e&&e.code)||'';
   if(c==='permission-denied')return 'You do not have permission to do this.';
   if(c==='auth/invalid-credential'||c==='auth/wrong-password'||c==='auth/user-not-found'||c==='auth/invalid-login-credentials')return 'Wrong email or password.';
-  if(c==='auth/email-already-in-use')return 'This email already has an account. Try Sign in.';
+  if(c==='auth/email-already-in-use')return 'This email already has an account. Tap Sign in, or Forgot password to set a password.';
   if(c==='auth/weak-password')return 'Password must be at least 6 characters.';
   if(c==='auth/invalid-email')return 'That email does not look right.';
   if(c==='auth/too-many-requests')return 'Too many tries. Please wait a little and try again.';
@@ -1118,28 +1134,49 @@ const ICON={
   del:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 14h10l1-14"/><path d="M10 10v6M14 10v6"/></svg>'
 };
 
-/* ---------- Passwordless staff sign-in by email link ---------- */
+/* ---------- Email + password sign-in. New staff join from the welcome email. ---------- */
 function amsg(t,ok){const m=$('amsg');m.textContent=t||'';m.className='msg'+(ok?' ok':'')}
-const emailLinkSettings={url:window.location.origin+window.location.pathname,handleCodeInApp:true};
-$('ef').addEventListener('submit',async(e)=>{
-  e.preventDefault();amsg('');const em=$('em').value.trim();
-  if(!em){amsg('Enter your email first.');return}
-  try{
-    await sendSignInLinkToEmail(auth,em,emailLinkSettings);
-    ls('emailForSignIn',em);
-    amsg('Sign-in link sent. Check your inbox (and spam folder), then open the link to sign in.',true);
-  }catch(err){amsg(niceErr(err))}
+function jmsg(t,ok){const m=$('jMsg');m.textContent=t||'';m.className='msg'+(ok?' ok':'')}
+$('lgForgot').addEventListener('click',async()=>{
+  const em=$('em').value.trim();
+  if(!em){amsg('Type your email above first, then tap Forgot password.');return}
+  try{await sendPasswordResetEmail(auth,em);amsg('Password reset link sent. Check your inbox (and spam folder).',true)}
+  catch(err){amsg(niceErr(err))}
 });
-if(isSignInWithEmailLink(auth,window.location.href)){
-  let email=ls('emailForSignIn');
-  if(!email)email=window.prompt('Confirm the email address where you received the sign-in link:');
-  if(email){
-    signInWithEmailLink(auth,email.trim(),window.location.href).then(()=>{
-      ls('emailForSignIn','');
-      window.history.replaceState({},document.title,window.location.pathname);
-    }).catch(err=>amsg(niceErr(err)));
-  }else{show('login');amsg('Enter the same email address that received the sign-in link to finish signing in.')}
-}
+$('ef').addEventListener('submit',async(e)=>{
+  e.preventDefault();amsg('');
+  const em=$('em').value.trim(),pw=$('pw').value;
+  if(!em){amsg('Enter your email.');return}
+  if(!pw){amsg('Enter your password.');return}
+  $('si').disabled=true;
+  try{await signInWithEmailAndPassword(auth,em,pw);$('pw').value=''}
+  catch(err){amsg(niceErr(err))}
+  finally{$('si').disabled=false}
+});
+// Welcome email link: "Join with us" -> name + create password
+const joinEmail=(new URLSearchParams(window.location.search).get('e')||'').trim().toLowerCase();
+let joining=isSignInWithEmailLink(auth,window.location.href);
+if(joining){$('jEm').value=joinEmail;if(!joinEmail){$('jEm').readOnly=false;$('jEm').placeholder='Your email'}show('join')}
+$('jToLogin').addEventListener('click',()=>{joining=false;window.history.replaceState({},document.title,window.location.pathname);route()});
+$('jf').addEventListener('submit',async(e)=>{
+  e.preventDefault();jmsg('');
+  const em=$('jEm').value.trim().toLowerCase(),name=$('jName').value.trim(),pw=$('jPw').value;
+  if(!em){jmsg('Enter your email.');return}
+  if(!name){jmsg('Write your name.');return}
+  if(pw.length<6){jmsg('Password must be at least 6 characters.');return}
+  $('jGo').disabled=true;
+  try{
+    const cred=await signInWithEmailLink(auth,em,window.location.href);
+    await updateProfile(cred.user,{displayName:name});
+    await updatePassword(cred.user,pw);
+    joining=false;
+    window.history.replaceState({},document.title,window.location.pathname);
+    route();
+  }catch(err){
+    jmsg((err&&(err.code==='auth/invalid-action-code'||err.code==='auth/expired-action-code'))?'This link was already used or has expired. Ask the owner to send a new one, or sign in if you already created your password.':niceErr(err));
+    $('jToLogin').hidden=false;
+  }finally{$('jGo').disabled=false}
+});
 $('out').addEventListener('click',()=>signOut(auth));
 $('pout').addEventListener('click',()=>signOut(auth));
 
@@ -1151,7 +1188,6 @@ function stopData(){
 }
 let wantLogin = false;
 $('signin').addEventListener('click',()=>{wantLogin=true;amsg('');show('login')});
-$('backlist').hidden=true;
 $('signin2').addEventListener('click',()=>{wantLogin=true;amsg('');show('login')});
 $('out2').addEventListener('click',()=>signOut(auth));
 
@@ -1174,6 +1210,7 @@ onAuthStateChanged(auth,async(u)=>{
 
 // Everyone can look at the price list (retail prices only). Staff and the owner sign in to do more.
 function route(){
+  if(joining)return;
   if(!user){show('login');return}
   if(role==='public'){show('pending');$('pmail').textContent=user.email||user.displayName||'';return}
   show('app');
@@ -2082,11 +2119,6 @@ function menuSync(){
 
 /* ----- login ----- */
 function startLogin(){closeGift();closeMyGift();closeAcct();closePDetail();wantLogin=true;amsg('');show('login')}
-$('gsi').addEventListener('click',async function(){
-  amsg('');
-  try{await signInWithPopup(auth,new GoogleAuthProvider())}catch(err){amsg(niceErr(err))}
-});
-
 /* ----- customer data ----- */
 function startCust(){
   if(!user||unsubCust)return;
@@ -2375,8 +2407,14 @@ $('seAdd').addEventListener('click',async function(){
   if(role!=='owner')return;
   const em=$('seIn').value.trim().toLowerCase();
   if(!/^[^\s@\/]+@[^\s@\/]+\.[^\s@\/]+$/.test(em)){seMsg('Enter a valid email.');return}
-  try{await setDoc(doc(db,'staffEmails',em),{email:em,role:'staff',createdAt:Date.now(),addedBy:user.uid});$('seIn').value='';seMsg('Added. They get the staff page when they sign in with this email.',true)}
-  catch(err){seMsg('Could not add: '+((err&&err.code==='permission-denied')?'publish the new Firebase rules first.':niceErr(err)))}
+  seMsg('');$('seAdd').disabled=true;
+  try{await setDoc(doc(db,'staffEmails',em),{email:em,role:'staff',createdAt:Date.now(),addedBy:user.uid})}
+  catch(err){seMsg('Could not add: '+((err&&err.code==='permission-denied')?'publish the new Firebase rules first.':niceErr(err)));$('seAdd').disabled=false;return}
+  try{
+    await sendSignInLinkToEmail(auth,em,{url:window.location.origin+window.location.pathname+'?e='+encodeURIComponent(em),handleCodeInApp:true});
+    $('seIn').value='';seMsg('Added. A welcome email with the join link was sent to '+em+'.',true)
+  }catch(err){seMsg('Added to the list, but the welcome email could not be sent: '+niceErr(err))}
+  finally{$('seAdd').disabled=false}
 });
 $('seList').addEventListener('click',async function(e){
   const b=e.target.closest('[data-se]');if(!b||role!=='owner')return;
@@ -3522,7 +3560,7 @@ $('report').querySelector('.nbody').addEventListener('scroll',function(){});
 setInterval(function(){if(!$('report').hidden)renderReport()},60000);
 
 // Wait for Firebase to answer before showing anything.
-show('loading');
+if(!joining)show('loading');
 
 </script>
 </body>
