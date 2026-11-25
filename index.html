@@ -340,6 +340,29 @@ a.pmb{text-decoration:none}
 .nfile a{color:var(--accent);font-weight:600;font-size:.85rem;text-decoration:none}
 .nfile .nx{background:transparent;color:var(--bad);border:1px solid var(--line);padding:4px 10px;font-weight:700}
 .nact{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+
+/* Customer profile: photo, pronouns, DOB, notes */
+input[type=date]{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;min-height:42px}
+.avrow{display:flex;align-items:center;gap:14px;margin:4px 0 14px}
+.av{flex:none;width:76px;height:76px;border-radius:50%;background:var(--soft);border:2px solid var(--line);overflow:hidden;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.8rem;color:#C20019}
+.av img{width:100%;height:100%;object-fit:cover;display:block}
+.av.sm{width:60px;height:60px;font-size:1.4rem}
+.avbtns{display:flex;flex-direction:column;align-items:flex-start;gap:2px}
+.nprow{display:grid;grid-template-columns:minmax(0,1fr) 132px;gap:10px}
+.nprow select{width:100%;padding:10px;min-height:42px}
+.nprow input{margin-bottom:0}
+.notegrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.notegrid>*{min-width:0}
+.notegrid select{width:100%;padding:10px;min-height:42px}
+.notegrid input{margin:0}
+.notegrid .wide{grid-column:1/-1}
+.nlbl{font-size:.8rem;color:var(--muted);display:block;margin:16px 0 4px;font-weight:600}
+.notelist .nfile{padding:6px 0}
+.mehead{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.mehead .who{min-width:0;flex:1}
+.mehead .nm{display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-size:1.1rem}
+.pron{display:inline-block;padding:2px 9px;border-radius:999px;background:var(--soft);border:1px solid var(--line);color:var(--muted);font-size:.78rem;font-weight:600}
+.menote{margin:4px 0;padding:6px 10px;border-radius:10px;background:var(--soft);font-size:.85rem;overflow-wrap:anywhere}
 </style>
 </head>
 <body>
@@ -500,8 +523,17 @@ a.pmb{text-decoration:none}
 <div class="nbody">
 <p class="hint" id="acHint">Add your details to finish creating your account.</p>
 <p class="hint">Signed in as <b id="acEmail"></b></p>
-<label for="acN">Name</label>
-<input autocomplete="name" id="acN"/>
+<div class="avrow">
+<div class="av" id="acAv"></div>
+<div class="avbtns"><button class="ghost" id="acPhotoBtn" type="button">Add photo</button><button class="linkbtn" hidden="" id="acPhotoDel" type="button">Remove photo</button></div>
+<input accept="image/*" hidden="" id="acPhotoIn" type="file"/>
+</div>
+<div class="nprow">
+<div><label for="acN">Name</label><input autocomplete="name" id="acN"/></div>
+<div><label for="acPr">Pronouns</label><select id="acPr"><option value="">Select</option><option value="he/him">he/him</option><option value="she/her">she/her</option><option value="they/them">they/them</option></select></div>
+</div>
+<label for="acDob" style="margin-top:10px">Date of birth</label>
+<input autocomplete="bday" id="acDob" type="date"/>
 <label for="acP">WhatsApp number</label>
 <input autocomplete="tel" id="acP" inputmode="tel" placeholder="01XXXXXXXXX"/>
 <label for="acA">Address</label>
@@ -511,6 +543,17 @@ a.pmb{text-decoration:none}
 <input autocomplete="off" id="acAL" placeholder="Label (Home, Office…)"/>
 <textarea id="acAT" placeholder="Address" style="min-height:60px"></textarea>
 <div class="nact" style="margin-top:0"><button class="ghost" id="acAAdd" type="button">+ Add this address</button></div>
+<span class="nlbl">Notes (birthdays &amp; special dates)</span>
+<p class="hint" style="margin-bottom:6px">Save birthdays and special days of people you love, so gifting is easy.</p>
+<div class="notelist" id="acNotes"></div>
+<div class="notegrid">
+<select aria-label="Occasion" id="acNT"><option>Birthday</option><option>Anniversary</option><option>Other</option></select>
+<input aria-label="Name" autocomplete="off" id="acNN" placeholder="Name"/>
+<input aria-label="Relation" autocomplete="off" id="acNR" placeholder="Relation (Sister, Friend…)"/>
+<input aria-label="Age" id="acNA" inputmode="numeric" max="120" min="0" placeholder="Age" type="number"/>
+<input aria-label="Date" class="wide" id="acND" type="date"/>
+</div>
+<div class="nact" style="margin-top:8px"><button class="ghost" id="acNAdd" type="button">+ Add note</button></div>
 <div class="msg" id="acMsg" role="status"></div>
 <div class="nact"><button id="acSave" type="button">Confirm</button><button class="ghost" id="acSkip" type="button">Skip for now</button></div>
 </div>
@@ -1110,7 +1153,7 @@ function acMsg(t, ok) {
   m.textContent = t || "", m.className = "msg" + (ok ? " ok" : "");
 }
 function openAcct(mode) {
-  user && (acctMode = mode, $("acTitle").textContent = mode === "new" ? "Create your account" : "My account", $("acHint").hidden = mode !== "new", $("acEmail").textContent = user.email || "", $("acN").value = cust && cust.name || user.displayName || "", $("acP").value = cust && cust.phone || "", $("acA").value = cust && cust.address || "", acAddrs = (cust && cust.addresses || []).slice(), acAddrDraw(), $("acAL").value = "", $("acAT").value = "", $("acSave").textContent = mode === "new" ? "Confirm" : "Save", $("acSkip").hidden = mode !== "new", acMsg(""), $("acct").hidden = !1, syncOverflow());
+  user && (acctMode = mode, $("acTitle").textContent = mode === "new" ? "Create your account" : "My account", $("acHint").hidden = mode !== "new", $("acEmail").textContent = user.email || "", $("acN").value = cust && cust.name || user.displayName || "", $("acP").value = cust && cust.phone || "", $("acA").value = cust && cust.address || "", acAddrs = (cust && cust.addresses || []).slice(), acAddrDraw(), acInit(), $("acAL").value = "", $("acAT").value = "", $("acSave").textContent = mode === "new" ? "Confirm" : "Save", $("acSkip").hidden = mode !== "new", acMsg(""), $("acct").hidden = !1, syncOverflow());
 }
 function closeAcct() {
   $("acct").hidden = !0, syncOverflow();
@@ -1123,7 +1166,7 @@ $("acSkip").addEventListener("click", function() {
 });
 $("acSave").addEventListener("click", async function() {
   if (!user) return;
-  let name = $("acN").value.trim(), phone = $("acP").value.trim(), address = $("acA").value.trim();
+  let name = $("acN").value.trim(), phone = $("acP").value.trim(), address = $("acA").value.trim(), pronouns = $("acPr").value, dob = $("acDob").value;
   if (!name) {
     acMsg("Enter your name.");
     return;
@@ -1136,10 +1179,14 @@ $("acSave").addEventListener("click", async function() {
     acMsg("Enter your address.");
     return;
   }
+  if (dob && dob > dateToday()) {
+    acMsg("Date of birth cannot be in the future.");
+    return;
+  }
   let now = Date.now();
   $("acSave").disabled = !0;
   try {
-    await setDoc(doc(db, "customers", user.uid), { uid: user.uid, email: user.email || "", name, phone, address, addresses: acAddrs.slice(0, 8), createdAt: cust && cust.createdAt || now, updatedAt: now }), cust = { uid: user.uid, email: user.email || "", name, phone, address, addresses: acAddrs.slice(0, 8), createdAt: cust && cust.createdAt || now, updatedAt: now }, closeAcct(), gToast(acctMode === "new" ? "Your account is ready." : "Saved."), afterLoginGo();
+    await setDoc(doc(db, "customers", user.uid), { uid: user.uid, email: user.email || "", name, phone, address, addresses: acAddrs.slice(0, 8), pronouns, dob, photo: acPhoto, notes: acNotes.slice(0, 20), createdAt: cust && cust.createdAt || now, updatedAt: now }), cust = { uid: user.uid, email: user.email || "", name, phone, address, addresses: acAddrs.slice(0, 8), pronouns, dob, photo: acPhoto, notes: acNotes.slice(0, 20), createdAt: cust && cust.createdAt || now, updatedAt: now }, closeAcct(), gToast(acctMode === "new" ? "Your account is ready." : "Saved."), afterLoginGo();
   } catch (err) {
     acMsg("Could not save: " + niceErr(err));
   } finally {
@@ -2017,7 +2064,7 @@ function renderMe() {
   let b = function(a, t, sub) {
     return '<button type="button" class="pmb" data-me="' + a + '"><span>' + t + (sub ? "<small>" + sub + "</small>" : "") + "</span><i>›</i></button>";
   }, h = "";
-  user ? h += '<div class="ocard"><div class="ol"><b>' + esc(cust && cust.name || user.displayName || "My account") + "</b></div>" + (cust ? '<div class="ol">' + esc(cust.phone) + '</div><div class="ol"><small>' + esc(cust.address) + "</small></div>" : '<div class="ol"><small>Finish your account to place orders.</small></div>') + "</div>" + b("account", "My account", "Name, phone, address") + b("wa", "WhatsApp", "Chat with us") + b("signout", "Sign out", "") : h += b("login", "Login / Create account", "Google or email") + b("wa", "WhatsApp", "Chat with us"), $("meBody").innerHTML = h + meExtras();
+  user ? h += meCard() + b("account", "My account", "Photo, pronouns, birthday, notes") + b("wa", "WhatsApp", "Chat with us") + b("signout", "Sign out", "") : h += b("login", "Login / Create account", "Google or email") + b("wa", "WhatsApp", "Chat with us"), $("meBody").innerHTML = h + meExtras();
 }
 function openMe() {
   renderMe(), $("mepanel").hidden = !1, syncOverflow();
@@ -2176,6 +2223,106 @@ function waHref(num, text) {
   return d.indexOf("880") !== 0 && d.charAt(0) === "0" && (d = "880" + d.slice(1)), "https://wa.me/" + d + (text ? "?text=" + encodeURIComponent(text) : "");
 }
 var lastOrderMsg = "", acAddrs = [];
+var acPhoto = "", acNotes = [];
+function fmtYmd(d) {
+  let m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(d || "");
+  return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])).toLocaleDateString(void 0, { day: "numeric", month: "short", year: "numeric" }) : "";
+}
+function avHtml(photo, name, small) {
+  let n = String(name || "").trim();
+  return '<div class="av' + (small ? " sm" : "") + '">' + (photo ? '<img alt="" src="' + esc(photo) + '"/>' : esc(n ? n.charAt(0).toUpperCase() : "?")) + "</div>";
+}
+function noteLine(n) {
+  return [n.type, n.name, n.relation, n.age !== "" && n.age != null ? "Age " + n.age : "", fmtYmd(n.date)].filter(Boolean).join(" · ");
+}
+function meCard() {
+  let nm = cust && cust.name || user.displayName || "My account";
+  if (!cust) return '<div class="ocard"><div class="mehead">' + avHtml("", nm, !0) + '<div class="who"><div class="nm"><b>' + esc(nm) + '</b></div></div></div><div class="ol"><small>Finish your account to place orders.</small></div></div>';
+  let h = '<div class="ocard"><div class="mehead">' + avHtml(cust.photo, nm, !0) + '<div class="who"><div class="nm"><b>' + esc(nm) + "</b>" + (cust.pronouns ? '<span class="pron">' + esc(cust.pronouns) + "</span>" : "") + "</div>" + (user.email ? '<div class="ol"><small>' + esc(user.email) + "</small></div>" : "") + "</div></div>";
+  h += '<div class="ol">' + esc(cust.phone) + "</div>";
+  cust.dob && (h += '<div class="ol"><small>Born ' + esc(fmtYmd(cust.dob)) + "</small></div>");
+  h += '<div class="ol"><small>' + esc(cust.address) + "</small></div>";
+  (cust.notes || []).length && (h += "<hr>" + (cust.notes || []).map(function(n) {
+    return '<div class="menote">' + esc(noteLine(n)) + "</div>";
+  }).join(""));
+  return h + "</div>";
+}
+function acAvDraw() {
+  let n = $("acN").value || cust && cust.name || user && user.displayName || "";
+  $("acAv").outerHTML = avHtml(acPhoto, n).replace('class="av"', 'class="av" id="acAv"');
+  $("acPhotoDel").hidden = !acPhoto;
+  $("acPhotoBtn").textContent = acPhoto ? "Change photo" : "Add photo";
+}
+function acNotesDraw() {
+  $("acNotes").innerHTML = acNotes.map(function(n, i) {
+    return '<div class="nfile"><div class="nmeta"><span><b>' + esc(n.type || "Note") + "</b></span><small>" + esc(noteLine(n).split(" · ").slice(1).join(" · ")) + '</small></div><button type="button" class="nx" data-ni="' + i + '" aria-label="Remove note">✕</button></div>';
+  }).join("");
+}
+function acInit() {
+  acPhoto = cust && cust.photo || "";
+  acNotes = (cust && cust.notes || []).slice();
+  $("acPr").value = cust && cust.pronouns || "";
+  $("acDob").value = cust && cust.dob || "";
+  $("acDob").max = dateToday();
+  $("acNT").value = "Birthday";
+  $("acNN").value = $("acNR").value = $("acNA").value = $("acND").value = "";
+  acAvDraw();
+  acNotesDraw();
+}
+$("acN").addEventListener("input", function() {
+  acPhoto || acAvDraw();
+});
+$("acPhotoBtn").addEventListener("click", function() {
+  $("acPhotoIn").click();
+});
+$("acPhotoDel").addEventListener("click", function() {
+  acPhoto = "", acAvDraw();
+});
+$("acPhotoIn").addEventListener("change", function() {
+  let f = this.files && this.files[0];
+  this.value = "";
+  if (!f) return;
+  if (!/^image\//.test(f.type)) {
+    acMsg("Please choose an image.");
+    return;
+  }
+  let r = new FileReader();
+  r.onload = function() {
+    let im = new Image();
+    im.onload = function() {
+      let S = 256, c = document.createElement("canvas"), side = Math.min(im.width, im.height);
+      c.width = c.height = S;
+      c.getContext("2d").drawImage(im, (im.width - side) / 2, (im.height - side) / 2, side, side, 0, 0, S, S);
+      acPhoto = c.toDataURL("image/jpeg", 0.8), acMsg(""), acAvDraw();
+    };
+    im.onerror = function() {
+      acMsg("Could not read that image.");
+    };
+    im.src = r.result;
+  };
+  r.readAsDataURL(f);
+});
+$("acNotes").addEventListener("click", function(e) {
+  let b = e.target.closest("[data-ni]");
+  b && (acNotes.splice(Number(b.getAttribute("data-ni")), 1), acNotesDraw());
+});
+$("acNAdd").addEventListener("click", function() {
+  let type = $("acNT").value, name = $("acNN").value.trim(), relation = $("acNR").value.trim(), age = $("acNA").value.trim(), date = $("acND").value;
+  if (!name) {
+    acMsg("Write a name for this note.");
+    return;
+  }
+  if (!date) {
+    acMsg("Pick the date.");
+    return;
+  }
+  if (acNotes.length >= 20) {
+    acMsg("You can save up to 20 notes.");
+    return;
+  }
+  acNotes.push({ type, name, relation, age, date }), $("acNN").value = $("acNR").value = $("acNA").value = $("acND").value = "", acMsg(""), acNotesDraw();
+});
+
 function orderMsg(o, id) {
   let code = String(id).slice(-5).toUpperCase(), gift = oType(o) === "gift", L = ["New order #" + code + " (OPARANNO)", "Name: " + (o.customerName || ""), "WhatsApp: " + (o.customerPhone || "")];
   return (o.items || []).forEach(function(i) {
