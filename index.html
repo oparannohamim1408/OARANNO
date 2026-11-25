@@ -364,6 +364,16 @@ input[type=date]{width:100%;padding:10px;border:1px solid var(--line);border-rad
 .pron{display:inline-block;padding:2px 9px;border-radius:999px;background:var(--soft);border:1px solid var(--line);color:var(--muted);font-size:.78rem;font-weight:600}
 .menote{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:6px 0;padding:8px 10px;border-radius:10px;background:var(--soft);font-size:.88rem;overflow-wrap:anywhere}
 .menote span{min-width:0;flex:1}
+.fvsearch{display:flex;gap:8px;align-items:stretch}
+.fvsearch input{flex:1;min-width:0;margin:0;min-height:46px;box-sizing:border-box}
+.fvsearch button{flex:none;padding:0 16px}
+.fvrow{display:flex;align-items:center;gap:12px;width:100%;box-sizing:border-box;text-align:left;padding:10px 12px;border:1px solid var(--line);border-radius:14px;background:var(--bg);color:var(--text);margin:6px 0;font:inherit;cursor:pointer}
+div.fvrow{cursor:default}
+.fvrow .meta{min-width:0;flex:1;display:flex;flex-direction:column}
+.fvrow .meta b,.fvrow .meta small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fvrow .meta small{color:var(--muted)}
+.fvrow .tag{flex:none;font-size:.78rem;font-weight:700;color:#C20019}
+.av.xs{width:44px;height:44px;font-size:1.1rem;border-width:1px}
 .nssec{font-size:.95rem;font-weight:700;margin:18px 0 6px}
 .notegrid input,.notegrid select{min-height:46px;box-sizing:border-box}
 .notegrid input[type=date]{display:block;min-height:46px}
@@ -521,6 +531,20 @@ input[type=date]{width:100%;padding:10px;border:1px solid var(--line);border-rad
 <div class="nact"><button id="mgOrder" type="button">Order</button></div>
 </div>
 </div>
+<div aria-label="Favourites" class="npanel" hidden="" id="favpage" role="dialog">
+<div class="nhead">
+<button aria-label="Back" class="bic" id="fvBack" type="button">←</button>
+<span class="ntitle">Add favourite</span>
+</div>
+<div class="nbody">
+<p class="hint">Search a friend by their email. If they have an account, their name and photo will show up.</p>
+<div class="fvsearch"><input aria-label="Email" autocapitalize="none" autocomplete="off" id="fvQ" inputmode="email" placeholder="Search by email" spellcheck="false" type="email"/><button id="fvGo" type="button">Search</button></div>
+<div class="msg" id="fvMsg" role="status"></div>
+<div id="fvRes"></div>
+<div class="nssec">Your favourites</div>
+<div id="fvList"></div>
+</div>
+</div>
 <div aria-label="Notes" class="npanel" hidden="" id="notespage" role="dialog">
 <div class="nhead">
 <button aria-label="Back" class="bic" id="nsBack" type="button">←</button>
@@ -570,8 +594,11 @@ input[type=date]{width:100%;padding:10px;border:1px solid var(--line);border-rad
 <p class="hint">Who is this gift for?</p>
 <button class="pmb" data-os="me" type="button"><span>Send to me<small>Use my name, number and address</small></span><i>›</i></button>
 <button class="pmb" data-os="rel" type="button"><span>Send to relative<small>Enter the receiver’s details</small></span><i>›</i></button>
+<button class="pmb" data-os="fav" type="button"><span>Send to favourite<small>Pick someone from your favourites</small></span><i>›</i></button>
+<div hidden="" id="oFavW"></div>
 </div>
 <div hidden="" id="oForm">
+<p class="hint" hidden="" id="oFavNote"></p>
 <label for="oN">Receiver name</label>
 <input autocomplete="off" id="oN"/>
 <label for="oP">Receiver number</label>
@@ -699,7 +726,7 @@ input[type=date]{width:100%;padding:10px;border:1px solid var(--line);border-rad
 // step6.mjs
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, doc, setDoc, updateDoc, onSnapshot, query, where, deleteDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, doc, setDoc, updateDoc, onSnapshot, query, where, deleteDoc, arrayUnion, getDocs, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getStorage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 var firebaseConfig = {
   apiKey: "AIzaSyBqtmeNjKlMA9Bllps7SYp2X2c-9hSoEAY",
@@ -1067,7 +1094,7 @@ function menuSync() {
   $("gMy").hidden = !cu, $("gMy").textContent = n ? "My Gift (" + n + ")" : "My Gift", setBadge("bnDraftN", cu ? n : 0), fSync();
 }
 function startLogin() {
-  closeGift(), closeMyGift(), closeAcct(), closeNotes(), closePDetail(), wantLogin = !0, amsg(""), show("login");
+  closeGift(), closeMyGift(), closeAcct(), closeNotes(), closeFav(), closePDetail(), wantLogin = !0, amsg(""), show("login");
 }
 $("gsi").addEventListener("click", async function() {
   amsg("");
@@ -1079,7 +1106,7 @@ $("gsi").addEventListener("click", async function() {
 });
 function startCust() {
   !user || unsubCust || (custLoaded = !1, unsubCust = onSnapshot(doc(db, "customers", user.uid), function(snap) {
-    cust = snap.exists() ? snap.data() : null, custLoaded = !0, acctAfterLoad();
+    cust = snap.exists() ? snap.data() : null, custLoaded = !0, syncPublic(), acctAfterLoad();
   }, function() {
     cust = null, custLoaded = !0;
   }), unsubDraft = onSnapshot(doc(db, "drafts", user.uid), function(snap) {
@@ -1102,7 +1129,7 @@ function stopCust() {
       u();
     } catch {
     }
-  }), unsubCust = unsubDraft = unsubMyOrders = null, cust = null, custLoaded = !1, draft = [], myOrders = [];
+  }), unsubCust = unsubDraft = unsubMyOrders = null, cust = null, custLoaded = !1, draft = [], myOrders = [], pubKey = "";
 }
 function acctAfterLoad() {
   if (isCustomer) {
@@ -1188,7 +1215,7 @@ $("acSave").addEventListener("click", async function() {
   let now = Date.now();
   $("acSave").disabled = !0;
   try {
-    await setDoc(doc(db, "customers", user.uid), { uid: user.uid, email: user.email || "", name, phone, address, addresses: acAddrs.slice(0, 8), pronouns, dob, photo: acPhoto, notes: cust && cust.notes || [], createdAt: cust && cust.createdAt || now, updatedAt: now }), cust = { uid: user.uid, email: user.email || "", name, phone, address, addresses: acAddrs.slice(0, 8), pronouns, dob, photo: acPhoto, notes: cust && cust.notes || [], createdAt: cust && cust.createdAt || now, updatedAt: now }, closeAcct(), gToast(acctMode === "new" ? "Your account is ready." : "Saved."), afterLoginGo();
+    await setDoc(doc(db, "customers", user.uid), { uid: user.uid, email: user.email || "", name, phone, address, addresses: acAddrs.slice(0, 8), pronouns, dob, photo: acPhoto, notes: cust && cust.notes || [], favorites: cust && cust.favorites || [], createdAt: cust && cust.createdAt || now, updatedAt: now }), cust = { uid: user.uid, email: user.email || "", name, phone, address, addresses: acAddrs.slice(0, 8), pronouns, dob, photo: acPhoto, notes: cust && cust.notes || [], favorites: cust && cust.favorites || [], createdAt: cust && cust.createdAt || now, updatedAt: now }, closeAcct(), syncPublic(), gToast(acctMode === "new" ? "Your account is ready." : "Saved."), afterLoginGo();
   } catch (err) {
     acMsg("Could not save: " + niceErr(err));
   } finally {
@@ -1502,7 +1529,7 @@ function openOrder(items2) {
   ordState = { view: "send", to: "me", payType: "full", method: "bkash", busy: !1, items: list }, $("oAgree").checked = !1, $("oPayW").hidden = !0, $("oTx").value = "", $("oDel").innerHTML = '<option value="">Choose delivery type</option>' + Object.keys(DELIVERY).map(function(k) {
     let d = DELIVERY[k];
     return '<option value="' + k + '">' + d.label + " (" + d.days + ") – " + (k === "cheapest" ? money(d.inside) + " Dhaka / " + money(d.outside) + " outside" : money(d.charge)) + "</option>";
-  }).join(""), $("oF").min = dateToday(), $("oT").min = dateToday(), oMsg("oMsg1", ""), oMsg("oMsg2", ""), oShow("send"), $("order").hidden = !1, syncOverflow();
+  }).join(""), $("oF").min = dateToday(), $("oT").min = dateToday(), oMsg("oMsg1", ""), oMsg("oMsg2", ""), $("oFavW").hidden = !0, oShow("send"), $("order").hidden = !1, syncOverflow();
 }
 function closeOrder() {
   $("order").hidden = !0, syncOverflow();
@@ -1538,9 +1565,18 @@ $("oBack").addEventListener("click", function() {
   v === "form" ? oShow("send") : v === "pay" ? oShow("form") : closeOrder();
 });
 $("order").addEventListener("click", function(e) {
+  let ofv = e.target.closest("[data-ofav]");
+  if (ofv) {
+    oPickFav(Number(ofv.getAttribute("data-ofav")));
+    return;
+  }
   let os = e.target.closest("[data-os]");
+  if (os && os.getAttribute("data-os") === "fav") {
+    oFavToggle();
+    return;
+  }
   if (os) {
-    ordState.to = os.getAttribute("data-os");
+    ordState.fav = null, $("oFavNote").hidden = !0, ordState.to = os.getAttribute("data-os");
     let me = ordState.to === "me";
     $("oN").value = me && cust.name || "", $("oP").value = me && cust.phone || "", $("oA").value = me && cust.address || "", fillAddrSel("oAddrSel", "oA", me, "oAddrW"), $("oOc").value = "", $("oF").value = "", $("oT").value = "", $("oDel").value = "", $("oZoneW").hidden = !0, $("oStyle").value = "regular", oMsg("oMsg1", ""), oShow("form");
     return;
@@ -1631,6 +1667,7 @@ $("oPlace").addEventListener("click", async function() {
     customerPhone: cust.phone || "",
     customerEmail: user.email || "",
     sendTo: ordState.to,
+    ...ordState.to === "fav" && ordState.fav ? { receiverUid: ordState.fav.uid, receiverEmail: ordState.fav.email } : {},
     giftStyle: f.style === "surprise" ? "surprise" : "regular",
     receiverName: f.name,
     receiverPhone: f.phone,
@@ -2066,7 +2103,7 @@ function renderMe() {
   let b = function(a, t, sub) {
     return '<button type="button" class="pmb" data-me="' + a + '"><span>' + t + (sub ? "<small>" + sub + "</small>" : "") + "</span><i>›</i></button>";
   }, h = "";
-  user ? h += meCard() + b("account", "Edit info", "Photo, pronouns, birthday, address") + b("notes", "Notes", notesSub()) + b("wa", "WhatsApp", "Chat with us") + b("signout", "Sign out", "") : h += b("login", "Login / Create account", "Google or email") + b("wa", "WhatsApp", "Chat with us"), $("meBody").innerHTML = h + meExtras();
+  user ? h += meCard() + b("account", "Edit info", "Photo, pronouns, birthday, address") + b("notes", "Notes", notesSub()) + b("fav", "Add favourite", favSub()) + b("wa", "WhatsApp", "Chat with us") + b("signout", "Sign out", "") : h += b("login", "Login / Create account", "Google or email") + b("wa", "WhatsApp", "Chat with us"), $("meBody").innerHTML = h + meExtras();
 }
 function openMe() {
   renderMe(), $("mepanel").hidden = !1, syncOverflow();
@@ -2086,7 +2123,7 @@ $("mepanel").addEventListener("click", function(e) {
   let b = e.target.closest("[data-me]");
   if (!b) return;
   let a = b.getAttribute("data-me");
-  closeMe(), a === "account" ? openAcct("edit") : a === "notes" ? openNotes() : a === "wa" ? window.open($("waHeader").href, "_blank", "noopener") : a === "login" ? startLogin() : a === "signout" && signOut(auth);
+  closeMe(), a === "account" ? openAcct("edit") : a === "notes" ? openNotes() : a === "fav" ? openFav() : a === "wa" ? window.open($("waHeader").href, "_blank", "noopener") : a === "login" ? startLogin() : a === "signout" && signOut(auth);
 });
 $("bnav").addEventListener("click", function(e) {
   let b = e.target.closest("[data-bn]");
@@ -2366,6 +2403,136 @@ $("notespage").addEventListener("click", async function(e) {
     nsMsg("Could not save: " + niceErr(err));
   }
 });
+
+var pubKey = "", fvFound = null;
+async function syncPublic() {
+  if (!user || !cust) return;
+  let em = String(user.email || "").toLowerCase();
+  if (!em) return;
+  let key = [em, cust.name || "", (cust.photo || "").length].join("|");
+  if (key === pubKey) return;
+  pubKey = key;
+  try {
+    await setDoc(doc(db, "publicProfiles", user.uid), { uid: user.uid, email: em, name: cust.name || "", photo: cust.photo || "", updatedAt: Date.now() });
+  } catch (e) {
+    pubKey = "";
+  }
+}
+function favAv(f) {
+  return avHtml(f.photo, f.name || f.email, !0).replace("av sm", "av xs");
+}
+function favMeta(f) {
+  return favAv(f) + '<span class="meta"><b>' + esc(f.name || "Unnamed") + "</b><small>" + esc(f.email) + "</small></span>";
+}
+function favSub() {
+  let n = cust && cust.favorites ? cust.favorites.length : 0;
+  return n ? n + (n === 1 ? " favourite saved" : " favourites saved") : "Find friends by email";
+}
+function fvMsg(t) {
+  let m = $("fvMsg");
+  m && (m.textContent = t || "");
+}
+function renderFav() {
+  let l = cust && cust.favorites || [];
+  $("fvList").innerHTML = l.length ? l.map(function(f, i) {
+    return '<div class="fvrow">' + favMeta(f) + '<button type="button" class="nx" data-fvrm="' + i + '" aria-label="Remove favourite">✕</button></div>';
+  }).join("") : '<div class="nsempty">No favourites yet.</div>';
+}
+function openFav() {
+  user && cust && (fvFound = null, $("fvQ").value = "", $("fvRes").innerHTML = "", fvMsg(""), renderFav(), $("favpage").hidden = !1, syncOverflow(), $("favpage").querySelector(".nbody").scrollTop = 0);
+}
+function closeFav() {
+  $("favpage").hidden = !0, syncOverflow();
+}
+async function fvSearch() {
+  if (!user) return;
+  let q = $("fvQ").value.trim().toLowerCase();
+  fvFound = null, $("fvRes").innerHTML = "";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(q)) {
+    fvMsg("Enter a full email address.");
+    return;
+  }
+  if (q === String(user.email || "").toLowerCase()) {
+    fvMsg("That is your own account.");
+    return;
+  }
+  fvMsg("Searching…"), $("fvGo").disabled = !0;
+  try {
+    let snap = await getDocs(query(collection(db, "publicProfiles"), where("email", "==", q), limit(1)));
+    if (snap.empty) {
+      fvMsg("No account found with this email. They need to sign in and complete their account first.");
+      return;
+    }
+    let d = snap.docs[0].data();
+    fvFound = { uid: d.uid || snap.docs[0].id, name: d.name || "", email: d.email || q, photo: d.photo || "" };
+    fvMsg(""), $("fvRes").innerHTML = '<button type="button" class="fvrow" data-fvadd="1">' + favMeta(fvFound) + '<span class="tag">+ Save</span></button>';
+  } catch (err) {
+    fvMsg("Could not search: " + niceErr(err));
+  } finally {
+    $("fvGo").disabled = !1;
+  }
+}
+async function fvSave(list) {
+  let now = Date.now();
+  await updateDoc(doc(db, "customers", user.uid), { favorites: list, updatedAt: now });
+  cust = Object.assign({}, cust, { favorites: list, updatedAt: now });
+  renderFav();
+}
+$("fvBack").addEventListener("click", function() {
+  closeFav(), openMe();
+});
+$("fvGo").addEventListener("click", fvSearch);
+$("fvQ").addEventListener("keydown", function(e) {
+  e.key === "Enter" && (e.preventDefault(), fvSearch());
+});
+$("favpage").addEventListener("click", async function(e) {
+  if (!user || !cust) return;
+  let rm = e.target.closest("[data-fvrm]");
+  if (rm) {
+    let l = (cust.favorites || []).slice();
+    l.splice(Number(rm.getAttribute("data-fvrm")), 1);
+    try {
+      await fvSave(l);
+    } catch (err) {
+      gToast("Could not save: " + niceErr(err));
+    }
+    return;
+  }
+  if (!e.target.closest("[data-fvadd]") || !fvFound) return;
+  let l = (cust.favorites || []).slice();
+  if (l.some(function(x) {
+    return x.uid === fvFound.uid;
+  })) {
+    fvMsg("Already in your favourites."), $("fvRes").innerHTML = "";
+    return;
+  }
+  if (l.length >= 20) {
+    fvMsg("You can save up to 20 favourites.");
+    return;
+  }
+  l.push(fvFound);
+  try {
+    await fvSave(l), fvFound = null, $("fvRes").innerHTML = "", $("fvQ").value = "", fvMsg(""), gToast("Saved to favourites.");
+  } catch (err) {
+    fvMsg("Could not save: " + niceErr(err));
+  }
+});
+function oFavToggle() {
+  let w = $("oFavW");
+  if (!w.hidden) {
+    w.hidden = !0;
+    return;
+  }
+  let l = cust && cust.favorites || [];
+  w.innerHTML = l.length ? l.map(function(f, i) {
+    return '<button type="button" class="fvrow" data-ofav="' + i + '">' + favMeta(f) + "</button>";
+  }).join("") : '<div class="nsempty">No favourites yet. Add one from Me › Add favourite.</div>', w.hidden = !1;
+}
+function oPickFav(i) {
+  let f = cust && cust.favorites && cust.favorites[i];
+  if (!f) return;
+  ordState.to = "fav", ordState.fav = f, $("oN").value = f.name || "", $("oP").value = "", $("oA").value = "", fillAddrSel("oAddrSel", "oA", !1, "oAddrW"), $("oOc").value = "", $("oF").value = "", $("oT").value = "", $("oDel").value = "", $("oZoneW").hidden = !0, $("oStyle").value = "regular", $("oFavNote").textContent = "Sending to your favourite: " + (f.name || f.email) + " (" + f.email + "). Add their number and address below.", $("oFavNote").hidden = !1, oMsg("oMsg1", ""), oShow("form");
+}
 function addrList() {
   let l = [];
   return cust && cust.address && l.push({ label: "Default", text: cust.address }), (cust && cust.addresses || []).forEach(function(a) {
