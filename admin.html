@@ -1011,7 +1011,6 @@ a.pmb{text-decoration:none}
       </div>
     </div>
     <div id="pmOrders" hidden>
-      <button type="button" class="pmb" id="soCust"><span>Customer<small>All customers, search, gift draft</small></span><i>›</i></button>
       <div class="cchips" id="soTabs"></div>
       <div class="cchips" id="soChips"></div>
       <div id="soList"></div>
@@ -2695,7 +2694,6 @@ function renderStaffOrders(){
   const list=mine.filter(function(o){return soFilter==='all'||normStatus(o)===soFilter});
   $('soList').innerHTML=list.map(soCard).join('')||'<p class="hint">No orders here.</p>';
 }
-$('soCust').addEventListener('click',function(){openCustList()});
 $('soTabs').addEventListener('click',function(e){
   const b=e.target.closest('button[data-st]');if(!b)return;
   soType=b.getAttribute('data-st');soFilter='placed';renderStaffOrders();
@@ -2726,7 +2724,7 @@ $('soList').addEventListener('click',async function(e){
   const b=e.target.closest('[data-oa]');if(!b||!canAdd())return;
   const card=b.closest('.ocard'),id=card.getAttribute('data-id'),o=ordersAll.find(function(x){return x.id===id});if(!o)return;
   const a=b.getAttribute('data-oa');
-  if(a==='cust'){openCustList()}
+  if(a==='cust'){cvDirect=true;openCustView(o)}
   else if(a==='print'){openInvoice(o,'invoice')}
   else if(a==='slip'){openInvoice(o,'slip')}
   else if(a==='next'){const stg=stagesOf(o),i=stg.indexOf(normStatus(o));if(i>=0&&i<stg.length-1)await setOrderStatus(o,stg[i+1])}
@@ -3135,7 +3133,7 @@ function matSetMode(kind){
   matCamIds=null;
 }
 function renderMatMenu(){
-  $('matMenu').innerHTML='<h2 style="margin:10px 0 8px;font-size:1.15rem">Materials</h2>'+'<button type="button" class="pmb" data-mat="customers"><span>Customer<small>All customers, search, gift draft</small></span><i>›</i></button>'+MAT_OPTS.map(function(o){return '<button type="button" class="pmb" data-mat="'+o[0]+'"><span>'+o[1]+'<small>'+o[2]+'</small></span><i>›</i></button>'}).join('');
+  $('matMenu').innerHTML='<h2 style="margin:10px 0 8px;font-size:1.15rem">Materials</h2>'+MAT_OPTS.map(function(o){return '<button type="button" class="pmb" data-mat="'+o[0]+'"><span>'+o[1]+'<small>'+o[2]+'</small></span><i>›</i></button>'}).join('');
 }
 function openMaterials(){
   if(!canAdd())return;
@@ -3164,7 +3162,7 @@ function matRender(){
         +'<div class="nmeta"><span>'+esc(i.name)+'</span><small>'+esc(money(i.price))+(i.sub?' · '+esc(i.sub):'')+(i.hidden?' · Hidden':'')+'</small></div><i style="color:var(--muted);font-style:normal">›</i></div>';
     }).join(''):'<p class="hint">Nothing here yet. Tap + Add.</p>');
 }
-$('matMenu').addEventListener('click',function(e){const b=e.target.closest('[data-mat]');if(!b)return;if(b.getAttribute('data-mat')==='customers'){openCustList();return}openMatKind(b.getAttribute('data-mat'))});
+$('matMenu').addEventListener('click',function(e){const b=e.target.closest('[data-mat]');if(b)openMatKind(b.getAttribute('data-mat'))});
 $('matBack').addEventListener('click',openMaterials);
 $('matList').addEventListener('click',function(e){
   if(e.target.id==='matCamClear'){matCamIds=null;matRender();return}
@@ -3280,7 +3278,7 @@ async function openCustView(o){
   $('custview').hidden=false;syncOverflow();$('custview').querySelector('.nbody').scrollTop=0;
 }
 function closeCustView(){$('custview').hidden=true;syncOverflow()}
-let cvMode='list',cvCust=[];
+let cvMode='list',cvCust=[],cvDirect=false;
 function cvFromOrders(){
   const m={};
   ordersAll.forEach(function(o){
@@ -3309,7 +3307,7 @@ function renderCvList(){
 }
 async function openCustList(){
   if(!canAdd())return;
-  cvMode='list';$('cvQ').value='';$('cvSearch').hidden=false;$('cvList').hidden=false;$('cvBody').hidden=true;
+  cvDirect=false;cvMode='list';$('cvQ').value='';$('cvSearch').hidden=false;$('cvList').hidden=false;$('cvBody').hidden=true;
   cvMerge({});renderCvList();
   $('custview').hidden=false;syncOverflow();$('custview').querySelector('.nbody').scrollTop=0;
   try{
@@ -3324,7 +3322,7 @@ $('cvList').addEventListener('click',function(e){
   const c=cvCust.find(function(x){return x.uid===b.getAttribute('data-cvu')});if(!c)return;
   openCustView({uid:c.uid,customerName:c.name,customerPhone:c.phone,customerEmail:c.email});
 });
-$('cvBack').addEventListener('click',function(){if(cvMode==='detail'){openCustListKeep()}else closeCustView()});
+$('cvBack').addEventListener('click',function(){if(cvMode==='detail'&&!cvDirect){openCustListKeep()}else closeCustView()});
 function openCustListKeep(){cvMode='list';$('cvSearch').hidden=false;$('cvList').hidden=false;$('cvBody').hidden=true;renderCvList()}
 $('cvBody').addEventListener('click',function(e){if(e.target.closest('#cvDraft'))startDraftFor({uid:cvUid,name:cvName})});
 function stopDraftForSub(){if(unsubDraftFor){try{unsubDraftFor()}catch(e){}unsubDraftFor=null}}
