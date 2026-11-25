@@ -461,6 +461,12 @@ body.matadd .camb{width:100%;border-radius:999px}
 .oh{flex-wrap:wrap}
 .ohl{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}
 .oiconb{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:1.5px solid #C20019;border-radius:50%;background:#FFFFFF;text-decoration:none}
+.cvsearch{position:sticky;top:0;z-index:2;background:var(--bg);padding:0 0 10px}
+.cvsearch input{width:100%;padding:12px 14px;font-size:1rem;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--text)}
+.cvrow{display:block;width:100%;text-align:left;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:11px 14px;margin:0 0 8px;font-weight:500}
+.cvrow b{font-size:1rem}
+.cvrow .cid{float:right;color:var(--accent);font-weight:700;font-size:.85rem}
+.cvrow small{display:block;color:var(--muted);margin-top:2px;overflow-wrap:anywhere}
 .custbar{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:#FFFFFF;color:#1A1A1A;border:1.5px solid #C20019;border-radius:999px;padding:9px 14px;margin:6px 0;font-weight:600;box-shadow:none}
 .custbar span{color:#6B6B6B;font-weight:500;font-size:.8rem}
 .custbar i{margin-left:auto;color:#C20019;font-style:normal;font-size:1.2rem}
@@ -922,7 +928,7 @@ a.pmb{text-decoration:none}
     <button type="button" class="bic" id="cvBack" aria-label="Back">&larr;</button>
     <span class="ntitle">Customer</span>
   </div>
-  <div class="nbody"><div id="cvBody"></div></div>
+  <div class="nbody"><div class="cvsearch" id="cvSearch"><input id="cvQ" type="search" placeholder="Search by email or phone number" aria-label="Search customers" autocomplete="off"></div><div id="cvList"></div><div id="cvBody"></div></div>
 </div>
 <div class="npanel" id="report" hidden role="dialog" aria-label="Report">
   <div class="nhead">
@@ -1068,7 +1074,7 @@ a.pmb{text-decoration:none}
 
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,sendPasswordResetEmail,sendSignInLinkToEmail,isSignInWithEmailLink,signInWithEmailLink,updatePassword,updateProfile,signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {getFirestore,collection,doc,getDoc,setDoc,updateDoc,writeBatch,onSnapshot,query,where,orderBy,deleteDoc,arrayUnion,runTransaction} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {getFirestore,collection,doc,getDoc,setDoc,updateDoc,writeBatch,onSnapshot,query,where,orderBy,deleteDoc,arrayUnion,runTransaction,getDocs} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import {getStorage,ref as sref,uploadBytesResumable,getDownloadURL,deleteObject} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 // ====== Firebase settings for the "oparanno" project ======
@@ -2717,7 +2723,7 @@ $('soList').addEventListener('click',async function(e){
   const b=e.target.closest('[data-oa]');if(!b||!canAdd())return;
   const card=b.closest('.ocard'),id=card.getAttribute('data-id'),o=ordersAll.find(function(x){return x.id===id});if(!o)return;
   const a=b.getAttribute('data-oa');
-  if(a==='cust'){openCustView(o)}
+  if(a==='cust'){openCustList()}
   else if(a==='print'){openInvoice(o,'invoice')}
   else if(a==='slip'){openInvoice(o,'slip')}
   else if(a==='next'){const stg=stagesOf(o),i=stg.indexOf(normStatus(o));if(i>=0&&i<stg.length-1)await setOrderStatus(o,stg[i+1])}
@@ -3254,6 +3260,7 @@ async function notifyUid(uid,title,text,kind){
 }
 async function openCustView(o){
   if(!canAdd())return;
+  cvMode='detail';$('cvSearch').hidden=true;$('cvList').hidden=true;$('cvBody').hidden=false;
   cvUid=o.uid;
   let c=null;try{const sn=await getDoc(doc(db,'customers',o.uid));if(sn.exists())c=sn.data()}catch(e){}
   const name=(c&&c.name)||o.customerName||'Customer',phone=(c&&c.phone)||o.customerPhone||'',email=(c&&c.email)||o.customerEmail||'',addr=(c&&c.address)||'';
@@ -3270,7 +3277,52 @@ async function openCustView(o){
   $('custview').hidden=false;syncOverflow();$('custview').querySelector('.nbody').scrollTop=0;
 }
 function closeCustView(){$('custview').hidden=true;syncOverflow()}
-$('cvBack').addEventListener('click',closeCustView);
+let cvMode='list',cvCust=[];
+function cvFromOrders(){
+  const m={};
+  ordersAll.forEach(function(o){
+    if(!o.uid||m[o.uid])return;
+    m[o.uid]={uid:o.uid,name:o.customerName||'',phone:o.customerPhone||'',email:o.customerEmail||''};
+  });
+  return m;
+}
+function cvMerge(fromDb){
+  const m=cvFromOrders();
+  Object.keys(fromDb||{}).forEach(function(k){
+    const d=fromDb[k];m[k]={uid:k,name:d.name||(m[k]&&m[k].name)||'',phone:d.phone||(m[k]&&m[k].phone)||'',email:d.email||(m[k]&&m[k].email)||''};
+  });
+  cvCust=Object.keys(m).map(function(k){return m[k]}).sort(function(a,b){return String(a.name||a.email).toLowerCase()<String(b.name||b.email).toLowerCase()?-1:1});
+}
+function renderCvList(){
+  const q=($('cvQ').value||'').trim().toLowerCase(),dq=q.replace(/\D/g,'');
+  const list=cvCust.filter(function(c){
+    if(!q)return true;
+    const id=c.uid.slice(-5).toLowerCase();
+    return String(c.email).toLowerCase().indexOf(q)>=0||String(c.name).toLowerCase().indexOf(q)>=0||id.indexOf(q)>=0||(dq.length>=2&&String(c.phone).replace(/\D/g,'').indexOf(dq)>=0);
+  });
+  $('cvList').innerHTML='<p class="hint" style="margin:0 0 8px">'+list.length+' customer'+(list.length===1?'':'s')+'</p>'+(list.map(function(c){
+    return '<button type="button" class="cvrow" data-cvu="'+esc(c.uid)+'"><span class="cid">ID #'+esc(c.uid.slice(-5).toUpperCase())+'</span><b>'+esc(c.name||'Customer')+'</b><small>'+esc(c.phone||'-')+' · '+esc(c.email||'-')+'</small></button>';
+  }).join('')||'<p class="hint">No customer found.</p>');
+}
+async function openCustList(){
+  if(!canAdd())return;
+  cvMode='list';$('cvQ').value='';$('cvSearch').hidden=false;$('cvList').hidden=false;$('cvBody').hidden=true;
+  cvMerge({});renderCvList();
+  $('custview').hidden=false;syncOverflow();$('custview').querySelector('.nbody').scrollTop=0;
+  try{
+    const snap=await getDocs(collection(db,'customers')),m={};
+    snap.forEach(function(d){m[d.id]=d.data()});
+    cvMerge(m);if(cvMode==='list')renderCvList();
+  }catch(e){}
+}
+$('cvQ').addEventListener('input',renderCvList);
+$('cvList').addEventListener('click',function(e){
+  const b=e.target.closest('button[data-cvu]');if(!b)return;
+  const c=cvCust.find(function(x){return x.uid===b.getAttribute('data-cvu')});if(!c)return;
+  openCustView({uid:c.uid,customerName:c.name,customerPhone:c.phone,customerEmail:c.email});
+});
+$('cvBack').addEventListener('click',function(){if(cvMode==='detail'){openCustListKeep()}else closeCustView()});
+function openCustListKeep(){cvMode='list';$('cvSearch').hidden=false;$('cvList').hidden=false;$('cvBody').hidden=true;renderCvList()}
 $('cvBody').addEventListener('click',function(e){if(e.target.closest('#cvDraft'))startDraftFor({uid:cvUid,name:cvName})});
 function stopDraftForSub(){if(unsubDraftFor){try{unsubDraftFor()}catch(e){}unsubDraftFor=null}}
 function startDraftFor(c){
