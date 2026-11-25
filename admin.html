@@ -521,6 +521,7 @@ a.pmb{text-decoration:none}
 #nLinkForm{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:10px;margin:10px 0}
 #nLinkForm input{margin-bottom:8px}
 #nLinkForm .nact{margin-top:2px}
+.npanel#custview{z-index:70}
 .npanel{position:fixed;inset:0;z-index:60;background:var(--bg);color:var(--text);display:flex;flex-direction:column}
 .nhead{background:#C20019;color:#fff;display:flex;align-items:center;gap:6px;padding:calc(8px + env(safe-area-inset-top,0px)) 10px 8px}
 .nhead .bic{font-size:1.5rem;line-height:1;font-weight:600}
@@ -1010,6 +1011,7 @@ a.pmb{text-decoration:none}
       </div>
     </div>
     <div id="pmOrders" hidden>
+      <button type="button" class="pmb" id="soCust"><span>Customer<small>All customers, search, gift draft</small></span><i>›</i></button>
       <div class="cchips" id="soTabs"></div>
       <div class="cchips" id="soChips"></div>
       <div id="soList"></div>
@@ -2693,6 +2695,7 @@ function renderStaffOrders(){
   const list=mine.filter(function(o){return soFilter==='all'||normStatus(o)===soFilter});
   $('soList').innerHTML=list.map(soCard).join('')||'<p class="hint">No orders here.</p>';
 }
+$('soCust').addEventListener('click',function(){openCustList()});
 $('soTabs').addEventListener('click',function(e){
   const b=e.target.closest('button[data-st]');if(!b)return;
   soType=b.getAttribute('data-st');soFilter='placed';renderStaffOrders();
@@ -3017,7 +3020,7 @@ function renderMe(){
   const b=function(a,t,sub){return '<button type="button" class="pmb" data-me="'+a+'"><span>'+t+(sub?'<small>'+sub+'</small>':'')+'</span><i>›</i></button>'};
   let h='';
   if(staffish){
-    h+=(role==='owner'?b('team','Team','Staff emails'):'')+b('notes','Note','Your private notes')+b('signout','Sign out','');
+    h+=b('customers','Customer','All customers, search, gift draft')+(role==='owner'?b('team','Team','Staff emails'):'')+b('notes','Note','Your private notes')+b('signout','Sign out','');
   }else if(user){
     h+='<div class="ocard"><div class="ol"><b>'+esc((cust&&cust.name)||user.displayName||'My account')+'</b></div>'+(cust?'<div class="ol">'+esc(cust.phone)+'</div><div class="ol"><small>'+esc(cust.address)+'</small></div>':'<div class="ol"><small>Finish your account to place orders.</small></div>')+'</div>'
       +b('account','My account','Name, phone, address')+b('wa','WhatsApp','Chat with us')+b('signout','Sign out','');
@@ -3033,7 +3036,7 @@ $('mepanel').addEventListener('click',function(e){
   const lg=e.target.closest('[data-lang]');if(lg){setLang(lg.getAttribute('data-lang'));return}
   const b=e.target.closest('[data-me]');if(!b)return;
   const a=b.getAttribute('data-me');closeMe();
-  if(a==='pm')openPM();else if(a==='team')openTeam();else if(a==='notes')openNotes();
+  if(a==='pm')openPM();else if(a==='customers')openCustList();else if(a==='team')openTeam();else if(a==='notes')openNotes();
   else if(a==='account')openAcct('edit');else if(a==='wa')window.open($('waHeader').href,'_blank','noopener');
   else if(a==='login')startLogin();else if(a==='signout')signOut(auth);else if(a==='infoedit')openInfoEdit();else if(a==='report')openReport();
 });
@@ -3132,7 +3135,7 @@ function matSetMode(kind){
   matCamIds=null;
 }
 function renderMatMenu(){
-  $('matMenu').innerHTML='<h2 style="margin:10px 0 8px;font-size:1.15rem">Materials</h2>'+MAT_OPTS.map(function(o){return '<button type="button" class="pmb" data-mat="'+o[0]+'"><span>'+o[1]+'<small>'+o[2]+'</small></span><i>›</i></button>'}).join('');
+  $('matMenu').innerHTML='<h2 style="margin:10px 0 8px;font-size:1.15rem">Materials</h2>'+'<button type="button" class="pmb" data-mat="customers"><span>Customer<small>All customers, search, gift draft</small></span><i>›</i></button>'+MAT_OPTS.map(function(o){return '<button type="button" class="pmb" data-mat="'+o[0]+'"><span>'+o[1]+'<small>'+o[2]+'</small></span><i>›</i></button>'}).join('');
 }
 function openMaterials(){
   if(!canAdd())return;
@@ -3161,7 +3164,7 @@ function matRender(){
         +'<div class="nmeta"><span>'+esc(i.name)+'</span><small>'+esc(money(i.price))+(i.sub?' · '+esc(i.sub):'')+(i.hidden?' · Hidden':'')+'</small></div><i style="color:var(--muted);font-style:normal">›</i></div>';
     }).join(''):'<p class="hint">Nothing here yet. Tap + Add.</p>');
 }
-$('matMenu').addEventListener('click',function(e){const b=e.target.closest('[data-mat]');if(b)openMatKind(b.getAttribute('data-mat'))});
+$('matMenu').addEventListener('click',function(e){const b=e.target.closest('[data-mat]');if(!b)return;if(b.getAttribute('data-mat')==='customers'){openCustList();return}openMatKind(b.getAttribute('data-mat'))});
 $('matBack').addEventListener('click',openMaterials);
 $('matList').addEventListener('click',function(e){
   if(e.target.id==='matCamClear'){matCamIds=null;matRender();return}
