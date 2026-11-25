@@ -364,7 +364,11 @@ input[type=date]{width:100%;padding:10px;border:1px solid var(--line);border-rad
 .pron{display:inline-block;padding:2px 9px;border-radius:999px;background:var(--soft);border:1px solid var(--line);color:var(--muted);font-size:.78rem;font-weight:600}
 .menote{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:6px 0;padding:8px 10px;border-radius:10px;background:var(--soft);font-size:.88rem;overflow-wrap:anywhere}
 .menote span{min-width:0;flex:1}
-.notecard .oh b{font-size:1rem}
+.nssec{font-size:.95rem;font-weight:700;margin:18px 0 6px}
+.notegrid input,.notegrid select{min-height:46px;box-sizing:border-box}
+.notegrid input[type=date]{display:block;min-height:46px}
+#nsMsg:empty{display:none}
+.nsempty{padding:14px;border-radius:12px;background:var(--soft);color:var(--muted);font-size:.9rem;text-align:center}
 </style>
 </head>
 <body>
@@ -516,6 +520,13 @@ input[type=date]{width:100%;padding:10px;border:1px solid var(--line);border-rad
 <div class="msg" id="mgMsg" role="status"></div>
 <div class="nact"><button id="mgOrder" type="button">Order</button></div>
 </div>
+</div>
+<div aria-label="Notes" class="npanel" hidden="" id="notespage" role="dialog">
+<div class="nhead">
+<button aria-label="Back" class="bic" id="nsBack" type="button">←</button>
+<span class="ntitle">Notes</span>
+</div>
+<div class="nbody" id="nsBody"></div>
 </div>
 <div aria-label="My account" class="npanel" hidden="" id="acct" role="dialog">
 <div class="nhead">
@@ -1056,7 +1067,7 @@ function menuSync() {
   $("gMy").hidden = !cu, $("gMy").textContent = n ? "My Gift (" + n + ")" : "My Gift", setBadge("bnDraftN", cu ? n : 0), fSync();
 }
 function startLogin() {
-  closeGift(), closeMyGift(), closeAcct(), closePDetail(), wantLogin = !0, amsg(""), show("login");
+  closeGift(), closeMyGift(), closeAcct(), closeNotes(), closePDetail(), wantLogin = !0, amsg(""), show("login");
 }
 $("gsi").addEventListener("click", async function() {
   amsg("");
@@ -2055,7 +2066,7 @@ function renderMe() {
   let b = function(a, t, sub) {
     return '<button type="button" class="pmb" data-me="' + a + '"><span>' + t + (sub ? "<small>" + sub + "</small>" : "") + "</span><i>›</i></button>";
   }, h = "";
-  user ? h += meCard() + meNotes() + b("account", "Edit info", "Photo, pronouns, birthday, address") + b("wa", "WhatsApp", "Chat with us") + b("signout", "Sign out", "") : h += b("login", "Login / Create account", "Google or email") + b("wa", "WhatsApp", "Chat with us"), $("meBody").innerHTML = h + meExtras();
+  user ? h += meCard() + b("account", "Edit info", "Photo, pronouns, birthday, address") + b("notes", "Notes", notesSub()) + b("wa", "WhatsApp", "Chat with us") + b("signout", "Sign out", "") : h += b("login", "Login / Create account", "Google or email") + b("wa", "WhatsApp", "Chat with us"), $("meBody").innerHTML = h + meExtras();
 }
 function openMe() {
   renderMe(), $("mepanel").hidden = !1, syncOverflow();
@@ -2075,7 +2086,7 @@ $("mepanel").addEventListener("click", function(e) {
   let b = e.target.closest("[data-me]");
   if (!b) return;
   let a = b.getAttribute("data-me");
-  closeMe(), a === "account" ? openAcct("edit") : a === "wa" ? window.open($("waHeader").href, "_blank", "noopener") : a === "login" ? startLogin() : a === "signout" && signOut(auth);
+  closeMe(), a === "account" ? openAcct("edit") : a === "notes" ? openNotes() : a === "wa" ? window.open($("waHeader").href, "_blank", "noopener") : a === "login" ? startLogin() : a === "signout" && signOut(auth);
 });
 $("bnav").addEventListener("click", function(e) {
   let b = e.target.closest("[data-bn]");
@@ -2282,64 +2293,77 @@ $("acPhotoIn").addEventListener("change", function() {
   r.readAsDataURL(f);
 });
 
-function meNotes() {
-  if (!cust) return "";
-  let list = cust.notes || [], h = '<div class="ocard notecard"><div class="oh"><b>Notes</b></div><p class="hint" style="margin-bottom:8px">Save birthdays and special dates of people you love.</p>';
-  h += list.map(function(n, i) {
-    return '<div class="menote"><span>' + esc(noteLine(n)) + '</span><button type="button" class="nx" data-nrm="' + i + '" aria-label="Remove note">✕</button></div>';
-  }).join("");
-  return h + '<div class="notegrid"><select aria-label="Occasion" id="meNT"><option>Birthday</option><option>Anniversary</option><option>Other</option></select><input aria-label="Name" autocomplete="off" id="meNN" placeholder="Name"/><input aria-label="Occasion name" autocomplete="off" class="wide" hidden id="meNO" maxlength="40" placeholder="Occasion name (e.g. Graduation)"/><input aria-label="Relation" autocomplete="off" id="meNR" placeholder="Relation (Sister…)"/><input aria-label="Age" id="meNA" inputmode="numeric" max="120" min="0" placeholder="Age" type="number"/><input aria-label="Date" class="wide" id="meND" type="date"/></div><div class="msg" id="meNMsg" role="status"></div><div class="nact" style="margin-top:0"><button class="ghost" id="meNAdd" type="button">+ Add note</button></div></div>';
+function notesSub() {
+  let n = cust && cust.notes ? cust.notes.length : 0;
+  return n ? n + (n === 1 ? " note saved" : " notes saved") : "Birthdays & special dates";
 }
-async function meNotesSave(notes) {
+function renderNotes() {
+  let list = cust && cust.notes || [], h = '<p class="hint">Save birthdays and special dates of people you love, so gifting is easy.</p>';
+  h += list.length ? list.map(function(n, i) {
+    return '<div class="menote"><span>' + esc(noteLine(n)) + '</span><button type="button" class="nx" data-nrm="' + i + '" aria-label="Remove note">✕</button></div>';
+  }).join("") : '<div class="nsempty">No notes yet.</div>';
+  h += '<div class="nssec">Add a note</div><div class="notegrid"><select aria-label="Occasion" id="nsT"><option>Birthday</option><option>Anniversary</option><option>Other</option></select><input aria-label="Name" autocomplete="off" id="nsN" placeholder="Name"/><input aria-label="Occasion name" autocomplete="off" class="wide" hidden id="nsO" maxlength="40" placeholder="Occasion name (e.g. Graduation)"/><input aria-label="Relation" autocomplete="off" id="nsR" placeholder="Relation (Sister…)"/><input aria-label="Age" id="nsA" inputmode="numeric" max="120" min="0" placeholder="Age" type="number"/><input aria-label="Date" class="wide" id="nsD" type="date"/></div><div class="msg" id="nsMsg" role="status"></div><div class="nact" style="margin-top:10px"><button id="nsAdd" type="button">+ Add note</button></div>';
+  $("nsBody").innerHTML = h;
+}
+function nsMsg(t) {
+  let m = $("nsMsg");
+  m && (m.textContent = t || "");
+}
+function openNotes() {
+  user && cust && (renderNotes(), $("notespage").hidden = !1, syncOverflow(), $("notespage").querySelector(".nbody").scrollTop = 0);
+}
+function closeNotes() {
+  $("notespage").hidden = !0, syncOverflow();
+}
+async function nsSave(notes) {
   let now = Date.now();
   await updateDoc(doc(db, "customers", user.uid), { notes, updatedAt: now });
   cust = Object.assign({}, cust, { notes, updatedAt: now });
-  renderMe();
+  renderNotes();
 }
-function meNMsg(t) {
-  let m = $("meNMsg");
-  m && (m.textContent = t || "");
-}
-$("mepanel").addEventListener("change", function(e) {
-  e.target.id === "meNT" && ($("meNO").hidden = e.target.value !== "Other");
+$("nsBack").addEventListener("click", function() {
+  closeNotes(), openMe();
 });
-$("mepanel").addEventListener("click", async function(e) {
+$("notespage").addEventListener("change", function(e) {
+  e.target.id === "nsT" && ($("nsO").hidden = e.target.value !== "Other");
+});
+$("notespage").addEventListener("click", async function(e) {
   if (!user || !cust) return;
   let rm = e.target.closest("[data-nrm]");
   if (rm) {
     let l = (cust.notes || []).slice();
     l.splice(Number(rm.getAttribute("data-nrm")), 1);
     try {
-      await meNotesSave(l);
+      await nsSave(l);
     } catch (err) {
       gToast("Could not save: " + niceErr(err));
     }
     return;
   }
-  if (!e.target.closest("#meNAdd")) return;
-  let sel = $("meNT").value, type = sel === "Other" ? $("meNO").value.trim() : sel, name = $("meNN").value.trim(), relation = $("meNR").value.trim(), age = $("meNA").value.trim(), date = $("meND").value, l = (cust.notes || []).slice();
+  if (!e.target.closest("#nsAdd")) return;
+  let sel = $("nsT").value, type = sel === "Other" ? $("nsO").value.trim() : sel, name = $("nsN").value.trim(), relation = $("nsR").value.trim(), age = $("nsA").value.trim(), date = $("nsD").value, l = (cust.notes || []).slice();
   if (!type) {
-    meNMsg("Write the occasion name.");
+    nsMsg("Write the occasion name.");
     return;
   }
   if (!name) {
-    meNMsg("Write a name.");
+    nsMsg("Write a name.");
     return;
   }
   if (!date) {
-    meNMsg("Pick the date.");
+    nsMsg("Pick the date.");
     return;
   }
   if (l.length >= 20) {
-    meNMsg("You can save up to 20 notes.");
+    nsMsg("You can save up to 20 notes.");
     return;
   }
   l.push({ type, name, relation, age, date });
   try {
-    await meNotesSave(l);
+    await nsSave(l);
     gToast("Note added.");
   } catch (err) {
-    meNMsg("Could not save: " + niceErr(err));
+    nsMsg("Could not save: " + niceErr(err));
   }
 });
 function addrList() {
